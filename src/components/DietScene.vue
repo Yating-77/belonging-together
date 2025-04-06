@@ -132,7 +132,7 @@ export default {
           label: 'Option 2: Needs toys or devices for distraction during meals',
           title: '📴 "Today we companion with food, not toys"',
           parentDialogue: 'You can play with your car after you finish eating. By the way, your teacher said your drawing of the sun was beautiful today!',
-          childDialogue: '*Reluctantly starts eating while glancing at the toy car*',
+          childDialogue: 'Reluctantly starts eating while glancing at the toy car',
           advices: [
             '1. Set consistent meal expectations by establishing clear rules about screen time and toys at the table.',
             '2. Create a gradual transition plan to reduce dependence on distractions during mealtimes.',
@@ -146,7 +146,7 @@ export default {
           label: 'Option 3: Irregular eating times or difficulty sitting calmly at the table',
           title: '⏰ "Racing with the little hourglass"',
           parentDialogue: 'Tick tock, the timer has started! Can you finish your bite before all the sand falls to the bottom?',
-          childDialogue: 'I want to finish before the sand runs out! *Takes bites while watching the timer*',
+          childDialogue: 'I want to finish before the sand runs out! Takes bites while watching the timer',
           advices: [
             '1. Establish a regular meal schedule with three meals and two snacks at consistent times each day.',
             '2. Use visual supports like timers or picture schedules to help your child understand mealtime expectations.',
