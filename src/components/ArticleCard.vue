@@ -6,7 +6,6 @@
         <h5 class="card-title text-truncate" :title="article.title">{{ article.title }}</h5>
         <p class="card-subtitle mb-2 text-muted">By The A List</p>
         
-        <!-- 添加浏览量显示 -->
         <p v-if="showViews && article.view_count !== undefined" class="view-count">
           <i class="fas fa-eye"></i> {{ article.view_count }} views
         </p>
@@ -36,7 +35,6 @@ export default {
   computed: {
     articlePreview() {
       if (!this.article.content) return '';
-      // 移除HTML标签并截取前80个字符
       const textContent = this.article.content.replace(/<[^>]*>/g, '');
       return textContent.substring(0, 80) + (textContent.length > 80 ? '...' : '');
     }
@@ -107,7 +105,6 @@ export default {
   text-decoration: underline;
 }
 
-/* 浏览量样式 */
 .view-count {
   font-size: 0.8rem;
   color: #666;

@@ -5,16 +5,13 @@
     <div class="hero-banner">
       <div class="hero-content">
         <h1 class="hero-title">Be Informed and Inspired</h1>
-        <p class="hero-subtitle">
-          The A List resources will support young people and their families. Browse by topic or do a search for something specific.
-        </p>
+
       </div>
     </div>
 
     <!-- Search area -->
     <div class="search-container">
       <div class="search-wrapper">
-        <p class="search-heading">Refine your search or just scroll and explore!</p>
 
         <div class="keyword-search">
           <label>Keyword search</label>
@@ -26,6 +23,62 @@
             @keyup.enter="searchArticles"
           />
           <button class="search-button" @click="searchArticles">Search</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search results area - 移到最受欢迎文章之前 -->
+    <div v-if="isSearchResult" class="search-results-section">
+      <div class="container">
+        <h2 class="section-title">Search Results</h2>
+
+        <!-- Search results tips -->
+        <div v-if="!loadingSearch && !errorSearch && searchResults.length > 0" class="search-result-info">
+          Found {{ searchResults.length }} articles related to "{{ lastSearchKeyword }}"
+          <button class="reset-search-btn" @click="resetSearch">Clear search results</button>
+        </div>
+
+        <div v-if="loadingSearch" class="loading-spinner">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Searching...</span>
+          </div>
+        </div>
+        
+        <div v-else-if="errorSearch" class="alert alert-danger">
+          {{ errorSearch }}
+          <button class="reset-search-btn" @click="resetSearch">Clear search results</button>
+        </div>
+        
+        <!-- Use the same Swiper component format as the main list -->
+        <div v-else-if="!loadingSearch && !errorSearch && searchResults.length > 0" class="swiper-container">
+          <div class="swiper-button-prev custom-nav-prev search-nav-prev"></div>
+          <swiper
+            :modules="swiperModules"
+            :slides-per-view="3"
+            :space-between="20"
+            :navigation="{
+              nextEl: '.search-nav-next',
+              prevEl: '.search-nav-prev'
+            }"
+            :pagination="{ 
+              clickable: true,
+              el: '.search-pagination'
+            }"
+            :breakpoints="swiperBreakpoints"
+            class="article-slider"
+          >
+            <swiper-slide v-for="article in searchResults" :key="'search-' + article.id">
+              <article-card :article="article" />
+            </swiper-slide>
+          </swiper>
+          <div class="swiper-button-next custom-nav-next search-nav-next"></div>
+          <div class="swiper-pagination search-pagination"></div>
+        </div>
+        
+        <!-- No results found prompt -->
+        <div v-else-if="!loadingSearch && !errorSearch && searchResults.length === 0" class="search-result-info">
+          No articles found related to "{{ lastSearchKeyword }}".
+          <button class="reset-search-btn" @click="resetSearch">Clear search results</button>
         </div>
       </div>
     </div>
@@ -52,7 +105,7 @@
         <div v-else class="swiper-container">
           <div class="swiper-button-prev custom-nav-prev popular-nav-prev"></div>
           <swiper
-            :modules="[SwiperNavigation, SwiperPagination]"
+            :modules="swiperModules"
             :slides-per-view="3"
             :space-between="20"
             :navigation="{
@@ -63,11 +116,7 @@
               clickable: true,
               el: '.popular-pagination'
             }"
-            :breakpoints="{
-              320: { slidesPerView: 1, spaceBetween: 10 },
-              640: { slidesPerView: 2, spaceBetween: 15 },
-              992: { slidesPerView: 3, spaceBetween: 20 }
-            }"
+            :breakpoints="swiperBreakpoints"
             class="article-slider"
           >
             <swiper-slide v-for="article in popularArticles" :key="'popular-' + article.id">
@@ -76,66 +125,6 @@
           </swiper>
           <div class="swiper-button-next custom-nav-next popular-nav-next"></div>
           <div class="swiper-pagination popular-pagination"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Search results area -->
-    <div v-if="isSearchResult" class="search-results-section">
-      <div class="container">
-        <h2 class="section-title">Search Results</h2>
-
-        <!-- Search results tips -->
-        <div v-if="!loadingSearch && !errorSearch && searchResults.length > 0" class="search-result-info">
-          Found {{ searchResults.length }} articles related to "{{ lastSearchKeyword }}"
-          <button class="reset-search-btn" @click="resetSearch">Clear search results</button>
-        </div>
-
-        <div v-if="loadingSearch" class="loading-spinner">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Searching...</span>
-          </div>
-        </div>
-        
-        <div v-else-if="errorSearch" class="alert alert-danger">
-          {{ errorSearch }}
-          <button class="reset-search-btn" @click="resetSearch">Clear search results</button>
-        </div>
-        
-        <!-- Use the same Swiper component format as the main list -->
-        <div v-else-if="!loadingSearch && !errorSearch && searchResults.length > 0" class="swiper-container">
-          <div class="swiper-button-prev custom-nav-prev search-nav-prev"></div>
-          <swiper
-            :modules="[SwiperNavigation, SwiperPagination]"
-            :slides-per-view="3"
-            :space-between="20"
-            :navigation="{
-              nextEl: '.search-nav-next',
-              prevEl: '.search-nav-prev'
-            }"
-            :pagination="{ 
-              clickable: true,
-              el: '.search-pagination'
-            }"
-            :breakpoints="{
-              320: { slidesPerView: 1, spaceBetween: 10 },
-              640: { slidesPerView: 2, spaceBetween: 15 },
-              992: { slidesPerView: 3, spaceBetween: 20 }
-            }"
-            class="article-slider"
-          >
-            <swiper-slide v-for="article in searchResults" :key="'search-' + article.id">
-              <article-card :article="article" />
-            </swiper-slide>
-          </swiper>
-          <div class="swiper-button-next custom-nav-next search-nav-next"></div>
-          <div class="swiper-pagination search-pagination"></div>
-        </div>
-        
-        <!-- No results found prompt -->
-        <div v-else-if="!loadingSearch && !errorSearch && searchResults.length === 0" class="search-result-info">
-          No articles found related to "{{ lastSearchKeyword }}".
-          <button class="reset-search-btn" @click="resetSearch">Clear search results</button>
         </div>
       </div>
     </div>
@@ -158,7 +147,7 @@
         <div v-else class="swiper-container">
           <div class="swiper-button-prev custom-nav-prev main-nav-prev"></div>
           <swiper
-            :modules="[SwiperNavigation, SwiperPagination]"
+            :modules="swiperModules"
             :slides-per-view="3"
             :space-between="20"
             :navigation="{
@@ -169,11 +158,7 @@
               clickable: true,
               el: '.main-pagination'
             }"
-            :breakpoints="{
-              320: { slidesPerView: 1, spaceBetween: 10 },
-              640: { slidesPerView: 2, spaceBetween: 15 },
-              992: { slidesPerView: 3, spaceBetween: 20 }
-            }"
+            :breakpoints="swiperBreakpoints"
             class="article-slider"
           >
             <swiper-slide v-for="article in articles" :key="article.id">
@@ -191,7 +176,7 @@
 
 <script>
 import { Swiper, SwiperSlide } from 'swiper/vue';
-import { Navigation as SwiperNavigation, Pagination as SwiperPagination } from 'swiper/modules';
+import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -223,8 +208,13 @@ export default {
       searchKeyword: '',
       isSearchResult: false, // Whether search has been executed
       lastSearchKeyword: '', // Last searched keyword
-      SwiperNavigation,
-      SwiperPagination
+      // 提取常用配置到数据属性
+      swiperModules: [Navigation, Pagination],
+      swiperBreakpoints: {
+        320: { slidesPerView: 1, spaceBetween: 10 },
+        640: { slidesPerView: 2, spaceBetween: 15 },
+        992: { slidesPerView: 3, spaceBetween: 20 }
+      }
     };
   },
   created() {
@@ -309,7 +299,6 @@ export default {
   color: white;
   padding: 80px 20px;
   text-align: center;
-  position: relative;
 }
 
 .hero-content {
@@ -386,10 +375,32 @@ export default {
   background-color: #c02e96;
 }
 
+/* Search results area style */
+.search-results-section {
+  padding: 40px 20px;
+  background-color: #f0f7ff;
+  margin-bottom: 30px;
+}
+
+/* Search results info general style */
+.search-result-info {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #d1e3ff; 
+  border-radius: 4px;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 /* Most popular articles area style */
 .popular-articles-section {
   padding: 40px 20px;
-  background-color: #f9f4ff; /* Different background color from search results */
+  background-color: #f9f4ff;
   margin-bottom: 30px;
 }
 
@@ -410,57 +421,7 @@ export default {
   z-index: 1;
 }
 
-/* Search results area style */
-.search-results-section {
-  padding: 40px 20px;
-  background-color: #f0f7ff;
-}
-
-/* Search results info general style */
-.search-result-info {
-  text-align: center;
-  margin-bottom: 20px;
-  padding: 10px;
-  background-color: #fff;
-  border: 1px solid #d1e3ff; 
-  border-radius: 4px;
-  font-size: 0.9rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-/* Empty content prompt */
-.no-articles {
-  text-align: center;
-  padding: 30px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
-  color: #666;
-  font-style: italic;
-}
-
-/* Reset button style */
-.reset-search-btn {
-  background: none;
-  border: none;
-  color: #4a90e2;
-  text-decoration: underline;
-  cursor: pointer;
-  margin-left: 10px;
-  font-size: 0.9rem;
-}
-
-.reset-search-btn:hover {
-  color: #2a70c2;
-}
-
-/* Articles list area style */
-.articles-section {
-  padding: 60px 20px;
-}
-
+/* 共享样式 */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -489,7 +450,37 @@ export default {
   border: 1px solid #f5c6cb;
 }
 
-/* Swiper related styles */
+/* 空内容提示 */
+.no-articles {
+  text-align: center;
+  padding: 30px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  color: #666;
+  font-style: italic;
+}
+
+/* 重置按钮样式 */
+.reset-search-btn {
+  background: none;
+  border: none;
+  color: #4a90e2;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 10px;
+  font-size: 0.9rem;
+}
+
+.reset-search-btn:hover {
+  color: #2a70c2;
+}
+
+/* 文章列表区域样式 */
+.articles-section {
+  padding: 60px 20px;
+}
+
+/* Swiper相关样式 */
 .swiper-container {
   position: relative;
   padding: 0 50px;
@@ -500,7 +491,7 @@ export default {
   padding-bottom: 40px;
 }
 
-/* Custom navigation arrows */
+/* 自定义导航箭头 */
 .custom-nav-prev,
 .custom-nav-next {
   position: absolute;
@@ -532,7 +523,7 @@ export default {
   color: #4a90e2;
 }
 
-/* Pagination style */
+/* 分页样式 */
 :deep(.swiper-pagination) {
   position: absolute;
   bottom: -10px !important;
@@ -555,12 +546,8 @@ export default {
   background-color: #4a90e2;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .search-filters {
-    flex-direction: column;
-  }
-  
+/* 响应式调整 */
+@media (max-width: 768px) {  
   .hero-title {
     font-size: 2rem;
   }

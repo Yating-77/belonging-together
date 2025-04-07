@@ -24,10 +24,10 @@
 </script>
 
 <style scoped>
-/* Added scoped */
+
 .my-footer {
-  background-color: #343a40; /* Dark gray */
-  color: #adb5bd; /* Light gray */
+  background-color: #343a40; 
+  color: #adb5bd; 
   padding: 6rem 5% 1rem;
 }
 .footer-container {
@@ -38,7 +38,7 @@
   margin: 0 auto 3rem;
 }
 .footer-section h4 {
-  color: #ffffff; /* White */
+  color: #ffffff; 
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1rem;
@@ -64,18 +64,18 @@
   transition: color 0.3s ease;
 }
 .footer-section a:hover, .footer-section .router-link-active {
-  color: #ffffff; /* White */
+  color: #ffffff; 
   text-decoration: underline;
 }
 .footer-bottom {
   text-align: center;
-  border-top: 1px solid #495057; /* Medium gray */
+  border-top: 1px solid #495057; 
   padding-top: 2rem;
   margin-top: 2rem;
 }
 .footer-bottom p {
   font-size: 0.85rem;
-  color: #6c757d; /* Slightly lighter gray */
+  color: #6c757d; 
   margin-bottom: 0;
 }
 </style>

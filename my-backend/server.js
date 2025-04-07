@@ -5,27 +5,23 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Configure PostgreSQL connection
 const pool = new Pool({
-  user: 'postgres',      // Your PostgreSQL username
-  host: 'localhost',     // Database host
-  database: 'postgres',  // Database name
-  password: '111111',    // Your password
-  port: 5432,            // PostgreSQL port
+  user: 'postgres',     
+  host: 'localhost',    
+  database: 'postgres',  
+  password: '111111',    
+  port: 5432,           
 });
 
-// Connect to database using Promise-based approach
 pool.connect()
   .then(() => console.log('Connected to PostgreSQL database'))
   .catch((err) => console.error('Connection error', err.stack));
 
 
 
-// Get all articles
 app.get('/api/articles', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -46,10 +42,9 @@ app.get('/api/articles', async (req, res) => {
   }
 });
 
-// Get most popular articles - note this specific route should come before the general route
 app.get('/api/articles/popular', async (req, res) => {
   try {
-    const limit = 2; // Fixed to get the top 2
+    const limit = 4; 
     const result = await pool.query(`
       SELECT 
         id, 
@@ -69,8 +64,6 @@ app.get('/api/articles/popular', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-
-// Search articles - also placed before the general route
 app.get('/api/articles/search', async (req, res) => {
   try {
     const keyword = req.query.keyword || '';
@@ -92,7 +85,6 @@ app.get('/api/articles/search', async (req, res) => {
   }
 });
 
-// Update article view count
 app.post('/api/articles/:id/view', async (req, res) => {
   try {
     const articleId = req.params.id;
@@ -108,7 +100,6 @@ app.post('/api/articles/:id/view', async (req, res) => {
   }
 });
 
-// Test search route
 app.get('/api/test-search', async (req, res) => {
   try {
     const keyword = req.query.keyword || '';
@@ -131,8 +122,6 @@ app.get('/api/test-search', async (req, res) => {
     res.status(500).json({ success: false, error: error.message, stack: error.stack });
   }
 });
-
-// Get single article details - this general route must be placed last
 app.get('/api/articles/:id', async (req, res) => {
   try {
     const articleId = req.params.id;
@@ -152,9 +141,7 @@ app.get('/api/articles/:id', async (req, res) => {
   }
 });
 
-// =================Recommendation System APIs=================
 
-// Get all categories
 app.get('/api/categories', async (req, res) => {
   console.log('Received request to get all categories');
   
@@ -172,7 +159,6 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
-// Get questions by category ID
 app.get('/api/questions/:categoryId', async (req, res) => {
   const { categoryId } = req.params;
   
@@ -193,7 +179,6 @@ app.get('/api/questions/:categoryId', async (req, res) => {
   }
 });
 
-// Get options by category ID (Updated SQL query)
 app.get('/api/options/:categoryId', async (req, res) => {
   const { categoryId } = req.params;
   
@@ -214,14 +199,13 @@ app.get('/api/options/:categoryId', async (req, res) => {
   }
 });
 
-// Get recommendations by option ID
 app.get('/api/recommendations/:optionId', async (req, res) => {
   const { optionId } = req.params;
   
   console.log(`Received recommendation request for option ID: ${optionId}`);
   
   try {
-    // Ensure valid option ID
+
     if (!optionId || isNaN(parseInt(optionId))) {
       return res.status(400).json({ error: 'Invalid option ID' });
     }
@@ -233,7 +217,6 @@ app.get('/api/recommendations/:optionId', async (req, res) => {
     
     console.log(`Option ID ${optionId} returned ${result.rows.length} recommendations`);
     
-    // If no data found, return appropriate message
     if (result.rows.length === 0) {
       console.warn(`No recommendations found for option ID ${optionId}`);
     }
@@ -245,7 +228,6 @@ app.get('/api/recommendations/:optionId', async (req, res) => {
   }
 });
 
-// Start server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
   console.log(`API available at http://localhost:${port}/api/`);

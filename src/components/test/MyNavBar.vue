@@ -34,16 +34,15 @@ onUnmounted(() => { window.removeEventListener('scroll', handleScroll); });
 </script>
 
 <style scoped>
-/* Added scoped */
 .my-navbar {
   position: sticky; top: 0; left: 0; width: 100%;
-  background-color: #ffffff; /* White */
+  background-color: #ffffff;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   padding: 0.8rem 5%; z-index: 1000;
   transition: background-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
 }
 .my-navbar.scrolled {
-  background-color: rgba(255, 255, 255, 0.95); /* Semi-transparent white */
+  background-color: rgba(255, 255, 255, 0.95); 
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   padding: 0.6rem 5%; backdrop-filter: blur(5px);
 }
@@ -72,16 +71,16 @@ onUnmounted(() => { window.removeEventListener('scroll', handleScroll); });
 }
 .navbar-links a {
   text-decoration: none;
-  color: #6c757d; /* Slightly lighter gray */
+  color: #6c757d;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 .navbar-links a:hover, .navbar-links a.active, .navbar-links .router-link-active {
-  color: #ffa600; /* Orange */
+  color: #ffa600;
 }
 .navbar-cta:hover {
-  background-color: #748ffc; /* Light blue-purple */
-  color: #ffa600; /* Orange */
+  background-color: #748ffc; 
+  color: #ffa600;
   transform: scale(1.05);
 }
 @media (max-width: 768px) {
