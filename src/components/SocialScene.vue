@@ -45,7 +45,18 @@
           
           <div class="advice-content" v-else>
             <h3>Parent Advice</h3>
-            <p>{{ currentAdvice }}</p>
+            <!-- 显示加载状态 -->
+            <div v-if="loading" class="loading-indicator">
+              Loading recommendations...
+            </div>
+            
+            <!-- Display error message -->
+            <div v-else-if="error" class="error-message">
+              {{ error }}
+            </div>
+            
+            <!-- Display recommendation content -->
+            <p v-else>{{ currentAdvice }}</p>
             <div class="advice-progress">
               {{ adviceProgress }}
             </div>
@@ -99,20 +110,15 @@ export default {
       showAdvice: false,
       currentAdviceIndex: 0,
       hasViewedLastAdvice: false,
+      loading: false,
+      error: null,
       options: [
         {
           label: 'Option 0: Plays completely alone, rarely initiates contact with peers',
           title: '🐢 First Step of "Playing Side by Side"',
           parentDialogue: '(In the living room, mom smiles as she watches Ethan and the neighbor\'s child each building with blocks separately)',
           childDialogue: '(Ethan glances at the neighbor child\'s creation without speaking, but nods slightly and continues building his own)',
-          advices: [
-            '1. Begin with "parallel play" where children play side by side using similar toys without direct interaction, which can gradually lead to more social engagement.',
-            '2. Create relaxed opportunities for social interaction by inviting one child over at a time for a structured activity your child enjoys.',
-            '3. Use your child\'s interests as a bridge to social connections, arranging playdates centered around their preferred activities.',
-            '4. Respect your child\'s need for breaks during social situations, allowing them to retreat to a quiet space when they feel overwhelmed.',
-            '5. Observe and celebrate small social gains like shared glances or proximity tolerance, as these are important steps toward social engagement.',
-            '6. Model appropriate social behaviors yourself, such as greeting others, taking turns, and showing interest in others\' activities.'
-          ],
+          advices: [],
           image: SocialOption0
         },
         {
@@ -120,14 +126,7 @@ export default {
           title: '🗣️ First "Can I Play With You"',
           parentDialogue: 'Let\'s try saying—hello, can I play with you? Look, these sentences are written on the picture card.',
           childDialogue: '(Sophie looks at the picture card, slowly walks toward children playing with bubbles, and recites) Hello... can I... play with you?',
-          advices: [
-            '1. Provide your child with "social scripts" - simple phrases they can use in common social situations like greetings or requesting to join play.',
-            '2. Use visual supports such as picture cards or social stories to help your child understand and navigate social situations step-by-step.',
-            '3. Role-play common social scenarios at home before encountering them in real life, allowing practice in a comfortable environment.',
-            '4. Arrange structured activities with clear roles that make social expectations more predictable for your child.',
-            '5. Encourage observation skills by pointing out social interactions in books, shows, or real life: "Look how they asked to play together."',
-            '6. Teach and practice the specific skill of joining play, using techniques like approaching, watching, and then making a relevant comment about the activity.'
-          ],
+          advices: [],
           image: SocialOption1
         },
         {
@@ -135,14 +134,7 @@ export default {
           title: '🧘 "I Need to Calm Down"',
           parentDialogue: 'I see you remembered to use the method we practiced! Deep breath, are you feeling better?',
           childDialogue: 'Stop, I need to calm down. (Returns to the puzzle table a few minutes later) Let\'s continue with the puzzle.',
-          advices: [
-            '1. Teach emotional regulation strategies such as deep breathing, counting to ten, or using a calming corner when frustration arises.',
-            '2. Create visual emotion scales to help your child identify their feelings and appropriate coping strategies at different intensity levels.',
-            '3. Practice conflict resolution skills through role-play, teaching specific phrases like "I feel... when you..." or "Can we take turns?"',
-            '4. Establish clear rules for play and cooperation, perhaps using visual reminders of expectations for sharing and taking turns.',
-            '5. Recognize and praise positive social behaviors immediately when they occur to reinforce these actions.',
-            '6. Teach perspective-taking through direct conversation: "How do you think Jamie felt when...?" or through stories with clear emotional content.'
-          ],
+          advices: [],
           image: SocialOption2
         },
         {
@@ -150,15 +142,7 @@ export default {
           title: '🦕 Sharing the Joy of Dinosaurs',
           parentDialogue: 'You could ask him which dinosaur is his favorite.',
           childDialogue: '(Stops his own explanation) Which one do you like? (After hearing the answer, they begin exchanging dinosaur cards)',
-          advices: [
-            '1. Use your child\'s special interests as a starting point for social interaction rather than discouraging them.',
-            '2. Teach specific turn-taking language related to interests: "Now I\'ll tell you about my favorite dinosaur, then you can share yours."',
-            '3. Create structured interest-sharing activities where your child can be the "expert" but must follow rules for including others.',
-            '4. Help your child recognize when others are losing interest by pointing out non-verbal cues in a supportive way.',
-            '5. Gradually expand the circle of interest by connecting your child\'s passion to related topics that might interest peers.',
-            '6. Encourage flexibility by introducing small variations to favorite activities, teaching that fun can happen with slight changes.',
-            '7. Arrange playdates with children who share similar interests to create natural opportunities for connection.'
-          ],
+          advices: [],
           image: SocialOption3
         }
       ]
@@ -203,11 +187,51 @@ export default {
     selectOption(index) {
       this.selected = index;
     },
-    showScene() {
+    async showScene() {
+      const selectedOption = this.options[this.selected];
       this.selectedOption = this.selected;
       this.showAdvice = false; 
       this.currentAdviceIndex = 0;
       this.hasViewedLastAdvice = false;
+      this.error = null;  // Reset error state
+
+      // Only fetch data if the advice array is empty
+      if (selectedOption.advices.length === 0) {
+        try {
+          this.loading = true;  // Set loading state
+          console.log(`Fetching recommendation data for social option ID ${this.selected + 9}`); // Social options start from ID 9
+          
+          // Note: Social option IDs start from 9, need to add 9, because Sleep scenario uses 1-4, Diet scenario uses 5-8
+          const res = await fetch(`http://localhost:3001/api/recommendations/${this.selected + 9}`);
+          
+          if (!res.ok) {
+            throw new Error(`API returned error: ${res.status}`);
+          }
+          
+          const data = await res.json();
+          console.log('Retrieved recommendation data:', data);
+          
+          if (data && data.length > 0) {
+            // Transform API returned data into required format
+            selectedOption.advices = data.map(item => 
+              `${item.title}: ${item.content}\n\nExample: ${item.example}`
+            );
+            console.log('Transformed recommendations:', selectedOption.advices);
+          } else {
+            console.warn('API returned empty data');
+            // Set a default message
+            selectedOption.advices = ['No recommendations available for this option.'];
+            this.error = 'No recommendations found for this option.';
+          }
+        } catch (err) {
+          console.error('Failed to fetch recommendations:', err);
+          // Set error message
+          selectedOption.advices = ['Unable to load recommendations. Please try again later.'];
+          this.error = `Failed to load recommendations: ${err.message}`;
+        } finally {
+          this.loading = false;  // Close loading state regardless of success or failure
+        }
+      }
     },
     reset() {
       this.selected = null;
@@ -238,6 +262,36 @@ export default {
       }, 50);
       
       this.$emit('close-modal');
+    }
+  },
+  async created() {
+    // Preload recommendation data for all options when component is created
+    console.log('SocialScene component created, preparing to preload recommendation data');
+    for (let i = 0; i < this.options.length; i++) {
+      const option = this.options[i];
+      if (option.advices.length === 0) {
+        try {
+          // Social options start from ID 9
+          const optionId = i + 9;
+          console.log(`Preloading recommendation data for social option ${optionId}`);
+          const res = await fetch(`http://localhost:3001/api/recommendations/${optionId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) {
+              option.advices = data.map(item => 
+                `${item.title}: ${item.content}\n\nExample: ${item.example}`
+              );
+              console.log(`Social option ${optionId} preloaded ${data.length} recommendations`);
+            } else {
+              console.warn(`Social option ${optionId} has no recommendation data`);
+            }
+          } else {
+            console.error(`Failed to preload social option ${optionId}: ${res.status}`);
+          }
+        } catch (err) {
+          console.error(`Error preloading recommendations for social option ${i + 9}:`, err);
+        }
+      }
     }
   }
 };
@@ -458,6 +512,20 @@ export default {
   background-color: #3E5C2B;
   box-shadow: 0 4px 10px rgba(77, 47, 32, 0.3);
   transform: translateY(-2px);
+}
+
+/* Loading Indicator Styles */
+.loading-indicator {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Error Message Styles */
+.error-message {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #d33;
 }
 
 /* Responsive Design */

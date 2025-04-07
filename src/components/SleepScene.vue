@@ -45,7 +45,18 @@
             
             <div class="advice-content" v-else>
               <h3>Parent Advice</h3>
-              <p>{{ currentAdvice }}</p>
+              <!-- 显示加载状态 -->
+              <div v-if="loading" class="loading-indicator">
+                Loading recommendations...
+              </div>
+              
+              <!-- 显示错误信息 -->
+              <div v-else-if="error" class="error-message">
+                {{ error }}
+              </div>
+              
+              <!-- 显示建议内容 -->
+              <p v-else>{{ currentAdvice }}</p>
               <div class="advice-progress">
                 {{ adviceProgress }}
               </div>
@@ -99,19 +110,15 @@
         showAdvice: false,
         currentAdviceIndex: 0,
         hasViewedLastAdvice: false,
+        loading: false,
+        error: null,
         options: [
           {
             label: 'Option 0: Difficulty falling asleep',
             title: '🌙 Bedtime Challenges',
             parentDialogue: 'Let\'s take three deep breaths together to calm your body. Close your eyes and feel your body relax...',
             childDialogue: 'Mom, I\'m not tired... I want to play a little more. The light outside is so bright...',
-            advices: [
-              '1. Maintain a consistent bedtime routine, such as regular bath and tooth brushing times, to establish a biological clock for your child.',
-              '2. Create a quiet, comfortable sleep environment, potentially lowering room temperature and using soft night lights.',
-              '3. Teach your child simple relaxation techniques like deep breathing and progressive muscle relaxation.',
-              '4. Limit electronic device use in the evening and avoid overly stimulating activities before bedtime.',
-              '5. Be patient and supportive, but avoid excessive focus on sleep issues to prevent adding pressure on your child.'
-            ],
+            advices: [],
             image: SleepOption0
           },
           {
@@ -119,14 +126,7 @@
             title: '🌛 Middle of the Night Awakenings',
             parentDialogue: 'You\'ll feel more secure in your own bed. I\'ll stay with you for a bit, okay?',
             childDialogue: 'Mom, I dreamed about monsters... I\'m scared to sleep alone.',
-            advices: [
-              '1. Ensure the sleep environment is comfortable, checking factors like room temperature, noise, and lighting for stability.',
-              '2. Help your child build a sense of security, perhaps placing favorite stuffed toys as "guardians" by the bed.',
-              '3. Minimize interactions when they wake at night, keeping lights dim and voices soft to help them return to sleep quickly.',
-              '4. Teach your child simple self-soothing techniques, such as hugging a toy or deep breathing.',
-              '5. Maintain a regular schedule, including weekends, to help stabilize sleep cycles.',
-              '6. If nightmares or anxiety persist, discuss the source of fears during the day and seek professional help if necessary.'
-            ],
+            advices: [],
             image: SleepOption1
           },
           {
@@ -134,14 +134,7 @@
             title: '🧸 Bedtime Routine "Variations"',
             parentDialogue: 'Today let\'s try having dad read a new story, okay? Afterwards we\'ll still turn off the lights and sing as usual.',
             childDialogue: 'No, it should be mom reading! It\'s always been mom...',
-            advices: [
-              '1. Maintain core bedtime habits, keeping basic steps like brushing teeth, washing face, and reading consistent to provide stability.',
-              '2. Inform children of changes in advance and explain the reasons to reduce anxiety and resistance.',
-              '3. Introduce changes gradually, altering only one element at a time to allow adaptation.',
-              '4. Recognize and encourage children\'s efforts to adapt to changes, boosting their confidence.',
-              '5. Use visual cues, such as a bedtime routine chart, to help children understand and anticipate changes.',
-              '6. Allow children to retain one or two ritual elements particularly important to them, respecting their need for security.'
-            ],
+            advices: [],
             image: SleepOption2
           },
           {
@@ -149,15 +142,7 @@
             title: '🏕️ First Night at Grandma\'s House',
             parentDialogue: 'We can still do our bedtime ritual here. Let\'s make this corner your special place.',
             childDialogue: 'This bed doesn\'t feel like mine... The lights are different too...',
-            advices: [
-              '1. Bring familiar items such as favorite blankets, pillows, or toys to increase familiar elements in the new environment.',
-              '2. Replicate home bedtime rituals as much as possible, maintaining the same steps and sequence.',
-              '3. Help your child become familiar with the new environment by exploring the new room together, reducing anxiety from the unknown.',
-              '4. Use portable white noise machines or play familiar music to mask unfamiliar sounds in the new environment.',
-              '5. Maintain consistent sleeping schedules in the new environment, not changing bedtime due to the change in surroundings.',
-              '6. Validate your child\'s feelings while providing security and encouragement, acknowledging that their discomfort is normal.',
-              '7. If conditions allow, consider a gradual adaptation process, such as short stays before overnight stays, to adjust gradually.'
-            ],
+            advices: [],
             image: SleepOption3
           }
         ]
@@ -168,16 +153,27 @@
         return this.options[this.selectedOption || 0];
       },
       totalAdvices() {
+        if (!this.currentScene.advices) return 0;
         return this.currentScene.advices.length;
       },
       currentAdvice() {
+        if (!this.currentScene.advices || this.currentScene.advices.length === 0) {
+          return "No recommendations available.";
+        }
+        
+        // Ensure index is within valid range
+        if (this.currentAdviceIndex >= this.currentScene.advices.length) {
+          this.currentAdviceIndex = 0;
+        }
+        
         return this.currentScene.advices[this.currentAdviceIndex];
       },
       adviceProgress() {
+        if (this.totalAdvices === 0) return "No advice available";
         return `Advice ${this.currentAdviceIndex + 1}/${this.totalAdvices}`;
       },
       hasReadAllAdvice() {
-        return this.hasViewedLastAdvice;
+        return this.hasViewedLastAdvice || this.totalAdvices <= 1;
       }
     },
     watch: {
@@ -202,12 +198,56 @@
       selectOption(index) {
         this.selected = index;
       },
-      showScene() {
+      async showScene() {
+        const selectedOption = this.options[this.selected];
         this.selectedOption = this.selected;
         this.showAdvice = false; 
         this.currentAdviceIndex = 0;
         this.hasViewedLastAdvice = false;
+        this.error = null;  // Reset error state
+
+        // Only fetch data if advice array is empty or doesn't have valid content
+        if (!selectedOption.advices || selectedOption.advices.length === 0 || 
+            (selectedOption.advices.length === 1 && selectedOption.advices[0].includes('No recommendations'))) {
+          try {
+            this.loading = true;  // Set loading state
+            const optionId = this.selected + 1; // Database IDs typically start from 1
+            console.log(`Fetching recommendation data for option ID ${optionId}`);
+            
+            const res = await fetch(`http://localhost:3001/api/recommendations/${optionId}`);
+            
+            if (!res.ok) {
+              throw new Error(`API returned error: ${res.status}`);
+            }
+            
+            const data = await res.json();
+            console.log('Retrieved recommendation data:', data);
+            
+            if (data && data.length > 0) {
+              // Transform API returned data into required format
+              selectedOption.advices = data.map(item => 
+                `${item.title || 'Recommendation'}: ${item.content || ''}\n\n${item.example ? 'Example: ' + item.example : ''}`
+              );
+              console.log('Transformed recommendations:', selectedOption.advices);
+            } else {
+              console.warn('API returned empty data');
+              // Set a default message
+              selectedOption.advices = ['No recommendations available for this option.'];
+              this.error = 'No recommendations found for this option.';
+            }
+          } catch (err) {
+            console.error('Failed to fetch recommendations:', err);
+            // Set error message
+            selectedOption.advices = ['Unable to load recommendations. Please try again later.'];
+            this.error = `Failed to load recommendations: ${err.message}`;
+          } finally {
+            this.loading = false;  // Close loading state regardless of success or failure
+          }
+        } else {
+          console.log(`Option ${this.selected} already has recommendation data: ${selectedOption.advices.length} items`);
+        }
       },
+      
       reset() {
         this.selected = null;
         this.selectedOption = null;
@@ -237,6 +277,57 @@
         }, 50);
         
         this.$emit('close-modal');
+      }
+    },
+    async created() {
+      console.log(`SleepScene component has been created, preloading recommendation data for all options...`);
+
+      try {
+        // Loop through all options and get recommendations
+        for (let i = 0; i < this.options.length; i++) {
+          const option = this.options[i];
+          
+          // If this option already has recommendation data, skip
+          if (option.advices && option.advices.length > 0) {
+            console.log(`Option ${i}: Already has ${option.advices.length} recommendations, skipping`);
+            continue;
+          }
+          
+          // Use option index+1 as ID (database IDs typically start from 1)
+          const optionId = i + 1;
+          console.log(`Loading recommendation data for option ID ${optionId}...`);
+          
+          try {
+            const response = await fetch(`http://localhost:3001/api/recommendations/${optionId}`);
+            
+            if (!response.ok) {
+              console.warn(`Failed to load recommendations for option ID ${optionId}: ${response.statusText}`);
+              // Set default recommendation
+              option.advices = ['No recommendations available for this option.'];
+              continue;
+            }
+            
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+              console.log(`Successfully loaded ${data.length} recommendations for option ID ${optionId}:`, data);
+              // Process recommendation data format
+              option.advices = data.map(item => 
+                `${item.title || 'Recommendation'}: ${item.content || ''}\n\n${item.example ? 'Example: ' + item.example : ''}`
+              );
+              console.log(`Recommendations for option ${i} formatted:`, option.advices);
+            } else {
+              console.warn(`Option ID ${optionId} has no recommendation data`);
+              option.advices = ['No recommendations available for this option.'];
+            }
+          } catch (error) {
+            console.error(`Error loading recommendations for option ID ${optionId}:`, error);
+            option.advices = ['Error loading recommendations. Please try again later.'];
+          }
+        }
+        console.log('All options recommendation data preloaded');
+      } catch (error) {
+        console.error('Error preloading recommendation data:', error);
       }
     }
   };
@@ -515,6 +606,20 @@
     background-color: #3E5C2B;
     box-shadow: 0 4px 10px rgba(77, 47, 32, 0.3);
     transform: translateY(-2px);
+  }
+  
+  /* Loading Indicator Styles */
+  .loading-indicator {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  /* Error Message Styles */
+  .error-message {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #d33;
   }
   </style>
   

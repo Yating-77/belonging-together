@@ -45,7 +45,15 @@
           
           <div class="advice-content" v-else>
             <h3>Parent Advice</h3>
-            <p>{{ currentAdvice }}</p>
+            <div v-if="loading" class="loading-indicator">
+              Loading recommendations...
+            </div>
+            
+            <div v-else-if="error" class="error-message">
+              {{ error }}
+            </div>
+            
+            <p v-else>{{ currentAdvice }}</p>
             <div class="advice-progress">
               {{ adviceProgress }}
             </div>
@@ -62,7 +70,6 @@
               </button>
             </div>
             
-            <!-- Show continue button after reading all advice -->
             <div v-if="hasReadAllAdvice" class="next-scenario-container">
               <button class="continue-btn" @click="goToNextScenario">
                 Continue to Next Scene
@@ -99,20 +106,15 @@ export default {
       showAdvice: false,
       currentAdviceIndex: 0,
       hasViewedLastAdvice: false,
+      loading: false,
+      error: null,
       options: [
         {
           label: 'Option 0: Uses few words and expresses needs through other means (weak non-verbal expression)',
           title: '✋ Small Cards Convey Wishes',
           parentDialogue: 'What would you like to eat? You can look at the picture cards to tell me.',
           childDialogue: '(Amy stares at the "cookie" card for a moment, then nods and actively takes the "cookie" card to give to mom)',
-          advices: [
-            '1. Introduce alternative communication systems like Picture Exchange Communication System (PECS) which uses visual cards to represent common items, activities, and needs.',
-            '2. Create a personalized communication board with photographs of your child\'s favorite foods, toys, and activities that they can point to when expressing needs.',
-            '3. Pair gestures with simple words consistently when communicating with your child, supporting their understanding of language while honoring their non-verbal communication.',
-            '4. Respond positively to all communication attempts, whether through pointing, leading by hand, or other non-verbal methods, to encourage continued efforts.',
-            '5. Gradually introduce visual choice boards for daily routines, starting with just two options and expanding as your child becomes comfortable using them.',
-            '6. Consider consulting with a speech-language pathologist about technological communication aids or apps that might support your child\'s specific communication needs.'
-          ],
+          advices: [],
           image: CommunicationOption0
         },
         {
@@ -120,15 +122,7 @@ export default {
           title: '📢 Understanding My "Echo Words"',
           parentDialogue: 'Do you want to wear a coat to go to the park? Then let\'s put on our coats and go outside! You say: \'I want to wear a coat\'.',
           childDialogue: 'I want to wear a coat!',
-          advices: [
-            '1. Recognize echolalia (repeated speech) as a form of communication rather than meaningless repetition - it often indicates your child is trying to engage or express a need.',
-            '2. Expand on your child\'s repeated phrases by adding meaning and context: If they say "outside" repeatedly, respond with "You want to go outside to play."',
-            '3. Create opportunities for functional language by setting up situations where your child needs to request items, using visual supports as needed.',
-            '4. Use the "echo and expand" technique: when your child repeats a phrase, acknowledge it and then model a slightly more complex version for them to learn.',
-            '5. Avoid demanding immediate language changes; instead, model proper language consistently while accepting their current communication method.',
-            '6. Celebrate when your child uses language functionally, even if it\'s a repeated phrase used appropriately in context.',
-            '7. Consider a language diary to track repeated phrases and their apparent meanings, helping you understand patterns in your child\'s communication attempts.'
-          ],
+          advices: [],
           image: CommunicationOption1
         },
         {
@@ -136,15 +130,7 @@ export default {
           title: '🧠 Speaking Clearly Like Putting Together a Puzzle',
           parentDialogue: 'Was it your sister pushing the ball in the park? Oh, you mean your sister was playing with bubble balls in the park, and then the ball flew away, is that right?',
           childDialogue: 'Park... bubbles... ball... sister... push! Ball... flew away! Yes!',
-          advices: [
-            '1. Use visual sequencing tools like picture schedules or comic strip conversations to help your child organize their thoughts before speaking.',
-            '2. Practice "sentence building" with visual supports - use picture cards for subject, verb, and object to physically arrange before speaking.',
-            '3. Implement the "first-then" structure to simplify language organization: "First we go to the park, then we play on the swings."',
-            '4. Model clear, simplified speech by using short, grammatically correct sentences when speaking with your child.',
-            '5. Provide verbal scaffolding by offering sentence starters or filling in missing words when your child is struggling to express a complete thought.',
-            '6. Create regular storytelling opportunities using picture books, asking simple questions that help your child practice sequencing events.',
-            '7. Use visual supports like emotion cards alongside language to help clarify the meaning behind fragmented speech attempts.'
-          ],
+          advices: [],
           image: CommunicationOption2
         },
         {
@@ -152,15 +138,7 @@ export default {
           title: '💡 Small Questions, Big Encouragement',
           parentDialogue: 'Yes, it\'s a red balloon! Would you like to touch it? You just told mommy you wanted to see the balloon, that\'s wonderful!',
           childDialogue: 'Balloon! (Smiles and nods slightly)',
-          advices: [
-            '1. Create an "irresistible communication environment" by placing desired items in sight but out of reach, creating natural opportunities for your child to request them.',
-            '2. Implement a "wait time" strategy - pause expectantly after asking a question or during an interaction, giving your child extra time to formulate a response.',
-            '3. Celebrate every communication initiation, no matter how small, with specific praise: "You told me you wanted the ball! Great talking!"',
-            '4. Introduce "sabotage" techniques in familiar routines - deliberately create a problem your child needs to communicate about (like forgetting a spoon at mealtime).',
-            '5. Use highly motivating activities and special interests to encourage spontaneous communication through excitement and engagement.',
-            '6. Create a communication-rich but low-pressure environment where requests are consistently honored, building trust that speaking leads to positive outcomes.',
-            '7. Consider a "communication temptations" approach, strategically arranging the environment with interesting but inaccessible items that might prompt your child to initiate interaction.'
-          ],
+          advices: [],
           image: CommunicationOption3
         }
       ]
@@ -195,7 +173,6 @@ export default {
       }
     },
     currentAdviceIndex(newVal) {
-      // When the user views the last advice, mark all advice as read
       if (newVal === this.totalAdvices - 1) {
         this.hasViewedLastAdvice = true;
       }
@@ -205,11 +182,52 @@ export default {
     selectOption(index) {
       this.selected = index;
     },
-    showScene() {
+    async showScene() {
+      const selectedOption = this.options[this.selected];
       this.selectedOption = this.selected;
       this.showAdvice = false; 
       this.currentAdviceIndex = 0;
       this.hasViewedLastAdvice = false;
+      this.error = null;
+
+      if (selectedOption.advices.length === 0) {
+        try {
+          this.loading = true;
+          const optionId = this.selected + 13;
+          console.log(`Attempting to fetch recommendations for Communication option ID ${optionId}`);
+          
+          const res = await fetch(`http://localhost:3001/api/recommendations/${optionId}`);
+          
+          if (!res.ok) {
+            throw new Error(`API returned error: ${res.status}`);
+          }
+          
+          const data = await res.json();
+          console.log(`Retrieved recommendation data for option ID ${optionId}:`, data);
+          
+          if (data && data.length > 0) {
+            // Check if data matches expected format
+            if (data[0].title && data[0].content) {
+              selectedOption.advices = data.map(item => 
+                `${item.title}: ${item.content}${item.example ? '\n\nExample: ' + item.example : ''}`
+              );
+              console.log('Transformed recommendations:', selectedOption.advices);
+            } else {
+              throw new Error('API returned unexpected data format');
+            }
+          } else {
+            console.warn('API returned empty data');
+            selectedOption.advices = ['No relevant recommendations found. Please contact administrator to add data.'];
+            this.error = 'No recommendations found for this option';
+          }
+        } catch (err) {
+          console.error('Failed to fetch recommendations:', err);
+          selectedOption.advices = ['Failed to fetch recommendation data. Please try again later.'];
+          this.error = `Failed to fetch recommendation data: ${err.message}`;
+        } finally {
+          this.loading = false;
+        }
+      }
     },
     reset() {
       this.selected = null;
@@ -247,6 +265,39 @@ export default {
       }, 50);
       
       this.$emit('close-modal');
+    }
+  },
+  async created() {
+    console.log('CommunicationScene component created, preparing to preload recommendation data');
+    
+    // Preload recommendation data for each option
+    for (let i = 0; i < this.options.length; i++) {
+      const option = this.options[i];
+      if (option.advices.length === 0) {
+        try {
+          const optionId = i + 13;
+          console.log(`Preloading recommendations for Communication option ${optionId}`);
+          const res = await fetch(`http://localhost:3001/api/recommendations/${optionId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) {
+              option.advices = data.map(item => 
+                `${item.title}: ${item.content}${item.example ? '\n\nExample: ' + item.example : ''}`
+              );
+              console.log(`Communication option ${optionId} preloaded with ${data.length} recommendations`);
+            } else {
+              console.warn(`Communication option ${optionId} has no recommendation data`);
+              option.advices = ['No relevant recommendations found. Please contact administrator to add data.'];
+            }
+          } else {
+            console.error(`Failed to preload Communication option ${optionId}: ${res.status}`);
+            option.advices = ['Failed to fetch recommendation data. Please try again later.'];
+          }
+        } catch (err) {
+          console.error(`Error when preloading recommendations for Communication option ${i + 13}:`, err);
+          option.advices = ['Failed to fetch recommendation data. Please try again later.'];
+        }
+      }
     }
   }
 };
@@ -497,5 +548,17 @@ export default {
   .image-section, .dialogue-section {
     width: 100%;
   }
+}
+
+.loading-indicator {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.error-message {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #d33;
 }
 </style>

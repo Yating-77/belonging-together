@@ -45,7 +45,18 @@
           
           <div class="advice-content" v-else>
             <h3>Parent Advice</h3>
-            <p>{{ currentAdvice }}</p>
+            <!-- loading -->
+            <div v-if="loading" class="loading-indicator">
+              Loading recommendations...
+            </div>
+            
+            <!-- error -->
+            <div v-else-if="error" class="error-message">
+              {{ error }}
+            </div>
+            
+            <!-- recommendation -->
+            <p v-else>{{ currentAdvice }}</p>
             <div class="advice-progress">
               {{ adviceProgress }}
             </div>
@@ -99,19 +110,15 @@ export default {
       showAdvice: false,
       currentAdviceIndex: 0,
       hasViewedLastAdvice: false,
+      loading: false,
+      error: null,
       options: [
         {
           label: 'Option 0: Refuses to try new foods, only eats a few specific foods',
           title: '🥦 "Just a tiny taste" courage',
           parentDialogue: 'Today we placed a little "dinosaur vegetable" (broccoli) next to your favorite chicken. You can just look at it or smell it first, no need to eat it if you don\'t want to.',
           childDialogue: 'I don\'t want to eat this! I don\'t like green things.',
-          advices: [
-            '1. Introduce new foods gradually using a "food bridge" strategy by placing new foods alongside familiar foods that your child enjoys.',
-            '2. Present foods 10-15 times before expecting acceptance — research shows children with autism may need repeated exposures before trying new foods.',
-            '3. Provide safety with familiar foods by ensuring that at least half the plate contains foods you know your child will eat.',
-            '4. Make food exploration playful and low-pressure by engaging with food through other senses first (touch, smell) before expecting tasting.',
-            '5. Use descriptive, fun language when introducing new foods, like "dinosaur trees" for broccoli or "orange wheels" for carrot slices.'
-          ],
+          advices: [],
           image: DietOption0
         },
         {
@@ -119,13 +126,7 @@ export default {
           title: '🍩 "Soft and crunchy adventures"',
           parentDialogue: 'It\'s a bit like the cookies you love, just a different color.',
           childDialogue: '*Licks it cautiously* It tastes strange...',
-          advices: [
-            '1. Work with texture preferences by first accepting the textures your child can tolerate while ensuring nutritional intake.',
-            '2. Introduce texture changes gradually by starting with minimal modifications to preferred foods before making bigger changes.',
-            '3. Create a food progression plan that moves slowly from totally accepted textures to slightly more challenging ones.',
-            '4. Engage in sensory food play outside of mealtimes to help desensitize children to textures they find challenging.',
-            '5. Consider the temperature of foods as some children may accept a specific food when warm but reject it when cold.'
-          ],
+          advices: [],
           image: DietOption1
         },
         {
@@ -133,13 +134,7 @@ export default {
           title: '📴 "Today we companion with food, not toys"',
           parentDialogue: 'You can play with your car after you finish eating. By the way, your teacher said your drawing of the sun was beautiful today!',
           childDialogue: 'Reluctantly starts eating while glancing at the toy car',
-          advices: [
-            '1. Set consistent meal expectations by establishing clear rules about screen time and toys at the table.',
-            '2. Create a gradual transition plan to reduce dependence on distractions during mealtimes.',
-            '3. Increase social engagement during meals by sharing interesting conversation topics or gentle questions about your child\'s day.',
-            '4. Use visual timers or schedules to help your child understand the expected mealtime duration without distractions.',
-            '5. Provide positive reinforcement for incremental improvements in focusing on mealtime without devices.'
-          ],
+          advices: [],
           image: DietOption2
         },
         {
@@ -147,13 +142,7 @@ export default {
           title: '⏰ "Racing with the little hourglass"',
           parentDialogue: 'Tick tock, the timer has started! Can you finish your bite before all the sand falls to the bottom?',
           childDialogue: 'I want to finish before the sand runs out! Takes bites while watching the timer',
-          advices: [
-            '1. Establish a regular meal schedule with three meals and two snacks at consistent times each day.',
-            '2. Use visual supports like timers or picture schedules to help your child understand mealtime expectations.',
-            '3. Make mealtime engaging with gentle mealtime games that encourage appropriate eating pace and sitting.',
-            '4. Start with realistic sitting duration goals (even just 2-3 minutes) and gradually increase the time.',
-            '5. Ensure your child comes to the table physically ready to eat (not too tired, not too full from snacking).'
-          ],
+          advices: [],
           image: DietOption3
         }
       ]
@@ -198,11 +187,51 @@ export default {
     selectOption(index) {
       this.selected = index;
     },
-    showScene() {
+    async showScene() {
+      const selectedOption = this.options[this.selected];
       this.selectedOption = this.selected;
       this.showAdvice = false; 
       this.currentAdviceIndex = 0;
       this.hasViewedLastAdvice = false;
+      this.error = null;  // Reset error state
+
+      // Only fetch data if the advice array is empty
+      if (selectedOption.advices.length === 0) {
+        try {
+          this.loading = true;  // Set loading state
+          console.log(`Fetching recommendation data for diet option ID ${this.selected + 5}`); // Diet options start from ID 5
+          
+          // Note: Diet option IDs start from 5, need to add 5, because Sleep scenario uses 1-4
+          const res = await fetch(`http://localhost:3001/api/recommendations/${this.selected + 5}`);
+          
+          if (!res.ok) {
+            throw new Error(`API returned error: ${res.status}`);
+          }
+          
+          const data = await res.json();
+          console.log('Retrieved recommendation data:', data);
+          
+          if (data && data.length > 0) {
+            // Transform API returned data into required format
+            selectedOption.advices = data.map(item => 
+              `${item.title}: ${item.content}\n\nExample: ${item.example}`
+            );
+            console.log('Transformed recommendations:', selectedOption.advices);
+          } else {
+            console.warn('API returned empty data');
+            // Set a default message
+            selectedOption.advices = ['No recommendations available for this option.'];
+            this.error = 'No recommendations found for this option.';
+          }
+        } catch (err) {
+          console.error('Failed to fetch recommendations:', err);
+          // Set error message
+          selectedOption.advices = ['Unable to load recommendations. Please try again later.'];
+          this.error = `Failed to load recommendations: ${err.message}`;
+        } finally {
+          this.loading = false;  // Close loading state regardless of success or failure
+        }
+      }
     },
     reset() {
       this.selected = null;
@@ -233,6 +262,36 @@ export default {
       }, 50);
       
       this.$emit('close-modal');
+    }
+  },
+  async created() {
+    // Preload recommendation data for all options when component is created
+    console.log('DietScene component created, preparing to preload recommendation data');
+    for (let i = 0; i < this.options.length; i++) {
+      const option = this.options[i];
+      if (option.advices.length === 0) {
+        try {
+          // Diet options start from ID 5
+          const optionId = i + 5;
+          console.log(`Preloading recommendation data for diet option ${optionId}`);
+          const res = await fetch(`http://localhost:3001/api/recommendations/${optionId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) {
+              option.advices = data.map(item => 
+                `${item.title}: ${item.content}\n\nExample: ${item.example}`
+              );
+              console.log(`Diet option ${optionId} preloaded ${data.length} recommendations`);
+            } else {
+              console.warn(`Diet option ${optionId} has no recommendation data`);
+            }
+          } else {
+            console.error(`Failed to preload diet option ${optionId}: ${res.status}`);
+          }
+        } catch (err) {
+          console.error(`Error preloading recommendations for diet option ${i + 5}:`, err);
+        }
+      }
     }
   }
 };
@@ -511,5 +570,19 @@ export default {
   background-color: #3E5C2B;
   box-shadow: 0 4px 10px rgba(77, 47, 32, 0.3);
   transform: translateY(-2px);
+}
+
+/* Loading Indicator Styles */
+.loading-indicator {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Error Message Styles */
+.error-message {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #d33;
 }
 </style>

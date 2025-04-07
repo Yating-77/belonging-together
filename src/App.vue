@@ -1,13 +1,103 @@
 <template>
-  <div class="fullscreen-container">
+  <!-- loading message -->
+  <div v-if="loading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Loading scenario data from database, please wait...</p>
+      <p class="loading-subtext">This may take a few seconds</p>
+    </div>
+  </div>
+
+  <!-- error message -->
+  <div v-else-if="error" class="error-overlay">
+    <div class="error-content">
+      <div class="error-icon"></div>
+      <h3 class="error-title">Data Loading Failed</h3>
+      <p class="error-text">{{ error }}</p>
+      <div class="error-actions">
+        <button @click="fetchCategories" class="retry-button">
+          <span class="icon"></span> Retry
+        </button>
+        <button @click="setupDefaultScenarios" class="default-button">
+          <span class="icon"></span> Use Simple Mode
+        </button>
+      </div>
+      <p class="error-help">If the problem persists, please ensure:</p>
+      <ul class="error-tips">
+        <li>Backend server is running (<code>node my-backend/server.js</code>)</li>
+        <li>Database service is working and contains the necessary data</li>
+        <li>Network connection is stable</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 主要内容 -->
+  <div v-else-if="scenarios.length > 0" class="fullscreen-container">
+    <!-- 页面顶部中央标题 -->
+    <div class="main-title-container text-center py-4">
+      <h1 class="mb-3 page-title">Supporting Autism Families</h1>
+      <p class="mb-4 page-subtitle">
+        Personalized recommendations based on your child's daily behaviors
+      </p>
+      
+      <div class="scenarios-cards-container">
+        <p class="intro-text page-subtitle">We provide support for six common scenarios:</p>
+        <div class="scenarios-cards-row">
+          <div class="scenario-card-item">
+            <div class="card-icon-placeholder">
+              <img src="./components/icons/sleep-icon.png" alt="Sleep Icon" class="scenario-icon">
+            </div>
+            <div class="card-title">Sleep Issues</div>
+            <div class="card-description">Trouble falling or staying asleep?</div>
+          </div>
+          <div class="scenario-card-item">
+            <div class="card-icon-placeholder">
+              <img src="./components/icons/diet-icon.png" alt="Diet Icon" class="scenario-icon">
+            </div>
+            <div class="card-title">Diet & Nutrition</div>
+            <div class="card-description">Selective eating or mealtime struggles?</div>
+          </div>
+          <div class="scenario-card-item">
+            <div class="card-icon-placeholder">
+              <img src="./components/icons/social-icon.png" alt="Social Icon" class="scenario-icon larger-icon">
+            </div>
+            <div class="card-title">Social Interaction</div>
+            <div class="card-description">Find it hard to connect with peers?</div>
+          </div>
+        </div>
+        <div class="scenarios-cards-row">
+          <div class="scenario-card-item">
+            <div class="card-icon-placeholder">
+              <img src="./components/icons/communication-icon.png" alt="Communication Icon" class="scenario-icon larger-icon">
+            </div>
+            <div class="card-title">Communication</div>
+            <div class="card-description">Limited language or unclear speech?</div>
+          </div>
+          <div class="scenario-card-item">
+            <div class="card-icon-placeholder">
+              <img src="./components/icons/emotion-icon.png" alt="Emotion Icon" class="scenario-icon larger-icon">
+            </div>
+            <div class="card-title">Emotional Management</div>
+            <div class="card-description">Frequent meltdowns or aggression?</div>
+          </div>
+          <div class="scenario-card-item">
+            <div class="card-icon-placeholder">
+              <img src="./components/icons/sensory-icon.png" alt="Sensory Icon" class="scenario-icon larger-icon">
+            </div>
+            <div class="card-title">Sensory Sensitivity</div>
+            <div class="card-description">Overreact to lights, sound or touch?</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <div v-if="!showResults" class="row g-0 h-100">
       <!-- Left fixed image area -->
       <div class="col-md-5 d-flex align-items-center justify-content-center sidebar-container">
         <div class="position-sticky sidebar-content">
-          <h1 class="text-center mb-3 page-title">Supporting Autism Families</h1>
-          <p class="text-center mb-4 page-subtitle">
-            Personalized recommendations based on your child's daily behaviors
-          </p>
+          <div class="scenario-header mb-3">
+            <h2 class="current-scenario-title">Scenario {{ currentScenario + 1}}: {{ scenarios[currentScenario].title }}</h2>
+          </div>
           <div class="main-image-container">
             <img 
               :src="'/scenario-' + currentScenario + '.jpg'" 
@@ -21,7 +111,7 @@
           <div class="progress-container mt-4">
             <div class="d-flex justify-content-between mb-2">
               <span class="progress-text">Scenario {{ currentScenario + 1 }}/{{ scenarios.length }}</span>
-              <span class="progress-percentage">{{ Math.round(((currentScenario + 1) / scenarios.length) * 100) }}% Complete</span>
+              <!-- <span class="progress-percentage">{{ Math.round(((currentScenario + 1) / scenarios.length) * 100) }}% Complete</span> -->
             </div>
             <div class="progress">
               <div class="progress-bar" 
@@ -153,7 +243,7 @@
           <div>
             <button class="btn handbook-button" @click="showSummary = true">
               📚 View Complete Handbook
-            </button>
+          </button>
           </div>
         </div>
         
@@ -177,10 +267,10 @@
           <button class="btn back-button" @click="backToScenarios">
             Back
           </button>
-        </div>
-      </div>
-    </div>
-    
+              </div>
+              </div>
+            </div>
+            
     <!-- Sleep Scene Modal -->
     <div v-if="showSleepScene" class="sleep-scene-modal" @keydown.escape="resetCurrentScenario">
       <div class="sleep-scene-content">
@@ -199,25 +289,25 @@
           <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
         </div>
       </div>
-    </div>
-    
+            </div>
+            
     <!-- Diet Scene Modal -->
     <div v-if="showDietScene" class="sleep-scene-modal" @keydown.escape="resetCurrentScenario">
       <div class="sleep-scene-content">
         <div class="modal-header">
           <h3 class="modal-title">Scenario Scene - Diet Issues</h3>
           <button type="button" class="close-btn" @click="resetCurrentScenario">&times;</button>
-        </div>
+                  </div>
         <div class="modal-body">
           <DietScene 
             :option="dietSceneOption" 
             @next-scenario="navigateToNextScenario" 
             @close-modal="resetCurrentScenario">
           </DietScene>
-        </div>
+                </div>
         <div class="modal-footer">
           <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
-        </div>
+              </div>
       </div>
     </div>
     
@@ -237,10 +327,10 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-    
+        
     <!-- Communication Scene Modal -->
     <div v-if="showCommunicationScene" class="sleep-scene-modal" @keydown.escape="resetCurrentScenario">
       <div class="sleep-scene-content">
@@ -254,7 +344,7 @@
             @next-scenario="navigateToNextScenario" 
             @close-modal="resetCurrentScenario">
           </CommunicationScene>
-        </div>
+      </div>
         <div class="modal-footer">
           <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
         </div>
@@ -317,6 +407,15 @@
       </div>
     </div>
   </div>
+  
+  <!-- no data attention -->
+  <div v-else class="loading-overlay">
+    <div class="loading-content">
+      <div class="error-icon">⚠️</div>
+      <p class="loading-text">Unable to load scenario data, please try again later</p>
+      <button @click="setupDefaultScenarios" class="retry-button">Use Default Data</button>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -359,241 +458,173 @@ export default {
       emotionSceneOption: null,
       sensorySceneOption: null,
       userSelections: [],
-      scenarios: [
-        {
-          title: 'Sleep Issues',
-          question: 'How does your child typically behave at bedtime or during the night?',
-          options: [
-            { 
-              text: 'Has difficulty falling asleep at bedtime (prolonged time to fall asleep)',
-              recommendations: []
-            },
-            { 
-              text: 'Shows significant anxiety or crying when bedtime routine changes (overly rigid bedtime routine)',
-              recommendations: []
-            },
-            { 
-              text: 'Has difficulty falling asleep when there are slight changes in the sleep environment (sensitive to sleep environment)',
-              recommendations: []
-            }
-          ]
-        },
-        {
-          title: 'Diet and Nutrition Issues',
-          question: 'During mealtimes, how does your child typically behave?',
-          options: [
-            { 
-              text: 'Refuses to try new foods, only eats a few specific foods (narrow food acceptance)',
-              recommendations: []
-            },
-            { 
-              text: 'Extremely sensitive to food texture or taste, leading to limited diet (sensory food aversions)',
-              recommendations: []
-            },
-            { 
-              text: 'Irregular eating times or difficulty sitting calmly at the table (poor mealtime structure)',
-              recommendations: []
-            }
-          ]
-        },
-        {
-          title: 'Social Interaction',
-          question: 'How does your child typically interact with peers in social situations?',
-          options: [
-            { 
-              text: 'Plays completely alone, rarely initiates contact with peers',
-              recommendations: []
-            },
-            { 
-              text: 'Willing to approach other children but doesn\'t know how to interact',
-              recommendations: []
-            },
-            { 
-              text: 'Often has conflicts with peers or difficulty cooperating',
-              recommendations: []
-            },
-            { 
-              text: 'Focuses only on preferred activities or interests',
-              recommendations: []
-            }
-          ]
-        },
-        {
-          title: 'Communication Issues',
-          question: 'When your child wants to express needs or interests, they typically:',
-          options: [
-            { 
-              text: 'Uses few words and expresses needs through other means (weak non-verbal expression)',
-              recommendations: [
-                {
-                  title: 'Introduce Alternative Communication Methods',
-                  content: 'If your child struggles with verbal expression, teach them other ways to communicate their needs, such as gestures and picture communication.',
-                  example: 'Start by having your child point or take your hand to lead you to desired items. You can also use a Picture Exchange Communication System (PECS): prepare picture cards of common items (cup, food, bathroom), and teach your child to give you the appropriate picture when they need something.'
-                },
-                {
-                  title: 'Provide Choices Instead of Open Questions',
-                  content: 'Give your child opportunities to make choices between two options to express preferences.',
-                  example: 'Instead of asking "What do you want to drink?" show two options, like milk and juice, and ask "Do you want milk or juice?" This makes communication more concrete and manageable.'
-                },
-                {
-                  title: 'Pair Gestures with Simple Words',
-                  content: 'Consistently use gestures along with simple verbal language to support communication development.',
-                  example: 'When saying "more," show the sign for more, or when saying "all done," gesture with your hands. This multimodal approach creates multiple pathways for understanding and expression.'
-                },
-                {
-                  title: 'Respond to All Communication Attempts',
-                  content: 'Honor and acknowledge all of your child\'s attempts to communicate, regardless of the method.',
-                  example: 'If your child points to the refrigerator, respond as if they had asked verbally: "Oh, you\'re thirsty? Let\'s get some water." This validates their communication effort and encourages continued attempts.'
-                },
-                {
-                  title: 'Create Communication-Rich Environments',
-                  content: 'Structure your home environment to encourage communication opportunities throughout the day.',
-                  example: 'Place desired items in sight but out of reach, requiring your child to communicate for help. Store favorite toys in clear containers that they can see but need assistance to open.'
-                }
-              ]
-            },
-            { 
-              text: 'Has language ability but often repeats common words or phrases (limited language expression)',
-              recommendations: [
-                {
-                  title: 'Recognize Echolalia as Communication',
-                  content: 'Understand that repeating words or phrases (echolalia) is often a meaningful communication attempt, not just meaningless repetition.',
-                  example: 'When your child repeats "outside, outside" from a favorite show, respond as if they\'ve made a request: "You want to go outside? Let\'s put on shoes." This acknowledges their communication intent behind the repeated phrase.'
-                },
-                {
-                  title: 'Use the Echo and Expand Technique',
-                  content: 'Build on your child\'s repeated phrases by acknowledging them and adding slightly more complex language.',
-                  example: 'If your child says "car go," respond with "Yes, the red car is going fast!" This validates their communication while providing a model for more complete language.'
-                },
-                {
-                  title: 'Create Functional Communication Opportunities',
-                  content: 'Set up situations where your child needs to use language functionally to get their needs met.',
-                  example: 'Place a favorite toy in a clear container that\'s difficult to open, or offer a small portion of a preferred snack so they need to ask for more, creating natural communication opportunities.'
-                },
-                {
-                  title: 'Maintain a Language Diary',
-                  content: 'Keep track of repeated phrases and their apparent meanings to better understand your child\'s communication patterns.',
-                  example: 'Note when your child says "blue train coming" and whether it means they want to play with trains, watch a train video, or something else. Sharing this diary with teachers and therapists creates consistent understanding.'
-                },
-                {
-                  title: 'Celebrate Functional Language Use',
-                  content: 'Provide enthusiastic feedback when your child uses language appropriately, even if it\'s a repeated phrase used in the right context.',
-                  example: 'If your child has been repeating "all done" and then uses it appropriately at the end of a meal, respond with specific praise: "You told me you\'re all done eating - great talking!"'
-                }
-              ]
-            },
-            { 
-              text: 'Just beginning to speak but language is confused, illogical, difficult to maintain simple conversations (weak language organization)',
-              recommendations: [
-                {
-                  title: 'Use Visual Sequencing Supports',
-                  content: 'Provide visual aids that help your child organize thoughts before speaking.',
-                  example: 'Create simple comic strip conversations or picture sequences showing the beginning, middle, and end of common events. Before discussing the day at school, look at a visual schedule together first to help organize thoughts.'
-                },
-                {
-                  title: 'Practice Physical Sentence Building',
-                  content: 'Use tangible objects or cards to physically arrange sentences before speaking them.',
-                  example: 'Create a set of picture cards with subjects (I, you, mom), verbs (want, see, go), and objects (ball, book, park). Have your child arrange the cards in order, then say the sentence they\'ve created.'
-                },
-                {
-                  title: 'Implement First-Then Structure',
-                  content: 'Use simple two-part sequences to help your child practice basic logical connections in language.',
-                  example: 'Use "First we put on shoes, then we go outside" structure in both your language and visual supports. This helps establish basic sequential thinking that underlies organized communication.'
-                },
-                {
-                  title: 'Model Simplified Speech',
-                  content: 'Provide clear, grammatically correct but simplified speech models for your child to imitate.',
-                  example: 'Instead of complex sentences, use shorter, complete sentences: "The boy is running" rather than "Look at that boy over there who\'s running so fast toward the playground." This provides an achievable language model.'
-                },
-                {
-                  title: 'Create Storytelling Opportunities',
-                  content: 'Use picture books to help your child practice sequencing events and describing actions.',
-                  example: 'After reading a simple story, ask your child to retell it using the pictures. Provide prompts as needed: "What happened first? Then what happened?" This builds narrative skills that transfer to conversation.'
-                }
-              ]
-            },
-            { 
-              text: 'Occasionally shows clear desire to express, but mostly struggles to show thoughts (lacks communication initiative)',
-              recommendations: [
-                {
-                  title: 'Implement Wait Time Strategy',
-                  content: 'Provide extended pause time after asking questions or during interactions, allowing your child time to formulate responses.',
-                  example: 'After asking a question, silently count to 10 before speaking again or prompting further. This patient waiting signals that you expect a response and gives your child processing time.'
-                },
-                {
-                  title: 'Celebrate Communication Initiations',
-                  content: 'Provide specific, enthusiastic feedback when your child initiates communication, no matter how small.',
-                  example: 'If your child unexpectedly comments on a toy, respond with "You told me about the red car! I love hearing your ideas!" This positive reinforcement encourages more spontaneous communication.'
-                },
-                {
-                  title: 'Create Communication Temptations',
-                  content: 'Arrange the environment with interesting items that might prompt your child to comment or ask questions.',
-                  example: 'Place a new toy or unusual object in your child\'s play area without commenting on it. Wind up a toy but don\'t activate it. These situations naturally encourage communication initiation.'
-                },
-                {
-                  title: 'Use Motivating Activities',
-                  content: 'Incorporate your child\'s high-interest activities to encourage spontaneous communication through excitement.',
-                  example: 'During activities your child loves, create unexpected problems (like missing pieces) or surprising moments that naturally prompt communication. Enthusiasm often breaks through communication reluctance.'
-                },
-                {
-                  title: 'Build Communication Confidence',
-                  content: 'Create a responsive environment where all communication attempts lead to positive outcomes.',
-                  example: 'When your child makes any attempt to communicate, respond quickly and positively. This builds trust that speaking is effective and worthwhile, encouraging more frequent communication attempts.'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          title: 'Emotional and Behavioral Management',
-          question: 'When facing frustration or disappointment, your child typically:',
-          options: [
-            { 
-              text: 'Emotions quickly collapse into crying and screaming, difficult to comfort',
-              recommendations: []
-            },
-            { 
-              text: 'Often shows pushing, hitting, or throwing things as aggressive behaviors',
-              recommendations: []
-            },
-            { 
-              text: 'Tries to escape, hide, or refuse to face difficult scenarios',
-              recommendations: []
-            },
-            { 
-              text: 'Rarely expresses emotions actively, more often silent or self-enclosed',
-              recommendations: []
-            }
-          ]
-        },
-        {
-          title: 'Sensory Sensitivity Issues',
-          question: 'Which type of sensory input does your child seem most sensitive or strongly reactive to?',
-          options: [
-            { 
-              text: 'Easily becomes overwhelmed in noisy or bright environments (environmental stimuli sensitivity)',
-              recommendations: []
-            },
-            { 
-              text: 'Resists hair washing, nail trimming, bathing, and other daily care activities (resistance to body touch)',
-              recommendations: []
-            },
-            { 
-              text: 'Overly sensitive to certain lights, colors, or visual environments (visual stimuli sensitivity)',
-              recommendations: []
-            },
-            { 
-              text: 'Needs a lot of movement, shaking, or seeking strong sensory stimulation (sensory seeking behavior)',
-              recommendations: []
-            }
-          ]
-        }
-      ]
+      scenarios: [],
+      loading: false,
+      error: null
     };
   },
   methods: {
+    // Get category and questions and options from API
+    async fetchCategories() {
+      this.loading = true;
+      this.error = null;
+      
+      // Loading time
+      const startTime = Date.now();
+      
+      try {
+        console.log('Starting to fetch categories and options data');
+        
+        // Get category
+        const categoriesRes = await fetch('http://localhost:3001/api/categories');
+        
+        if (!categoriesRes.ok) {
+          throw new Error(`Failed to fetch categories: ${categoriesRes.status} - ${categoriesRes.statusText}`);
+        }
+        
+        let categories = await categoriesRes.json();
+        console.log(`Retrieved ${categories.length} categories:`, JSON.stringify(categories));
+        
+        if (!categories || categories.length === 0) {
+          throw new Error('No category data retrieved, please check the database');
+        }
+        
+        // Handle duplicate data
+        const uniqueTitles = new Set();
+        categories = categories.filter(category => {
+          if (uniqueTitles.has(category.title)) {
+            return false;
+          }
+          uniqueTitles.add(category.title);
+          return true;
+        });
+        
+        console.log(`After removing duplicates, ${categories.length} categories remain`);
+        
+        // Temp scene
+        const tempScenarios = [];
+        
+        // Get questions and options for each category
+        for (const category of categories) {
+          console.log(`Processing category: [ID: ${category.id}] ${category.title}`);
+          
+          try {
+            // Get questions
+            const questionsRes = await fetch(`http://localhost:3001/api/questions/${category.id}`);
+            
+            if (!questionsRes.ok) {
+              console.error(`Failed to fetch questions for category ${category.id}: ${questionsRes.status} - ${questionsRes.statusText}`);
+              continue;
+            }
+            
+            const questions = await questionsRes.json();
+            console.log(`Questions data for category ${category.id}:`, JSON.stringify(questions));
+            
+            if (!questions || questions.length === 0) {
+              console.warn(`Category ${category.id} has no question data, skipping this category`);
+              continue;
+            }
+            
+            // Use the text from the first question as the question for this scenario
+            const questionText = questions[0].text;
+            console.log(`Question for category ${category.title}: ${questionText}`);
+            
+            // fetch the options for the category
+            const optionsRes = await fetch(`http://localhost:3001/api/options/${category.id}`);
+            
+            if (!optionsRes.ok) {
+              console.error(`Failed to fetch options for category ${category.id}: ${optionsRes.status} - ${optionsRes.statusText}`);
+              continue;
+            }
+            
+            let options = await optionsRes.json();
+            console.log(`Options data for category ${category.id}:`, JSON.stringify(options));
+            
+            if (!options || options.length === 0) {
+              console.warn(`Category ${category.id} has no options data, skipping this category`);
+              continue;
+            }
+            
+            // handle duplicate option data: remove duplicates by label
+            const uniqueLabels = new Set();
+            options = options.filter(option => {
+              if (uniqueLabels.has(option.label)) {
+                return false;
+              }
+              uniqueLabels.add(option.label);
+              return true;
+            });
+            
+            console.log(`After removing duplicates, retrieved ${options.length} options for category ${category.title}`);
+            
+            // build the scenario object
+            const scenario = {
+              title: category.title,
+              question: questionText, // use the text retrieved from the questions table
+              options: options.map(option => ({
+                id: option.id, // save the option ID, for later retrieval of recommendations
+                text: option.label,
+                recommendations: []
+              }))
+            };
+            
+            console.log(`Scenario object constructed:`, JSON.stringify(scenario));
+            
+            // add to the scenarios array
+            tempScenarios.push(scenario);
+          } catch (error) {
+            console.error(`Error when processing category ${category.id}:`, error);
+            // continue to process other categories
+            continue;
+          }
+        }
+        
+        // if the data is retrieved, update the scenarios array
+        if (tempScenarios.length > 0) {
+          this.scenarios = tempScenarios;
+          console.log('Scenario data updated, retrieved', tempScenarios.length, 'scenarios');
+        } else {
+          console.warn('No scenario data retrieved, using default data');
+          this.error = 'Could not retrieve any valid scenario data. This might be because the database does not have complete categories, questions, and options data.';
+          this.setupDefaultScenarios();
+        }
+        
+      } catch (err) {
+        console.error('Failed to fetch categories and options data:', err);
+        this.error = `Data loading failed: ${err.message}. Please ensure that the backend server is running and the database contains valid data.`;
+        this.setupDefaultScenarios();
+      } finally {
+        // count the past time
+        const elapsedTime = Date.now() - startTime;
+        // if less than 1sec close
+        const minLoadingTime = 500;
+        
+        if (elapsedTime < minLoadingTime) {
+          const remainingTime = minLoadingTime - elapsedTime;
+          console.log(`Waiting additional ${remainingTime}ms to ensure minimum loading time`);
+          
+          setTimeout(() => {
+            this.loading = false;
+          }, remainingTime);
+        } else {
+          this.loading = false;
+        }
+      }
+    },
     showRecommendation() {
       this.currentSelectedOption = this.scenarios[this.currentScenario].options[this.selected];
+      
+      // fetch the option ID
+      const optionId = this.currentSelectedOption.id;
+      console.log(`Currently selected option ID: ${optionId}`);
+      
+      // if the option has an ID, fetch the recommendations
+      if (optionId) {
+        console.log(`Fetching recommendations for option ID ${optionId}`);
+        this.fetchRecommendations(optionId);
+      } else {
+        console.warn('Current option has no ID, cannot fetch recommendation data');
+      }
       
       // If it's a sleep issue scenario, directly display the SleepScene component
       if (this.currentScenario === 0) {
@@ -659,7 +690,37 @@ export default {
       // Smooth scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
+    
+    // Get recommendations from API
+    async fetchRecommendations(optionId) {
+      try {
+        console.log(`Starting to fetch recommendations for option ID ${optionId}`);
+        const response = await fetch(`http://localhost:3001/api/recommendations/${optionId}`);
+        
+        if (!response.ok) {
+          console.error(`Failed to fetch recommendations: ${response.status}`);
+          return;
+        }
+        
+        const recommendations = await response.json();
+        console.log(`Retrieved ${recommendations.length} recommendations for option ID ${optionId}:`);
+        console.log(JSON.stringify(recommendations));
+        
+        // Update current option's recommendation data
+        if (this.currentSelectedOption && recommendations.length > 0) {
+          this.currentSelectedOption.recommendations = recommendations;
+          console.log('Updated recommendation data for current option');
+        } else {
+          console.warn('Cannot update recommendation data, current option is empty or no recommendations available');
+        }
+      } catch (error) {
+        console.error('Error when fetching recommendation data:', error);
+      }
+    },
     resetCurrentScenario() {
+      // Save current scroll position
+      const scrollPosition = window.scrollY;
+      
       this.selected = null;
       this.currentSelectedOption = null;
       this.showSleepScene = false; // Reset SleepScene display state
@@ -668,50 +729,23 @@ export default {
       this.showCommunicationScene = false; // Reset CommunicationScene display state
       this.showEmotionScene = false; // Reset EmotionScene display state
       this.showSensoryScene = false; // Reset SensoryScene display state
-      // Smooth scroll to top
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Delay a bit to ensure DOM is updated, then restore scroll position
+      this.$nextTick(() => {
+        window.scrollTo({ top: scrollPosition });
+      });
     },
     navigateToScenario(index) {
       this.currentScenario = index;
       this.selected = null;
       this.currentSelectedOption = null;
-      // Smooth scroll to top
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     navigateToNextScenario() {
-      // Print log, for debugging
-      console.log('navigateToNextScenario called');
+      // Save current scroll position
+      const scrollPosition = window.scrollY;
       
-      if (this.currentScenario < this.scenarios.length - 1) {
-        // First close the modal window
-        this.showSleepScene = false;
-        this.showDietScene = false;
-        this.showSocialScene = false;
-        this.showCommunicationScene = false;
-        this.showEmotionScene = false;
-        this.showSensoryScene = false;
-        
-        // Then switch to the next scenario
-        this.currentScenario++;
-        this.selected = null;
-        this.currentSelectedOption = null;
-        
-        // Add delay to ensure the modal window is fully closed before processing next step
-        setTimeout(() => {
-          // Force refresh view
-          this.$forceUpdate();
-          
-          // Smooth scroll to top
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          
-          // Print current scenario, for debugging
-          console.log('Current scenario index:', this.currentScenario);
-          console.log('Current scenario title:', this.scenarios[this.currentScenario].title);
-        }, 100);
-      } else {
-        // If it's the last scenario, display the results page
-        this.completeScenarios();
-      }
+      // Restore previous scroll position instead of scrolling to top
+      window.scrollTo({ top: scrollPosition });
     },
     completeScenarios() {
       // Add thank you message to user selections
@@ -719,18 +753,7 @@ export default {
         scenarioTitle: "To Parents",
         scenarioQuestion: "Thank you for your dedication and love",
         optionText: "Message from Belonging Together",
-        recommendations: [
-          {
-            title: "Every child is a unique universe",
-            content: "Every child is a unique universe. In their journey of growth, there may be anxiety, sensitivity, or different ways of expression.",
-            example: "We hope these gentle scenarios can serve as a bridge of understanding and connection between you and your child."
-          },
-          {
-            title: "Trust, strength, and love",
-            content: "May you feel trust, strength, and love in every moment of companionship.",
-            example: "— Belonging Together Team ❤️"
-          }
-        ]
+        recommendations: []
       });
       
       // Display results page
@@ -740,36 +763,27 @@ export default {
       this.currentScenario = 0;
       this.selected = null;
       this.currentSelectedOption = null;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     backToScenarios() {
       this.showResults = false;
       this.resetAllScenarios();
     },
     formatRecommendations(recommendations) {
-      // If already in object array format, return directly
-      if (recommendations.length > 0 && typeof recommendations[0] === 'object') {
-        return recommendations;
+      if (!recommendations || !Array.isArray(recommendations)) {
+        return [];
       }
-      
-      // If string array, convert to object format
       return recommendations.map(rec => {
-        // Try to split string to get title and content
+        if (typeof rec === 'string') {
+          // If it's in string format, parse it into an object
         const parts = rec.split(':');
-        if (parts.length > 1) {
           return {
-            title: parts[0],
-            content: parts[1],
-            example: parts.length > 2 ? parts[2] : 'Try following the recommendations and observe your child\'s response, adjusting as needed for the best results.'
+            title: parts[0] || '',
+            content: parts[1] || rec,
+            example: parts[2] || ''
           };
         }
-        
-        // If can't split, return entire string as content
-        return {
-          title: this.generateSimpleTitle(rec),
-          content: rec,
-          example: 'Try following the recommendations and observe your child\'s response, adjusting as needed for the best results.'
-        };
+        // If it's already in object format, return it directly
+        return rec;
       });
     },
     generateSimpleTitle(recommendation) {
@@ -779,7 +793,27 @@ export default {
         return firstSentence.substring(0, 15) + '...';
       }
       return firstSentence;
+    },
+    setupDefaultScenarios() {
+      console.log('Using minimal default scenario data structure');
+      this.scenarios = [
+        {
+          title: 'No Data Available',
+          question: 'Cannot load scenario data from database',
+          options: [
+            { 
+              text: 'Please check database connection and refresh the page',
+              recommendations: ['Cannot load recommendation data. Please check database connection.']
+            }
+          ]
+        }
+      ];
     }
+  },
+  created() {
+    // Fetch data when component is created
+    console.log('App component created, starting to fetch data');
+    this.fetchCategories();
   }
 };
 </script>
@@ -797,6 +831,97 @@ export default {
   flex-direction: column;
 }
 
+/* Page top center title styles */
+.main-title-container {
+  width: 100%;
+  background-color: #f9f7f6;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  padding: 1.5rem 0;
+  margin-bottom: 1rem;
+}
+
+/* Scenario card styles */
+.scenarios-cards-container {
+  max-width: 900px;
+  margin: 1.5rem auto 0;
+}
+
+.scenarios-cards-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+}
+
+.scenario-card-item {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 15px;
+  margin: 0 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  flex: 1;
+  height: 200px; /* 增加卡片高度从180px到200px */
+  width: 200px;
+  max-width: 250px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.scenario-card-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+.card-title {
+  color: #4d2f20;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.card-icon-placeholder {
+  height: 60px;
+  margin: 5px 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scenario-icon {
+  height: 60px;
+  width: 60px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Apply extra scaling for specific icons */
+.scenario-card-item:nth-child(3) .scenario-icon,
+.scenario-card-item:nth-child(4) .scenario-icon,
+.scenario-card-item:nth-child(6) .scenario-icon {
+  transform: scale(1.5);
+}
+
+.card-description {
+  font-size: 0.9rem;
+  color: #4d2f20;
+  text-align: center;
+  margin-top: auto;
+  line-height: 1.3;
+}
+
+/* Current scenario title styles */
+.scenario-header {
+  text-align: center;
+}
+
+.current-scenario-title {
+  color: #3E5C2B;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
 /* Sidebar styles */
 .sidebar-container {
   position: relative;
@@ -805,6 +930,14 @@ export default {
 .sidebar-content {
   top: 0;
   padding: 2rem;
+}
+
+.center-title-container {
+  padding: 1rem 1.5rem;
+  background-color: #f9f7f6;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
 }
 
 .page-title {
@@ -816,6 +949,37 @@ export default {
 .page-subtitle {
   color: #4d2f20;
   font-size: 1.2rem;
+}
+
+/* Scenario introduction styles */
+.scenario-intro {
+  max-width: 90%;
+  margin: 0 auto;
+}
+
+.intro-text {
+  color: #4d2f20;
+  margin-bottom: 1rem;
+}
+
+.scenario-bullets-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.scenario-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.scenario-item {
+  color: #3E5C2B;
+  font-size: 1rem;
+  flex: 1;
+  text-align: left;
+  padding-right: 10px;
 }
 
 /* Main image styles */
@@ -1340,6 +1504,160 @@ export default {
   font-style: italic;
   font-weight: 500;
   color: #3E5C2B;
+}
+
+/* Loading overlay styles */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.loading-spinner {
+  margin-bottom: 1rem;
+}
+
+.loading-text {
+  color: #4d2f20;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.retry-button {
+  background-color: #3E5C2B;
+  color: white;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  padding: 10px 20px;
+  border: none;
+}
+
+.retry-button:hover {
+  background-color: #3E5C2B;
+  box-shadow: 0 4px 10px rgba(77, 47, 32, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Error overlay styles */
+.error-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.error-content {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.error-icon {
+  margin-bottom: 1rem;
+}
+
+.error-title {
+  color: #4d2f20;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.error-text {
+  color: #4d2f20;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.error-actions {
+  margin-bottom: 1.5rem;
+}
+
+.default-button {
+  background-color: #3E5C2B;
+  color: white;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  padding: 10px 20px;
+  border: none;
+  margin-left: 10px;
+}
+
+.default-button:hover {
+  background-color: #3E5C2B;
+  box-shadow: 0 4px 10px rgba(77, 47, 32, 0.3);
+  transform: translateY(-2px);
+}
+
+.error-help {
+  color: #4d2f20;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+
+.error-tips {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.error-tips li {
+  color: #4d2f20;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.error-tips li {
+  color: #4d2f20;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
+.error-tips code {
+  background-color: #f5f5f5;
+  border-radius: 3px;
+  font-family: monospace;
+  padding: 2px 4px;
+  color: #d63031;
+}
+
+.loading-subtext {
+  color: #666;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.icon {
+  margin-right: 5px;
+}
+
+/* Apply extra scaling for specific icons */
+.larger-icon {
+  transform: scale(1.4);
 }
 
 </style>

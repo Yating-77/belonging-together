@@ -45,7 +45,18 @@
           
           <div class="advice-content" v-else>
             <h3>Parent Advice</h3>
-            <p>{{ currentAdvice }}</p>
+            <!-- loading -->
+            <div v-if="loading" class="loading-indicator">
+              Loading recommendations...
+            </div>
+            
+            <!-- error -->
+            <div v-else-if="error" class="error-message">
+              {{ error }}
+            </div>
+            
+            <!-- recommendation -->
+            <p v-else>{{ currentAdvice }}</p>
             <div class="advice-progress">
               {{ adviceProgress }}
             </div>
@@ -99,21 +110,15 @@ export default {
       showAdvice: false,
       currentAdviceIndex: 0,
       hasViewedLastAdvice: false,
+      loading: false,
+      error: null,
       options: [
         {
           label: 'Option 0: Easily becomes overwhelmed in noisy or bright environments (environmental stimuli sensitivity)',
           title: '🎧 Noise-Cancelling Headphones as "Brave Equipment"',
           parentDialogue: 'Let\'s put on your "brave headphones." You\'re doing so well today, even better than last time.',
           childDialogue: '(Before going to the supermarket, Andy is already frowning. When entering the supermarket, Andy wears headphones and holds a small car toy. Despite the noisy crowd, he can quietly choose items by the shelves)',
-          advices: [
-            '1. Provide noise-reducing headphones or earplugs in environments your child finds overwhelming, allowing them to participate while reducing sensory input.',
-            '2. Create a "sensory toolkit" with items that provide comfort (favorite small toy, stress ball, fidget spinner) that can be carried to challenging environments.',
-            '3. Prepare your child in advance for noisy or busy environments with visual schedules and simple social stories that explain what to expect.',
-            '4. Plan visits to potentially overwhelming places (like supermarkets) during quieter times, such as early mornings or late evenings when crowds are minimal.',
-            '5. Use gradual exposure techniques, starting with brief visits to challenging environments and slowly increasing duration as your child builds tolerance.',
-            '6. Identify specific sensory triggers in various environments by observing your child\'s reactions, then develop strategies to specifically address those elements.',
-            '7. Teach your child to recognize their own sensory thresholds and practice self-advocacy by requesting breaks or using their sensory tools when needed.'
-          ],
+          advices: [],
           image: SensoryOption0
         },
         {
@@ -121,15 +126,7 @@ export default {
           title: '🛁 Bath Time Can Be Gradually Adapted',
           parentDialogue: 'Today we\'ll only wash your hair, not your face, and we\'ll cover your eyes with a towel right away when we\'re done, okay? You\'re being so brave today. Next time you can try pouring the water yourself!',
           childDialogue: '(Mimi cries loudly every time she has to wash her hair. Mom gently pours water while singing her favorite song. Though Mimi frowns, she doesn\'t scream and gradually adapts to this new rhythm)',
-          advices: [
-            '1. Break hygiene routines into small, predictable steps that your child can anticipate, focusing on one challenging element at a time.',
-            '2. Use visual schedules with pictures or simple drawings to outline each step of the process, reviewing them before beginning and tracking progress throughout.',
-            '3. Provide sensory-friendly alternatives, such as dry shampoo occasionally, shower instead of bath, or bath wipes for particularly difficult days.',
-            '4. Incorporate preferred elements into challenging routines, like bringing favorite waterproof toys into the bath or playing favorite music during nail trimming.',
-            '5. Give your child appropriate control where possible, such as choosing water temperature, selecting which body part to wash first, or holding the nail clippers themselves.',
-            '6. Use sensory preparation techniques before challenging routines, like deep pressure massage before baths or hand-warming before nail trimming to reduce tactile sensitivity.',
-            '7. Celebrate small improvements with specific praise that focuses on the effort: "You kept your hand still for three nails today! That was really brave."'
-          ],
+          advices: [],
           image: SensoryOption1
         },
         {
@@ -137,15 +134,7 @@ export default {
           title: '☀️ Changing the Light Makes the World Gentler',
           parentDialogue: 'Let\'s find a spot by the window and turn off the overhead lights, okay?',
           childDialogue: '(Emma stops as soon as she enters the art classroom. The white ceiling lights are too bright, and the collages on the wall are visually complex. She instinctively covers her eyes: "I don\'t like it here, it\'s too chaotic..." She opens the curtains to let soft natural light in and brings a light-colored cushion to place beside Emma. Emma slowly sits down. Though there are still colors around, the space before her has become fresh and gentle. She opens her sketchbook and softly begins drawing blue skies and little trees)',
-          advices: [
-            '1. Modify lighting environments by using natural light when possible, eliminating fluorescent lighting, or providing options for dimming lights in key spaces.',
-            '2. Offer tinted glasses or visors that can reduce visual sensitivities, particularly for children bothered by fluorescent lighting or bright sunlight.',
-            '3. Create designated "visual rest zones" at home with minimal visual stimulation - neutral colors, reduced patterns, and organized spaces where your child can retreat.',
-            '4. Organize your child\'s workspace or play area to reduce visual clutter, using solid-colored storage containers and keeping walls relatively clear.',
-            '5. When entering visually stimulating environments, provide a "preview" by showing pictures beforehand and approaching gradually, allowing time for your child to adjust.',
-            '6. Consider seating positions in classrooms or other spaces that minimize visual distractions (away from windows, bulletin boards, or high-traffic areas).',
-            '7. Use room dividers, curtains, or strategic furniture placement to create visually contained areas in open spaces like classrooms or family rooms.'
-          ],
+          advices: [],
           image: SensoryOption2
         },
         {
@@ -153,15 +142,7 @@ export default {
           title: '🏃‍♂️ A Day\'s Energy Needs Special Planning',
           parentDialogue: 'Noah, it\'s movement time. First, jump on the bouncy ball for 10 minutes, then spin a few times on the rotating chair, and finally go to the climbing wall, okay?',
           childDialogue: '(Noah has just returned home from school and starts running in circles around the sofa before even taking off his shoes, shaking his head as he runs. He\'s mumbling something but his eyes aren\'t focused. When he hears the movement plan, his expression becomes focused, and he begins each activity in sequence)',
-          advices: [
-            '1. Schedule regular "movement breaks" throughout your child\'s day, providing appropriate physical outlets before periods requiring sitting or focused attention.',
-            '2. Create a dedicated sensory space at home with equipment like mini trampolines, therapy swings, crash pads, or climbing structures that safely meet vestibular needs.',
-            '3. Introduce "heavy work" activities that provide proprioceptive input, such as carrying groceries, pushing a loaded cart, or animal walks (bear crawls, crab walks).',
-            '4. Use therapy tools like weighted blankets, compression vests, or body socks that provide deep pressure input, helping to organize your child\'s sensory system.',
-            '5. Collaborate with your child\'s teacher to incorporate movement into learning (standing desks, therapy ball seating, errands that involve walking).',
-            '6. Establish a structured "sensory diet" with occupational therapy guidance - a personalized activity plan that provides needed sensory input throughout the day.',
-            '7. Teach your child to recognize their own need for movement and develop appropriate ways to seek input (jumping jacks in the bathroom vs. running in the classroom).'
-          ],
+          advices: [],
           image: SensoryOption3
         }
       ]
@@ -206,11 +187,51 @@ export default {
     selectOption(index) {
       this.selected = index;
     },
-    showScene() {
+    async showScene() {
+      const selectedOption = this.options[this.selected];
       this.selectedOption = this.selected;
       this.showAdvice = false; 
       this.currentAdviceIndex = 0;
       this.hasViewedLastAdvice = false;
+      this.error = null;  // Reset error state
+
+      // Only fetch data if the advice array is empty
+      if (selectedOption.advices.length === 0) {
+        try {
+          this.loading = true;  // Set loading state
+          console.log(`Fetching recommendation data for sensory option ID ${this.selected + 17}`); // Sensory options start from ID 17
+          
+          // Note: Sensory option IDs start from 17, need to add 17, because Sleep scenario uses 1-4, Diet scenario uses 5-8, Social scenario uses 9-12, Emotion scenario uses 13-16
+          const res = await fetch(`http://localhost:3001/api/recommendations/${this.selected + 17}`);
+          
+          if (!res.ok) {
+            throw new Error(`API returned error: ${res.status}`);
+          }
+          
+          const data = await res.json();
+          console.log('Retrieved recommendation data:', data);
+          
+          if (data && data.length > 0) {
+            // Transform API returned data into required format
+            selectedOption.advices = data.map(item => 
+              `${item.title}: ${item.content}\n\nExample: ${item.example}`
+            );
+            console.log('Transformed recommendations:', selectedOption.advices);
+          } else {
+            console.warn('API returned empty data');
+            // Set a default message
+            selectedOption.advices = ['No recommendations available for this option.'];
+            this.error = 'No recommendations found for this option.';
+          }
+        } catch (err) {
+          console.error('Failed to fetch recommendations:', err);
+          // Set error message
+          selectedOption.advices = ['Unable to load recommendations. Please try again later.'];
+          this.error = `Failed to load recommendations: ${err.message}`;
+        } finally {
+          this.loading = false;  // Close loading state regardless of success or failure
+        }
+      }
     },
     reset() {
       this.selected = null;
@@ -250,6 +271,36 @@ export default {
       }, 50);
       
       this.$emit('close-modal');
+    }
+  },
+  async created() {
+    // Preload recommendation data for all options when component is created
+    console.log('SensoryScene component created, preparing to preload recommendation data');
+    for (let i = 0; i < this.options.length; i++) {
+      const option = this.options[i];
+      if (option.advices.length === 0) {
+        try {
+          // Sensory options start from ID 17
+          const optionId = i + 17;
+          console.log(`Preloading recommendation data for sensory option ${optionId}`);
+          const res = await fetch(`http://localhost:3001/api/recommendations/${optionId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.length > 0) {
+              option.advices = data.map(item => 
+                `${item.title}: ${item.content}\n\nExample: ${item.example}`
+              );
+              console.log(`Sensory option ${optionId} preloaded ${data.length} recommendations`);
+            } else {
+              console.warn(`Sensory option ${optionId} has no recommendation data`);
+            }
+          } else {
+            console.error(`Failed to preload sensory option ${optionId}: ${res.status}`);
+          }
+        } catch (err) {
+          console.error(`Error preloading recommendations for sensory option ${i + 17}:`, err);
+        }
+      }
     }
   }
 };
@@ -490,6 +541,20 @@ export default {
 .button-clicked {
   transform: scale(0.95);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Loading Indicator Styles */
+.loading-indicator {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Error Message Styles */
+.error-message {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #d33;
 }
 
 /* Responsive Design */
