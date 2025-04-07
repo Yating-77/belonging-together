@@ -744,8 +744,39 @@ export default {
       // Save current scroll position
       const scrollPosition = window.scrollY;
       
-      // Restore previous scroll position instead of scrolling to top
-      window.scrollTo({ top: scrollPosition });
+      // Print log, for debugging
+      console.log('navigateToNextScenario called');
+      
+      if (this.currentScenario < this.scenarios.length - 1) {
+        // First close the modal window
+        this.showSleepScene = false;
+        this.showDietScene = false;
+        this.showSocialScene = false;
+        this.showCommunicationScene = false;
+        this.showEmotionScene = false;
+        this.showSensoryScene = false;
+        
+        // Then switch to the next scenario
+        this.currentScenario++;
+        this.selected = null;
+        this.currentSelectedOption = null;
+        
+        // Add delay to ensure the modal window is fully closed before processing next step
+        setTimeout(() => {
+          // Force refresh view
+          this.$forceUpdate();
+          
+          // Restore previous scroll position instead of scrolling to top
+          window.scrollTo({ top: scrollPosition });
+          
+          // Print current scenario, for debugging
+          console.log('Current scenario index:', this.currentScenario);
+          console.log('Current scenario title:', this.scenarios[this.currentScenario].title);
+        }, 100);
+      } else {
+        // If it's the last scenario, display the results page
+        this.completeScenarios();
+      }
     },
     completeScenarios() {
       // Add thank you message to user selections
@@ -845,27 +876,31 @@ export default {
 .scenarios-cards-container {
   max-width: 900px;
   margin: 1.5rem auto 0;
+  padding: 0 15px;
+  width: 100%;
 }
 
 .scenarios-cards-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   margin-bottom: 1.2rem;
+  gap: 20px;
+  width: 100%;
 }
 
 .scenario-card-item {
   background-color: #ffffff;
   border-radius: 12px;
   padding: 15px;
-  margin: 0 12px;
   box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-  flex: 1;
-  height: 200px; /* 增加卡片高度从180px到200px */
-  width: 200px;
-  max-width: 250px;
+  width: calc(33.33% - 20px);
+  height: 220px;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
+  max-width: 280px;
+  min-width: 250px;
 }
 
 .scenario-card-item:hover {
@@ -1373,6 +1408,39 @@ export default {
   
   .recommendation-cards {
     max-height: 50vh;
+  }
+  
+  .scenarios-cards-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .scenario-card-item {
+    width: 100%;
+    max-width: 280px;
+    height: 200px;
+    margin: 0;
+  }
+  
+  .card-title {
+    font-size: 1rem;
+  }
+  
+  .card-description {
+    font-size: 0.85rem;
+  }
+}
+
+/* 平板电脑尺寸调整 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .scenarios-cards-row {
+    justify-content: center;
+  }
+  
+  .scenario-card-item {
+    width: calc(50% - 20px);
+    max-width: 300px;
   }
 }
 

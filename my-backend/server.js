@@ -56,7 +56,7 @@ app.get('/api/options/:categoryId', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'SELECT id, text as label, display_order FROM options WHERE question_id = (SELECT id FROM questions WHERE category_id = $1) ORDER BY display_order',
+      'SELECT id, text as label, display_order FROM options WHERE question_id IN (SELECT id FROM questions WHERE category_id = $1) ORDER BY display_order',
       [categoryId]
     );
 
