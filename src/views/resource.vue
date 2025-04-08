@@ -1,20 +1,17 @@
 <template>
   <div class="resource-page">
     <MyNavBar />
-    <!-- Top banner area -->
     <div class="hero-banner">
       <div class="hero-content">
         <h1 class="hero-title">Be Informed and Inspired</h1>
-
       </div>
     </div>
 
-    <!-- Search area -->
     <div class="search-container">
       <div class="search-wrapper">
 
         <div class="keyword-search">
-          <label>Keyword search</label>
+          <label>Search articles by keyword</label>
           <input 
             v-model="searchKeyword" 
             type="text" 
@@ -27,12 +24,10 @@
       </div>
     </div>
 
-    <!-- Search results area - 移到最受欢迎文章之前 -->
     <div v-if="isSearchResult" class="search-results-section">
       <div class="container">
         <h2 class="section-title">Search Results</h2>
 
-        <!-- Search results tips -->
         <div v-if="!loadingSearch && !errorSearch && searchResults.length > 0" class="search-result-info">
           Found {{ searchResults.length }} articles related to "{{ lastSearchKeyword }}"
           <button class="reset-search-btn" @click="resetSearch">Clear search results</button>
@@ -49,7 +44,6 @@
           <button class="reset-search-btn" @click="resetSearch">Clear search results</button>
         </div>
         
-        <!-- Use the same Swiper component format as the main list -->
         <div v-else-if="!loadingSearch && !errorSearch && searchResults.length > 0" class="swiper-container">
           <div class="swiper-button-prev custom-nav-prev search-nav-prev"></div>
           <swiper
@@ -75,7 +69,6 @@
           <div class="swiper-pagination search-pagination"></div>
         </div>
         
-        <!-- No results found prompt -->
         <div v-else-if="!loadingSearch && !errorSearch && searchResults.length === 0" class="search-result-info">
           No articles found related to "{{ lastSearchKeyword }}".
           <button class="reset-search-btn" @click="resetSearch">Clear search results</button>
@@ -83,7 +76,6 @@
       </div>
     </div>
 
-    <!-- Most popular articles area -->
     <div class="popular-articles-section">
       <div class="container">
         <h2 class="section-title">Most Popular Articles</h2>
@@ -129,7 +121,6 @@
       </div>
     </div>
 
-    <!-- Articles list area -->
     <div class="articles-section">
       <div class="container">
         <h2 class="section-title">{{ isSearchResult ? 'All Article Resources' : 'Article Resources' }}</h2>
@@ -162,7 +153,7 @@
             class="article-slider"
           >
             <swiper-slide v-for="article in articles" :key="article.id">
-              <article-card :article="article" />
+              <article-card :article="article" :show-views="true" />
             </swiper-slide>
           </swiper>
           <div class="swiper-button-next custom-nav-next main-nav-next"></div>
@@ -208,7 +199,6 @@ export default {
       searchKeyword: '',
       isSearchResult: false, // Whether search has been executed
       lastSearchKeyword: '', // Last searched keyword
-      // 提取常用配置到数据属性
       swiperModules: [Navigation, Pagination],
       swiperBreakpoints: {
         320: { slidesPerView: 1, spaceBetween: 10 },
@@ -285,33 +275,52 @@ export default {
 </script>
 
 <style scoped>
-/* Overall page style */
 .resource-page {
   width: 100%;
   font-family: Arial, sans-serif;
 }
 
-/* Top banner style */
 .hero-banner {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/hero-banner.jpg');
+  background-image: url('/888.jpg');
   background-size: cover;
   background-position: center;
-  color: white;
-  padding: 80px 20px;
-  text-align: center;
+  background-repeat: no-repeat;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0;
 }
 
+.hero-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+
 .hero-content {
+  z-index: 1;
+  position: relative;
+  text-align: center;
+  padding: 20px;
   max-width: 800px;
   margin: 0 auto;
 }
 
-.hero-title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
 
+.hero-title {
+  font-size: 3rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+  margin: 0;
+}
 .hero-subtitle {
   font-size: 1.1rem;
   line-height: 1.5;
@@ -319,9 +328,8 @@ export default {
   margin: 0 auto;
 }
 
-/* Search area style */
 .search-container {
-  background-color: #f5f5f0;
+  background-color: #f8f7f6;
   padding: 40px 20px;
 }
 
@@ -362,7 +370,7 @@ export default {
   max-width: 200px;
   margin: 0 auto;
   padding: 10px;
-  background-color: #d83cad;
+  background-color: #3E5C2B;
   color: white;
   border: none;
   border-radius: 20px;
@@ -372,17 +380,15 @@ export default {
 }
 
 .search-button:hover {
-  background-color: #c02e96;
+  background-color: #4d7234;
 }
 
-/* Search results area style */
 .search-results-section {
   padding: 40px 20px;
-  background-color: #f0f7ff;
+  background-color: #f9f7f6;
   margin-bottom: 30px;
 }
 
-/* Search results info general style */
 .search-result-info {
   text-align: center;
   margin-bottom: 20px;
@@ -397,10 +403,9 @@ export default {
   flex-wrap: wrap;
 }
 
-/* Most popular articles area style */
 .popular-articles-section {
   padding: 40px 20px;
-  background-color: #f9f4ff;
+  background-color: #F8EFED;
   margin-bottom: 30px;
 }
 
@@ -413,7 +418,7 @@ export default {
   position: absolute;
   top: 10px;
   right: 10px;
-  background-color: #e74c3c;
+  background-color: #3E5C2B;
   color: white;
   padding: 3px 8px;
   border-radius: 4px;
@@ -421,7 +426,6 @@ export default {
   z-index: 1;
 }
 
-/* 共享样式 */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -431,7 +435,7 @@ export default {
   text-align: center;
   margin-bottom: 40px;
   font-size: 2rem;
-  color: #333;
+  color: #4d2f20;
 }
 
 .loading-spinner {
@@ -450,7 +454,6 @@ export default {
   border: 1px solid #f5c6cb;
 }
 
-/* 空内容提示 */
 .no-articles {
   text-align: center;
   padding: 30px;
@@ -460,11 +463,10 @@ export default {
   font-style: italic;
 }
 
-/* 重置按钮样式 */
 .reset-search-btn {
   background: none;
   border: none;
-  color: #4a90e2;
+  color: #3E5C2B;
   text-decoration: underline;
   cursor: pointer;
   margin-left: 10px;
@@ -472,15 +474,13 @@ export default {
 }
 
 .reset-search-btn:hover {
-  color: #2a70c2;
+  color: #4d7234;
 }
 
-/* 文章列表区域样式 */
 .articles-section {
   padding: 60px 20px;
 }
 
-/* Swiper相关样式 */
 .swiper-container {
   position: relative;
   padding: 0 50px;
@@ -491,7 +491,6 @@ export default {
   padding-bottom: 40px;
 }
 
-/* 自定义导航箭头 */
 .custom-nav-prev,
 .custom-nav-next {
   position: absolute;
@@ -520,10 +519,9 @@ export default {
 .custom-nav-prev::after,
 .custom-nav-next::after {
   font-size: 20px;
-  color: #4a90e2;
+  color: #3E5C2B;
 }
 
-/* 分页样式 */
 :deep(.swiper-pagination) {
   position: absolute;
   bottom: -10px !important;
@@ -543,10 +541,9 @@ export default {
 }
 
 :deep(.swiper-pagination-bullet-active) {
-  background-color: #4a90e2;
+  background-color: #3E5C2B;
 }
 
-/* 响应式调整 */
 @media (max-width: 768px) {  
   .hero-title {
     font-size: 2rem;

@@ -198,10 +198,10 @@ export default {
       // Only fetch data if the advice array is empty
       if (selectedOption.advices.length === 0) {
         try {
-          this.loading = true;  // Set loading state
+          this.loading = true;
           console.log(`Fetching recommendation data for sensory option ID ${this.selected + 17}`); // Sensory options start from ID 17
           
-          // Note: Sensory option IDs start from 17, need to add 17, because Sleep scenario uses 1-4, Diet scenario uses 5-8, Social scenario uses 9-12, Emotion scenario uses 13-16
+          //Sensory option IDs start from 17, need to add 17, because Sleep scenario uses 1-4, Diet scenario uses 5-8, Social scenario uses 9-12, Emotion scenario uses 13-16
           const res = await fetch(`http://localhost:3000/api/recommendations/${this.selected + 17}`);
           
           if (!res.ok) {

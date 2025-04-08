@@ -10,12 +10,12 @@
         <ul>
           <li><router-link to="/">Home</router-link></li>
           <li><router-link to="/resource">Resource Center</router-link></li>
-          <li><router-link to="/recommendation">Personalized Recommendations</router-link></li>
+          <li><router-link to="/recommendation">Personalised Recommendations</router-link></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© {{ new Date().getFullYear() }} Autism Care. All Rights Reserved.</p>
+      <p>© {{ new Date().getFullYear() }} Belonging Together. All Rights Reserved.</p>
     </div>
   </footer>
 </template>

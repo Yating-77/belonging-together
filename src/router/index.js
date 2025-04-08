@@ -3,7 +3,6 @@ import Homepage from '../views/homepage.vue'
 import Recommendation from '../views/recommendation.vue'
 import resource from '../views/resource.vue'
 import ArticleView from '../views/ArticleView.vue'
-//import { path } from 'animejs'
 
 const routes = [
   {
@@ -32,7 +31,6 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    // 总是滚动到顶部
     return { top: 0 }
   }
 })

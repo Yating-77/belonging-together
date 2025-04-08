@@ -1,12 +1,13 @@
 <template>
   <section class="split-hero-section">
     <div class="hero-text-content" data-aos="fade-right" data-aos-delay="100">
-      <h1 class="hero-title">Get Personalized Strategies for Effective Communication with Your Child</h1>
+      <h1 class="hero-title">We see you.</h1>
+      <h1 class="hero-title">We support you.</h1>
       <p class="hero-subtitle">
-        Enter your child's behavioral characteristics to receive practical growth advice; learn effective communication skills to easily understand your child's needs. Simple, practical, and based on care.
+        Tell us about your child’s daily experiences: bedtime, meals, emotions, play. And we’ll give you gentle, clear suggestions to support their growth. All free. All backed by science. All with love.
       </p>
       <div class="hero-actions">
-        <router-link to="/recommendation" class="cta-button button-secondary">Get Personalized Recommendations</router-link>
+        <router-link to="/recommendation" class="cta-button button-secondary">Get Personalised Recommendations</router-link>
       </div>
     </div>
     <div class="hero-visual-content" data-aos="fade-left" data-aos-delay="100">
@@ -37,14 +38,15 @@
 .hero-title {
   font-size: clamp(2.5rem, 5.5vw, 3.5rem); 
   font-weight: 700; 
-  color: #343a40; 
+  color: #4d2f20; 
   margin-bottom: 1.5rem; 
   line-height: 1.25;
 }
 .hero-subtitle {
   font-size: clamp(1rem, 2.5vw, 1.15rem); 
   color: #6c757d;
-  margin-bottom: 2.5rem; 
+  margin-bottom: 3rem; 
+  margin-top: 2.5rem; 
   max-width: 580px; 
   margin-left: 0; 
   margin-right: 0;
@@ -63,7 +65,7 @@
 .stat-number { 
   font-size: clamp(2rem, 5vw, 2.8rem); 
   font-weight: 700; 
-  color: #15b371; /* Changed to green */
+  color: #3E5C2B; /* Changed to match primary green */
    margin-right: 0.5rem; 
    line-height: 1; 
   }
@@ -111,10 +113,10 @@
 
 .cta-button { display: inline-block; padding: 12px 28px; border: none; border-radius: 50px; font-size: 1rem; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.3s ease; color: #ffffff; letter-spacing: 0.5px; }
 .cta-button:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); }
-.button-secondary { background-color: #15b371; } 
-.button-secondary:hover { background-color: #7bf2c0; color: #15b371; } 
+.button-secondary { background-color: #3E5C2B; } 
+.button-secondary:hover { background-color: #4d7234; color: #ffffff; } 
 
 .cta-button.secondary { background-color: transparent; border: 2px solid; }
-.button-secondary-outline { border-color: #15b371; color: #15b371; } 
-.button-secondary-outline:hover { background-color: #7bf2c0; color: #15b371; border-color: #7bf2c0;} 
+.button-secondary-outline { border-color: #3E5C2B; color: #3E5C2B; } 
+.button-secondary-outline:hover { background-color: #3E5C2B; color: #ffffff; border-color: #3E5C2B;} 
 </style>

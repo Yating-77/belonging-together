@@ -9,7 +9,7 @@
       <ul class="navbar-links">
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/resource">Resource Center</router-link></li>
-        <li><router-link to="/recommendation">Personalized Recommendations</router-link></li>
+        <li><router-link to="/recommendation">Personalised Recommendations</router-link></li>
       </ul>
     </div>
   </nav>
@@ -76,7 +76,7 @@ onUnmounted(() => { window.removeEventListener('scroll', handleScroll); });
   transition: color 0.3s ease;
 }
 .navbar-links a:hover, .navbar-links a.active, .navbar-links .router-link-active {
-  color: #ffa600;
+  color: #3E5C2B;
 }
 .navbar-cta:hover {
   background-color: #748ffc; 
