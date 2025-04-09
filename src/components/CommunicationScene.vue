@@ -196,7 +196,7 @@ export default {
           const optionId = this.selected + 13;
           console.log(`Attempting to fetch recommendations for Communication option ID ${optionId}`);
           
-          const res = await fetch(`http://belongingtogether.me/api/recommendations/${optionId}`);
+          const res = await fetch(`/api/recommendations/${optionId}`);
           
           if (!res.ok) {
             throw new Error(`API returned error: ${res.status}`);
@@ -277,7 +277,7 @@ export default {
         try {
           const optionId = i + 13;
           console.log(`Preloading recommendations for Communication option ${optionId}`);
-          const res = await fetch(`http://belongingtogether.me/api/recommendations/${optionId}`);
+          const res = await fetch(`/api/recommendations/${optionId}`);
           if (res.ok) {
             const data = await res.json();
             if (data && data.length > 0) {
