@@ -298,7 +298,7 @@ export default {
         console.log(`Loading recommendation data for option ID ${optionId}...`);
         
         try {
-          const response = await fetch(`http://belongingtogether.me/api/recommendations/${optionId}`);
+          const response = await fetch(`/api/recommendations/${optionId}`);
           
           if (!response.ok) {
             console.warn(`Failed to load recommendations for option ID ${optionId}: ${response.statusText}`);

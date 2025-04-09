@@ -202,7 +202,7 @@ export default {
           console.log(`Fetching recommendation data for diet option ID ${this.selected + 5}`); // Diet options start from ID 5
           
           // Note: Diet option IDs start from 5, need to add 5, because Sleep scenario uses 1-4
-          const res = await fetch(`http://belongingtogether.me/api/recommendations/${this.selected + 5}`);
+          const res = await fetch(`/api/recommendations/${this.selected + 5}`);
           
           if (!res.ok) {
             throw new Error(`API returned error: ${res.status}`);
@@ -274,7 +274,7 @@ export default {
           // Diet options start from ID 5
           const optionId = i + 5;
           console.log(`Preloading recommendation data for diet option ${optionId}`);
-          const res = await fetch(`http://belongingtogether.me/api/recommendations/${optionId}`);
+          const res = await fetch(`/api/recommendations/${optionId}`);
           if (res.ok) {
             const data = await res.json();
             if (data && data.length > 0) {

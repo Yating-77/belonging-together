@@ -324,7 +324,7 @@ export default {
             console.log(`Fetching recommendation data for option ID ${optionId}, corresponding to ${category.title} - ${scenario.title}`);
             
             try {
-              const res = await fetch(`http://belongingtogether.me/api/recommendations/${optionId}`);
+              const res = await fetch(`/api/recommendations/${optionId}`);
               
               if (!res.ok) {
                 console.error(`Failed to fetch data for option ID ${optionId}: ${res.status}`);

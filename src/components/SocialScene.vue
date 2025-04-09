@@ -274,7 +274,7 @@ export default {
           // Social options start from ID 9
           const optionId = i + 9;
           console.log(`Preloading recommendation data for social option ${optionId}`);
-          const res = await fetch(`http://belongingtogether.me/api/recommendations/${optionId}`);
+          const res = await fetch(`/api/recommendations/${optionId}`);
           if (res.ok) {
             const data = await res.json();
             if (data && data.length > 0) {

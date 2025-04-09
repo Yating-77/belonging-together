@@ -202,7 +202,7 @@ export default {
           console.log(`Fetching recommendation data for sensory option ID ${this.selected + 17}`); // Sensory options start from ID 17
           
           //Sensory option IDs start from 17, need to add 17, because Sleep scenario uses 1-4, Diet scenario uses 5-8, Social scenario uses 9-12, Emotion scenario uses 13-16
-          const res = await fetch(`http://belongingtogether.me/api/recommendations/${this.selected + 17}`);
+          const res = await fetch(`/api/recommendations/${this.selected + 17}`);
           
           if (!res.ok) {
             throw new Error(`API returned error: ${res.status}`);
@@ -283,7 +283,7 @@ export default {
           // Sensory options start from ID 17
           const optionId = i + 17;
           console.log(`Preloading recommendation data for sensory option ${optionId}`);
-          const res = await fetch(`http://belongingtogether.me/api/recommendations/${optionId}`);
+          const res = await fetch(`/api/recommendations/${optionId}`);
           if (res.ok) {
             const data = await res.json();
             if (data && data.length > 0) {

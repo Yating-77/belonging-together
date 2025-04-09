@@ -671,7 +671,7 @@ export default {
     async fetchRecommendations(optionId) {
       try {
         console.log(`Starting to fetch recommendations for option ID ${optionId}`);
-        const response = await fetch(`http://belongingtogether.me/api/recommendations/${optionId}`);
+        const response = await fetch(`/api/recommendations/${optionId}`);
         
         if (!response.ok) {
           console.error(`Failed to fetch recommendations: ${response.status}`);

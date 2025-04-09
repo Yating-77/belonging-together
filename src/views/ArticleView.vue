@@ -97,7 +97,7 @@ export default {
       }
       
      
-      return `http://belongingtogether.me/image/article_${this.article.id}.jpg`;
+      return `/image/article_${this.article.id}.jpg`;
     }
   },
   created() {
