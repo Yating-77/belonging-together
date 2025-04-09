@@ -60,7 +60,7 @@ export default {
       }
       
       // Otherwise, construct URL based on article ID
-      return `http://belongingtogether.me/image/article_${this.article.id}.jpg`;
+      return `/image/article_${this.article.id}.jpg`;
     }
   },
   methods: {
