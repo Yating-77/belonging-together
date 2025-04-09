@@ -214,7 +214,7 @@ export default {
           const optionId = this.selected + 1; // Database IDs typically start from 1
           console.log(`Fetching recommendation data for option ID ${optionId}`);
           
-          const res = await fetch(`http://belongingtogether.me/api/recommendations/${optionId}`);
+          const res = await fetch(`/api/recommendations/${optionId}`);
           
           if (!res.ok) {
             throw new Error(`API returned error: ${res.status}`);

@@ -202,7 +202,7 @@ export default {
           console.log(`Fetching recommendation data for social option ID ${this.selected + 9}`); // Social options start from ID 9
           
           // Note: Social option IDs start from 9, need to add 9, because Sleep scenario uses 1-4, Diet scenario uses 5-8
-          const res = await fetch(`http://belongingtogether.me/api/recommendations/${this.selected + 9}`);
+          const res = await fetch(`/api/recommendations/${this.selected + 9}`);
           
           if (!res.ok) {
             throw new Error(`API returned error: ${res.status}`);

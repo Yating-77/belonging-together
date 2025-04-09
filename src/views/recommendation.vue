@@ -457,7 +457,7 @@ export default {
         console.log('Starting to fetch categories and options data');
         
         // Get category
-        const categoriesRes = await fetch('http://belongingtogether.me/api/categories');
+        const categoriesRes = await fetch('/api/categories');
         
         if (!categoriesRes.ok) {
           throw new Error(`Failed to fetch categories: ${categoriesRes.status} - ${categoriesRes.statusText}`);
@@ -491,7 +491,7 @@ export default {
           
           try {
             // Get questions
-            const questionsRes = await fetch(`http://belongingtogether.me/api/questions/${category.id}`);
+            const questionsRes = await fetch(`/api/questions/${category.id}`);
             
             if (!questionsRes.ok) {
               console.error(`Failed to fetch questions for category ${category.id}: ${questionsRes.status} - ${questionsRes.statusText}`);
@@ -511,7 +511,7 @@ export default {
             console.log(`Question for category ${category.title}: ${questionText}`);
             
             // fetch the options for the category
-            const optionsRes = await fetch(`http://belongingtogether.me/api/options/${category.id}`);
+            const optionsRes = await fetch(`/api/options/${category.id}`);
             
             if (!optionsRes.ok) {
               console.error(`Failed to fetch options for category ${category.id}: ${optionsRes.status} - ${optionsRes.statusText}`);
