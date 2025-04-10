@@ -1,13 +1,21 @@
+/*
+ * This is a RESTful API server that provides articles and recommendations for autism support.
+ * Main features include article management and recommendation system.
+ */
+
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 3000;
-const path = require('path');
-app.use(cors());
-app.use(express.json());
-app.use('/image', express.static(path.join(__dirname, 'public/image')));
+
+app.use(cors()); 
+app.use(express.json()); 
+app.use('/image', express.static(path.join(__dirname, 'public/image'))); // Serve static image resources
+
+// Configure PostgreSQL connect to RDS
 const pool = new Pool({
   user: 'postgres',
   host: 'autism-database.c9gms0e0w8ty.ap-southeast-2.rds.amazonaws.com',
@@ -19,13 +27,14 @@ const pool = new Pool({
   }
 });
 
-
+// Test database connection
 pool.connect()
   .then(() => console.log('Connected to PostgreSQL database'))
   .catch((err) => console.error('Connection error', err.stack));
 
-
-
+/*
+  Get the list of all articles
+ */
 app.get('/api/articles', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -46,9 +55,12 @@ app.get('/api/articles', async (req, res) => {
   }
 });
 
+/*
+  Get the list of popular articles
+ */
 app.get('/api/articles/popular', async (req, res) => {
   try {
-    const limit = 4; 
+    const limit = 4;
     const result = await pool.query(`
       SELECT 
         id, 
@@ -68,6 +80,10 @@ app.get('/api/articles/popular', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+/*
+ Search articles by keyword in the title and content
+ */
 app.get('/api/articles/search', async (req, res) => {
   try {
     const keyword = req.query.keyword || '';
@@ -79,16 +95,17 @@ app.get('/api/articles/search', async (req, res) => {
     );
     
     console.log(`Found ${result.rows.length} search results`);
-    res.json({ 
-      success: true, 
-      data: result.rows 
-    });
+    res.json({ success: true, data: result.rows });
   } catch (error) {
     console.error('Error searching articles:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
+/*
+ Update article view count
+ Increment the view count of the specified article by 1 on each request
+ */
 app.post('/api/articles/:id/view', async (req, res) => {
   try {
     const articleId = req.params.id;
@@ -104,6 +121,10 @@ app.post('/api/articles/:id/view', async (req, res) => {
   }
 });
 
+/*
+ Test search endpoint
+ Perform search in memory instead of in the database
+ */
 app.get('/api/test-search', async (req, res) => {
   try {
     const keyword = req.query.keyword || '';
@@ -126,6 +147,10 @@ app.get('/api/test-search', async (req, res) => {
     res.status(500).json({ success: false, error: error.message, stack: error.stack });
   }
 });
+
+/*
+ Get article details by ID
+ */
 app.get('/api/articles/:id', async (req, res) => {
   try {
     const articleId = req.params.id;
@@ -145,7 +170,9 @@ app.get('/api/articles/:id', async (req, res) => {
   }
 });
 
-
+/*
+ Get all categories
+ */
 app.get('/api/categories', async (req, res) => {
   console.log('Received request to get all categories');
   
@@ -163,6 +190,9 @@ app.get('/api/categories', async (req, res) => {
   }
 });
 
+/*
+ Get all questions under the specified category
+ */
 app.get('/api/questions/:categoryId', async (req, res) => {
   const { categoryId } = req.params;
   
@@ -183,6 +213,9 @@ app.get('/api/questions/:categoryId', async (req, res) => {
   }
 });
 
+/*
+ Get all options for the questions in the specified category
+ */
 app.get('/api/options/:categoryId', async (req, res) => {
   const { categoryId } = req.params;
   
@@ -203,13 +236,15 @@ app.get('/api/options/:categoryId', async (req, res) => {
   }
 });
 
+/*
+ Get recommendation content based on the specified option
+ */
 app.get('/api/recommendations/:optionId', async (req, res) => {
   const { optionId } = req.params;
   
   console.log(`Received recommendation request for option ID: ${optionId}`);
   
   try {
-
     if (!optionId || isNaN(parseInt(optionId))) {
       return res.status(400).json({ error: 'Invalid option ID' });
     }
@@ -232,6 +267,9 @@ app.get('/api/recommendations/:optionId', async (req, res) => {
   }
 });
 
+/*
+Start the server
+ */
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
   console.log(`API available at http://localhost:${port}/api/`);
