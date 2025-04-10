@@ -26,7 +26,7 @@
       <ul class="mobile-links">
         <li><router-link to="/" @click="closeMobileMenu">Home</router-link></li>
         <li><router-link to="/resource" @click="closeMobileMenu">Resource Center</router-link></li>
-        <li><router-link to="/recommendation" @click="closeMobileMenu">Personalized Recommendations</router-link></li>
+        <li><router-link to="/recommendation" @click="closeMobileMenu">Personalised Recommendations</router-link></li>
       </ul>
     </div>
   </nav>
