@@ -1,22 +1,26 @@
 <template>
+  
   <div class="resource-page">
+    
     <MyNavBar />
+
+    
     <div class="hero-banner">
       <div class="hero-content">
         <h1 class="hero-title">Be Informed and Inspired</h1>
       </div>
     </div>
 
+    <!-- Keyword search input area -->
     <div class="search-container">
       <div class="search-wrapper">
-
         <div class="keyword-search">
           <label>Search articles by keyword</label>
           <input 
-            v-model="searchKeyword" 
-            type="text" 
-            class="form-control" 
-            placeholder="Enter your keyword" 
+            v-model="searchKeyword"
+            type="text"
+            class="form-control"
+            placeholder="Enter your keyword"
             @keyup.enter="searchArticles"
           />
           <button class="search-button" @click="searchArticles">Search</button>
@@ -24,25 +28,30 @@
       </div>
     </div>
 
+    <!-- Search result section (visible only after user searches) -->
     <div v-if="isSearchResult" class="search-results-section">
       <div class="container">
         <h2 class="section-title">Search Results</h2>
 
+        
         <div v-if="!loadingSearch && !errorSearch && searchResults.length > 0" class="search-result-info">
           Found {{ searchResults.length }} articles related to "{{ lastSearchKeyword }}"
           <button class="reset-search-btn" @click="resetSearch">Clear search results</button>
         </div>
 
+        
         <div v-if="loadingSearch" class="loading-spinner">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Searching...</span>
           </div>
         </div>
+
         
         <div v-else-if="errorSearch" class="alert alert-danger">
           {{ errorSearch }}
           <button class="reset-search-btn" @click="resetSearch">Clear search results</button>
         </div>
+
         
         <div v-else-if="!loadingSearch && !errorSearch && searchResults.length > 0" class="swiper-container">
           <div class="swiper-button-prev custom-nav-prev search-nav-prev"></div>
@@ -50,14 +59,8 @@
             :modules="swiperModules"
             :slides-per-view="3"
             :space-between="20"
-            :navigation="{
-              nextEl: '.search-nav-next',
-              prevEl: '.search-nav-prev'
-            }"
-            :pagination="{ 
-              clickable: true,
-              el: '.search-pagination'
-            }"
+            :navigation="{ nextEl: '.search-nav-next', prevEl: '.search-nav-prev' }"
+            :pagination="{ clickable: true, el: '.search-pagination' }"
             :breakpoints="swiperBreakpoints"
             class="article-slider"
           >
@@ -68,6 +71,7 @@
           <div class="swiper-button-next custom-nav-next search-nav-next"></div>
           <div class="swiper-pagination search-pagination"></div>
         </div>
+
         
         <div v-else-if="!loadingSearch && !errorSearch && searchResults.length === 0" class="search-result-info">
           No articles found related to "{{ lastSearchKeyword }}".
@@ -76,38 +80,37 @@
       </div>
     </div>
 
+    <!-- Section for most popular articles -->
     <div class="popular-articles-section">
       <div class="container">
         <h2 class="section-title">Most Popular Articles</h2>
-        
+
+       
         <div v-if="loadingPopular" class="loading-spinner">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
         </div>
+
         
         <div v-else-if="errorPopular" class="alert alert-danger">
           {{ errorPopular }}
         </div>
+
         
         <div v-else-if="popularArticles.length === 0" class="no-articles">
           No popular articles available
         </div>
-        
+
+       
         <div v-else class="swiper-container">
           <div class="swiper-button-prev custom-nav-prev popular-nav-prev"></div>
           <swiper
             :modules="swiperModules"
             :slides-per-view="3"
             :space-between="20"
-            :navigation="{
-              nextEl: '.popular-nav-next',
-              prevEl: '.popular-nav-prev'
-            }"
-            :pagination="{ 
-              clickable: true,
-              el: '.popular-pagination'
-            }"
+            :navigation="{ nextEl: '.popular-nav-next', prevEl: '.popular-nav-prev' }"
+            :pagination="{ clickable: true, el: '.popular-pagination' }"
             :breakpoints="swiperBreakpoints"
             class="article-slider"
           >
@@ -121,19 +124,23 @@
       </div>
     </div>
 
+    <!-- Section for all articles -->
     <div class="articles-section">
       <div class="container">
         <h2 class="section-title">{{ isSearchResult ? 'All Article Resources' : 'Article Resources' }}</h2>
+
         
         <div v-if="loading" class="loading-spinner">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
         </div>
+
         
         <div v-else-if="error" class="alert alert-danger">
           {{ error }}
         </div>
+
         
         <div v-else class="swiper-container">
           <div class="swiper-button-prev custom-nav-prev main-nav-prev"></div>
@@ -141,14 +148,8 @@
             :modules="swiperModules"
             :slides-per-view="3"
             :space-between="20"
-            :navigation="{
-              nextEl: '.main-nav-next',
-              prevEl: '.main-nav-prev'
-            }"
-            :pagination="{ 
-              clickable: true,
-              el: '.main-pagination'
-            }"
+            :navigation="{ nextEl: '.main-nav-next', prevEl: '.main-nav-prev' }"
+            :pagination="{ clickable: true, el: '.main-pagination' }"
             :breakpoints="swiperBreakpoints"
             class="article-slider"
           >
@@ -165,16 +166,18 @@
   </div>
 </template>
 
+
 <script>
-import { Swiper, SwiperSlide } from 'swiper/vue';
-import { Navigation, Pagination } from 'swiper/modules';
+import { Swiper, SwiperSlide } from 'swiper/vue'; 
+import { Navigation, Pagination } from 'swiper/modules'; 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
+
 import MyFooter from '../components/test/MyFooter.vue';
 import MyNavBar from '../components/test/MyNavBar.vue';
 import ArticleCard from '@/components/ArticleCard.vue';
-import apiService from '@/services/api';
+import apiService from '@/services/api'; 
 
 export default {
   name: 'resource',
@@ -187,20 +190,20 @@ export default {
   },
   data() {
     return {
-      articles: [],        // All articles
-      popularArticles: [], // Popular articles
-      searchResults: [],   // Search results
-      loading: true,       // Initial loading state
-      loadingPopular: true,// Popular articles loading state
-      error: null,         // Initial loading error
-      errorPopular: null,  // Popular articles loading error
-      loadingSearch: false,// Search loading state
-      errorSearch: null,   // Search error
-      searchKeyword: '',
-      isSearchResult: false, // Whether search has been executed
-      lastSearchKeyword: '', // Last searched keyword
+      articles: [],            
+      popularArticles: [],     
+      searchResults: [],      
+      loading: true,           
+      loadingPopular: true,    
+      error: null,             
+      errorPopular: null,     
+      loadingSearch: false,    
+      errorSearch: null,       
+      searchKeyword: '',    
+      isSearchResult: false,   
+      lastSearchKeyword: '',   
       swiperModules: [Navigation, Pagination],
-      swiperBreakpoints: {
+      swiperBreakpoints: {   
         320: { slidesPerView: 1, spaceBetween: 10 },
         640: { slidesPerView: 2, spaceBetween: 15 },
         992: { slidesPerView: 3, spaceBetween: 20 }
@@ -208,13 +211,15 @@ export default {
     };
   },
   created() {
+    
     this.fetchArticles();
     this.fetchPopularArticles();
   },
   methods: {
+    // Load all articles
     async fetchArticles() {
       this.loading = true;
-      this.error = null; 
+      this.error = null;
       try {
         const response = await apiService.getArticles();
         this.articles = response.data.data;
@@ -225,12 +230,13 @@ export default {
         this.loading = false;
       }
     },
-    
+
+    // Load popular articles
     async fetchPopularArticles() {
       this.loadingPopular = true;
       this.errorPopular = null;
       try {
-        const response = await apiService.getPopularArticles(5); // Get top 5 popular articles
+        const response = await apiService.getPopularArticles(5); // Top 5
         this.popularArticles = response.data.data;
       } catch (err) {
         this.errorPopular = 'Unable to load popular articles: ' + (err.message || err);
@@ -239,13 +245,14 @@ export default {
         this.loadingPopular = false;
       }
     },
-    
+
+    // Search articles by keyword
     async searchArticles() {
       if (!this.searchKeyword.trim()) {
-        this.resetSearch(); 
+        this.resetSearch();
         return;
       }
-      
+
       this.loadingSearch = true;
       this.errorSearch = null;
       this.isSearchResult = true;
@@ -262,7 +269,8 @@ export default {
         this.loadingSearch = false;
       }
     },
-    
+
+    // Clear search and show all articles again
     resetSearch() {
       this.isSearchResult = false;
       this.lastSearchKeyword = '';

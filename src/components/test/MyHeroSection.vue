@@ -1,22 +1,33 @@
 <template>
+ 
   <section class="hero-slideshow">
+
+    
     <div class="slideshow-container">
+
+      <!-- Slide 1 -->
       <div class="slideshow-slide" :class="{ active: currentSlide === 0 }">
+        
         <div class="hero-text-content" data-aos="fade-right" data-aos-delay="100">
           <h1 class="hero-title">Built for families of autistic children.</h1>
           <p class="hero-subtitle">
             Whether you're facing bedtime battles or communication challenges, we're here with clear, kind, and practical support.
           </p>
           <div class="hero-actions">
+           
             <router-link to="/resource" class="cta-button button-secondary">Explore Our Resources</router-link>
           </div>
         </div>
+
+        
         <div class="hero-visual-content" data-aos="fade-left" data-aos-delay="100">
           <img src="/slideshow-1.png" alt="Support for families with autistic children" class="slideshow-image">
         </div>
       </div>
-      
+
+      <!-- Slide 2 -->
       <div class="slideshow-slide" :class="{ active: currentSlide === 1 }">
+        
         <div class="hero-text-content" data-aos="fade-right" data-aos-delay="100">
           <h1 class="hero-title">We see you.</h1>
           <h1 class="hero-title">We support you.</h1>
@@ -24,33 +35,43 @@
             Tell us about your child's daily experiences: bedtime, meals, emotions, play. And we'll give you gentle, clear suggestions to support their growth. All free. All backed by science. All with love.
           </p>
           <div class="hero-actions">
+           
             <router-link to="/recommendation" class="cta-button button-secondary">Get Personalised Recommendations</router-link>
           </div>
         </div>
+
+     
         <div class="hero-visual-content" data-aos="fade-left" data-aos-delay="100">
           <img src="/222.jpg" alt="We support families" class="slideshow-image">
         </div>
       </div>
-      
+
+      <!-- Slide 3 -->
       <div class="slideshow-slide" :class="{ active: currentSlide === 2 }">
+        
         <div class="hero-text-content" data-aos="fade-right" data-aos-delay="100">
           <h1 class="hero-title">Together, we promote social inclusion.</h1>
           <p class="hero-subtitle">
             We help every child feel seen, heard, and included at home, in school, and in the community.
           </p>
           <div class="hero-actions">
+            
             <router-link to="/resource" class="cta-button button-secondary">Explore Our Resources</router-link>
           </div>
         </div>
+
+       
         <div class="hero-visual-content" data-aos="fade-left" data-aos-delay="100">
           <img src="/slideshow-2.jpg" alt="Social inclusion for children" class="slideshow-image">
         </div>
       </div>
     </div>
 
-    <button class="slide-nav prev" @click="prevSlide" aria-label="上一张幻灯片">&#10094;</button>
-    <button class="slide-nav next" @click="nextSlide" aria-label="下一张幻灯片">&#10095;</button>
     
+    <button class="slide-nav prev" @click="prevSlide" aria-label="Previous slide">&#10094;</button>
+    <button class="slide-nav next" @click="nextSlide" aria-label="Next slide">&#10095;</button>
+    
+   
     <div class="slideshow-indicators">
       <span 
         v-for="(_, index) in slides" 
@@ -174,7 +195,7 @@ const goToSlide = (index) => {
   flex: 1 1 45%; 
   position: relative; 
   min-height: 350px;
-  clip-path: polygon(12% 0, 100% 0, 100% 100%, 0 100%);
+  clip-path: polygon(12% 0, 100% 0, 100% 100%, 0 100%);/**Creates the angled corner visual effect */
   display: flex; 
   align-items: center; 
   justify-content: center; 

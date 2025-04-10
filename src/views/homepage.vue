@@ -1,10 +1,19 @@
 <template>
   <div id="app-container">
+
+    <!-- Top navigation bar -->
     <MyNavBar />
+
+    <!-- Hero section -->
     <MyHeroSection data-aos="fade-in" data-aos-duration="1200" />
+
+    <!-- Introduction section with autism information cards -->
     <section class="info-grid-section" aria-labelledby="autism-facts-heading">
       <div class="info-grid-container-wrapper">
+        
         <h2 id="autism-facts-heading" class="section-title">Understanding Autism</h2>
+        
+        <!-- Card grid-->
         <div class="info-grid-container">
           <MyInfoCard
             v-for="(card, index) in autismIntroCards"
@@ -22,7 +31,11 @@
         </div>
       </div>
     </section>
-      <MyVideoSection />
+
+    <!-- Video explanation section -->
+    <MyVideoSection />
+
+    
     <div
       class="full-width-section background-image-section"
       data-aos="fade-left"
@@ -33,14 +46,23 @@
       data-aos-delay="150"
     >
       <div class="content-wrapper">
+      
         <h2 class="content-item">Resources & Support: Walking With You</h2>
-        <p class="content-item">Explore our curated resources, including practical tools, professional guides, family support strategies, and community connection opportunities, as we journey together.</p>
-        <router-link to="/resource" class="resource-button content-item">Explore Resource Center</router-link>
+        <p class="content-item">
+          Explore our curated resources, including practical tools, professional guides, family support strategies, and community connection opportunities, as we journey together.
+        </p>
+
+       
+        <router-link to="/resource" class="resource-button content-item">
+          Explore Resource Center
+        </router-link>
       </div>
     </div>
+
     <MyFooter />
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue';
@@ -75,7 +97,7 @@ const autismIntroCards = ref([
     colorAccent: "tertiary"
   }
 ]);
-
+// Initialize AOS animations when component is mounted
 onMounted(() => {
   AOS.init({
     duration: 1200, 

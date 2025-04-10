@@ -1,11 +1,16 @@
 <template>
   <div class="article-view">
+
+
     <MyNavBar />
+
     <main>
+
+      <!-- Back button -->
       <div class="back-button-container">
         <button @click="goBack" class="back-button">
           <i class="fas fa-arrow-left"></i> Back to Article List
-      </button>
+        </button>
       </div>
 
       <div v-if="loading" class="loading-container">
@@ -13,12 +18,16 @@
         <p>Loading article...</p>
       </div>
 
+      <!-- Error state: shows error message  -->
       <div v-else-if="error" class="error-container">
         <i class="fas fa-exclamation-triangle"></i>
         <p>{{ error }}</p>
       </div>
 
+      <!-- Article display-->
       <div v-else>
+
+        <!-- Article image (with fallback if image fails to load) -->
         <div class="centered-image-container">
           <img 
             :src="articleImageUrl" 
@@ -27,19 +36,25 @@
             @error="handleImageError"
           />
         </div>
-        
+
         
         <div class="colored-content-container">
           <div class="article-content">
-          <h1 class="article-title">{{ article.title }}</h1>
+
            
+            <h1 class="article-title">{{ article.title }}</h1>
+
+            
             <div class="article-meta" v-if="article.view_count">
               <span class="views">
                 <i class="far fa-eye"></i> {{ article.view_count }} views
-            </span>
-          </div>
+              </span>
+            </div>
 
-        <div class="article-body" v-html="formattedContent"></div>
+          
+            <div class="article-body" v-html="formattedContent"></div>
+
+            <!-- Article source link (if available) -->
             <div class="article-source" v-if="article.source_link">
               <hr />
               <p>
@@ -49,93 +64,121 @@
                 </a>
               </p>
             </div>
+
           </div>
         </div>
-    </div>
+
+      </div>
     </main>
-    
+
     <MyFooter />
+
   </div>
 </template>
 
+
 <script>
+
 import apiService from '@/services/api'
+
+
 import MyNavBar from '../components/test/MyNavBar.vue'
 import MyFooter from '../components/test/MyFooter.vue'
 
 export default {
+
   name: 'ArticleView',
+
+ 
   components: {
     MyNavBar,
     MyFooter
   },
+
+
   data() {
     return {
-      article: {},
-      loading: true,
-      error: null,
-      imageError: false
+      article: {},         
+      loading: true,       
+      error: null,         
+      imageError: false   
     }
   },
+
+  // Computed properties
   computed: {
+   
     formattedContent() {
       if (!this.article.content) return '';
 
       return this.article.content
-        .replace(/\\n\\n/g, '\n\n')
-        .split(/\n{2,}/) 
-        .map(p => `<p>${p.trim()}</p>`)
-        .join('');
+        .replace(/\\n\\n/g, '\n\n')               
+        .split(/\n{2,}/)                         
+        .map(p => `<p>${p.trim()}</p>`)           
+        .join('');                               
     },
+
+    
     articleImageUrl() {
       if (this.imageError) {
-        return '/images/fallback-image.jpg'; 
+        return '/images/fallback-image.jpg';      
       }
-   
+
       if (this.article.image_path) {
-        return this.article.image_path;
       }
-      
-     
-      return `/image/article_${this.article.id}.jpg`;
+
+      return `/image/article_${this.article.id}.jpg`; // Default image path pattern
     }
   },
+
+  // called when the component is created
   created() {
-    this.fetchArticle();
+    this.fetchArticle(); // Fetch article data from backend
   },
+
+
   methods: {
+    // Fetches the article by ID from the backend
     async fetchArticle() {
       const articleId = this.$route.params.id;
       this.loading = true;
       this.error = null;
-      
+
       try {
+        // Request article data from the backend
         const response = await apiService.getArticle(articleId);
         this.article = response.data.data;
-        
+
+     
         apiService.incrementArticleViewCount(articleId).catch(err => {
           console.warn('Failed to increment view count:', err);
         });
       } catch (err) {
+        
         this.error = 'Unable to load article content';
         console.error('Failed to get article:', err.response?.data?.message || err.message || err);
       } finally {
         this.loading = false;
       }
     },
+
+    
     goBack() {
       if (window.history.length > 1) {
-        this.$router.go(-1);
+        this.$router.go(-1); 
       } else {
-        this.$router.push('/resource');
+        this.$router.push('/resource'); 
       }
     },
+
+    
     handleImageError() {
       this.imageError = true;
     }
   }
 }
 </script>
+
 
 <style scoped>
 

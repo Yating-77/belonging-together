@@ -98,7 +98,7 @@ export default {
   height: 180px;
   object-fit: cover;
   width: 100%;
-  background-color: #e9ecef; /* Placeholder color while image loads */
+  background-color: #e9ecef; 
 }
 
 .card-title {
