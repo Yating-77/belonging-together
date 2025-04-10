@@ -36,3 +36,14 @@ npm run dev
 
 ##Compile and Minify for Production
 npm run build
+
+##API Overview
+GET /api/articles — fetch all articles
+
+GET /api/articles/popular — fetch top articles by view count
+
+GET /api/articles/search?keyword=xxx — search articles
+
+POST /api/articles/:id/view — increment view count
+
+GET /api/recommendations/:optionId — fetch recommendations by selected option
