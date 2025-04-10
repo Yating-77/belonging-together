@@ -1,33 +1,38 @@
-<<<<<<< HEAD
-# Yating-77.github.io
-=======
-# element
+# Autism Support Web App
 
-This template should help get you started developing with Vue 3 in Vite.
+This project is a Vue 3 + Vite-based web application designed to support families with autistic children.  
+It provides keyword-based article search, personalized recommendations based on questionnaire responses, and a responsive UI with animations and carousels.
+
+## Features
+
+- Search articles by keyword
+-  View popular articles based on view count
+- Receive personalized recommendations based on selected options
+- Carousel display for articles (Swiper.js)
+- Smooth scroll animations (AOS)
+- RESTful API integration with Express and PostgreSQL backend
+
+## Technologies Used
+
+- Vue 3
+- Vite
+- Swiper.js
+- AOS (Animate On Scroll)
+- Axios
+- Node.js + Express (for API server)
+- PostgreSQL (as database)
 
 ## Recommended IDE Setup
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
+- [Visual Studio Code](https://code.visualstudio.com/)
+- [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) extension (recommended for Vue 3)
 
 ## Project Setup
-
-```sh
 npm install
-```
 
-### Compile and Hot-Reload for Development
+##Compile and Hot-Reload for Development
 
-```sh
 npm run dev
-```
 
-### Compile and Minify for Production
-
-```sh
+##Compile and Minify for Production
 npm run build
-```
->>>>>>> frontend
