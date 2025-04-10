@@ -30,14 +30,15 @@ It provides keyword-based article search, personalized recommendations based on 
 ## Project Setup
 npm install
 
-##Compile and Hot-Reload for Development
+## Compile and Hot-Reload for Development
 
 npm run dev
 
-##Compile and Minify for Production
+## Compile and Minify for Production
 npm run build
 
-##API Overview
+## API Overview
+
 GET /api/articles — fetch all articles
 
 GET /api/articles/popular — fetch top articles by view count
