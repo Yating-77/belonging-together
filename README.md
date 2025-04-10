@@ -5,12 +5,21 @@ It provides keyword-based article search, personalized recommendations based on 
 
 ## Features
 
-- Search articles by keyword
--  View popular articles based on view count
-- Receive personalized recommendations based on selected options
-- Carousel display for articles (Swiper.js)
-- Smooth scroll animations (AOS)
-- RESTful API integration with Express and PostgreSQL backend
+- Receive personalized recommendations based on your child's behavior traits  
+  Parents can input specific traits such as age, communication ability, social skills, emotional regulation, and repetitive behaviors. The system provides customized suggestions tailored to their child’s needs.
+
+- Learn effective communication strategies for daily life  
+  Access articles and videos that help parents communicate more clearly with their autistic children, understand their expressions, and build stronger emotional connections.
+
+- Search autism-related articles by keyword  
+  Easily find information that’s relevant to your concerns using a smart keyword-based search function.
+
+- View the most popular articles  
+  Explore resources that have helped other parents, based on real view counts.
+
+- Interactive article carousel for engaging browsing  
+  Swipe through categorized articles in a visually friendly and responsive interface.
+
 
 ## Technologies Used
 
