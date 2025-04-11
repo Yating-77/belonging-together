@@ -64,6 +64,9 @@
             <div class="card-description">Overreact to lights, sound or touch?</div>
           </div>
         </div>
+        
+        <!-- Attribution line -->
+        <div class="attribution-line">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank"><span class="green-text">Better Health Channel</span></a></div>
       </div>
     </div>
     
@@ -1671,6 +1674,28 @@ export default {
 
 .larger-icon {
   transform: scale(1.4);
+}
+
+.attribution-line {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0 15px;
+}
+
+.attribution-line a {
+  color: #3E5C2B;
+  text-decoration: none;
+}
+
+.attribution-line a:hover {
+  text-decoration: underline;
+}
+
+.green-text {
+  color: #3E5C2B;
 }
 
 </style>

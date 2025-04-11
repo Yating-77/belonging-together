@@ -45,17 +45,17 @@
           
           <div class="advice-content" v-else>
             <h3>Parent Advice</h3>
-            <!-- 显示加载状态 -->
+            <!-- loading -->
             <div v-if="loading" class="loading-indicator">
               Loading recommendations...
             </div>
             
-            <!-- Display error message -->
+            <!-- display error message -->
             <div v-else-if="error" class="error-message">
               {{ error }}
             </div>
             
-            <!-- Display recommendation content -->
+            <!-- display recommendation content -->
             <p v-else>{{ currentAdvice }}</p>
             <div class="advice-progress">
               {{ adviceProgress }}
@@ -73,7 +73,7 @@
               </button>
             </div>
             
-            <!-- Show continue button after reading all advice -->
+            <!-- show continue button after reading all advice -->
             <div v-if="hasReadAllAdvice" class="next-scenario-container">
               <button class="continue-btn" @click="goToNextScenario">
                 Continue to Next Scene

@@ -302,15 +302,6 @@ export default {
       try {
         console.log('Starting to fetch recommendation data for all scenarios');
         
-        // Get recommendation data for all scenarios
-        // Scenario list - corresponding option ID ranges
-        // Sleep: 1-4
-        // Diet: 5-8
-        // Social: 9-12
-        // Communication: 13-16
-        // Emotion: 17-20
-        // Sensory: 21-24
-        
         // For each scenario, get recommendation data in sequence
         for (let categoryIndex = 0; categoryIndex < this.scenarioData.length; categoryIndex++) {
           const category = this.scenarioData[categoryIndex];
@@ -391,7 +382,6 @@ export default {
   text-align: center;
 }
 
-/* Loading and Error styles */
 .loading-container, .error-container {
   display: flex;
   flex-direction: column;
@@ -450,7 +440,6 @@ export default {
   background-color: #4d7234;
 }
 
-/* Summary content styles */
 .summary-content {
   font-family: 'Arial', sans-serif;
   color: #333;

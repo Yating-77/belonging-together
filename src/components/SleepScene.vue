@@ -45,17 +45,17 @@
           
           <div class="advice-content" v-else>
             <h3>Parent Advice</h3>
-            <!-- 显示加载状态 -->
+            <!-- loading -->
             <div v-if="loading" class="loading-indicator">
               Loading recommendations...
             </div>
             
-            <!-- 显示错误信息 -->
+            <!-- error message -->
             <div v-else-if="error" class="error-message">
               {{ error }}
             </div>
             
-            <!-- 显示建议内容 -->
+            <!-- recommendation -->
             <p v-else>{{ currentAdvice }}</p>
             <div class="advice-progress">
               {{ adviceProgress }}
@@ -377,7 +377,6 @@ export default {
   cursor: not-allowed;
 }
 
-/* Scenario Scene Styles */
 .scenario-container {
   margin-top: 0;
   flex: 1;
@@ -416,7 +415,6 @@ export default {
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Dialogue Bubbles Styles */
 .dialogue-bubbles {
   display: flex;
   flex-direction: column;

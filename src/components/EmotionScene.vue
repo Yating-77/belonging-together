@@ -23,7 +23,7 @@
       <h2 class="drama-title">{{ currentScene.title }}</h2>
       
       <div class="scenario-content">
-        <!-- Left image area -->
+        <!-- Image area -->
         <div class="image-section">
           <img :src="currentScene.image" alt="Scenario Illustration" class="illustration" />
         </div>
@@ -45,17 +45,14 @@
           
           <div class="advice-content" v-else>
             <h3>Parent Advice</h3>
-            <!-- 显示加载状态 -->
             <div v-if="loading" class="loading-indicator">
               Loading recommendations...
             </div>
-            
-            <!-- 显示错误信息 -->
+          
             <div v-else-if="error" class="error-message">
               {{ error }}
             </div>
             
-            <!-- 显示建议内容 -->
             <p v-else>{{ currentAdvice }}</p>
             <div class="advice-progress">
               {{ adviceProgress }}
