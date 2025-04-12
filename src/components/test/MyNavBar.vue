@@ -72,7 +72,6 @@ onUnmounted(() => {
   document.body.style.overflow = ''; 
 });
 </script>
-
 <style scoped>
 .my-navbar {
   position: sticky;
@@ -80,16 +79,16 @@ onUnmounted(() => {
   left: 0;
   width: 100%;
   background-color: #ffffff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  padding: 0.8rem 5%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 1.0rem 3%;
   z-index: 1000;
   transition: background-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
 }
 
 .my-navbar.scrolled {
   background-color: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  padding: 0.6rem 5%;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+  padding: 0.6rem 3%;
   backdrop-filter: blur(5px);
 }
 
@@ -97,8 +96,14 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
+  max-width: 2000px;
   margin: 0 auto;
+  width: 100%;
+  padding: 0 3%;
+}
+
+.navbar-logo {
+  margin-left: -1%;
 }
 
 .navbar-logo a {
@@ -108,7 +113,7 @@ onUnmounted(() => {
 }
 
 .logo-image {
-  height: 40px;
+  height: 70px;
   width: auto;
   display: block;
 }
@@ -119,12 +124,14 @@ onUnmounted(() => {
   gap: 2rem;
   margin: 0;
   padding: 0;
+  margin-right: -1%;
 }
 
 .navbar-links a {
   text-decoration: none;
   color: #6c757d;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1.05rem;
   padding: 0.5rem 0;
   display: block;
   transition: color 0.3s ease;
@@ -187,9 +194,9 @@ onUnmounted(() => {
 .mobile-links a {
   color: #6c757d;
   text-decoration: none;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 500;
-  padding: 1rem 0;
+  padding: 1.1rem 0;
   display: block;
   transition: color 0.3s ease;
 }
@@ -207,10 +214,21 @@ onUnmounted(() => {
   
   .mobile-menu-toggle {
     display: flex;
+    margin-right: -1%;
   }
   
   .logo-image {
-    height: 35px;
+    height: 60px;
+  }
+  
+  .mobile-menu-toggle span {
+    height: 4px;
+    margin-bottom: 3px;
+    width: 30px;
+  }
+  
+  .my-navbar {
+    padding: 1.2rem 3%;
   }
 }
 
@@ -228,16 +246,16 @@ onUnmounted(() => {
 
 @media (max-width: 320px) {
   .my-navbar {
-    padding: 0.7rem 4%;
+    padding: 1.3rem 4%;
   }
   
   .logo-image {
-    height: 30px;
+    height: 50px;
   }
   
   .mobile-links a {
-    padding: 1.2rem 0;
-    font-size: 1.2rem;
+    padding: 1.4rem 0;
+    font-size: 1.3rem;
   }
 }
 </style>
