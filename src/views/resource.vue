@@ -20,7 +20,7 @@
             v-model="searchKeyword"
             type="text"
             class="form-control"
-            placeholder="Type a keyword (e.g., 'social')"
+            placeholder="Search by title, content, or any part you remember, even a single letter works (e.g., 'More Than Words')"
             @keyup.enter="searchArticles"
           />
           <button class="search-button" @click="searchArticles">Search</button>
