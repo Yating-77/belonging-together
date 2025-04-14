@@ -17,7 +17,7 @@
       <ul class="navbar-links">
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/resource">Resource Center</router-link></li>
-        <li><router-link to="/recommendation">Personalised Recommendations</router-link></li>
+        <li><router-link to="/intro">Personalised Recommendations</router-link></li>
       </ul>
     </div>
     
@@ -80,7 +80,7 @@ onUnmounted(() => {
   width: 100%;
   background-color: #ffffff;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  padding: 1.0rem 3%;
+  padding: 0.2rem 3%;
   z-index: 1000;
   transition: background-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
 }
@@ -88,7 +88,7 @@ onUnmounted(() => {
 .my-navbar.scrolled {
   background-color: rgba(255, 255, 255, 0.95);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
-  padding: 0.6rem 3%;
+  padding: 0.2rem 3%;
   backdrop-filter: blur(5px);
 }
 

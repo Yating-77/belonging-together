@@ -36,7 +36,7 @@
           </p>
           <div class="hero-actions">
            
-            <router-link to="/recommendation" class="cta-button button-secondary">Get Personalised Recommendations</router-link>
+            <router-link to="/intro" class="cta-button button-secondary">Get Personalised Recommendations</router-link>
           </div>
         </div>
 

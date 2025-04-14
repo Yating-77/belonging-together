@@ -1,6 +1,6 @@
 <template>
   <!-- loading message -->
-  <div v-if="loading" class="loading-overlay">
+  <div v-if="false" class="loading-overlay">
     <div class="loading-content">
       <div class="loading-spinner"></div>
       <p class="loading-text">Preparing your personalised recommendations...</p>
@@ -10,256 +10,209 @@
 
   <div v-else-if="scenarios.length > 0" class="fullscreen-container">
     <MyNavBar />
-    
-    <!-- slide container -->
-    <div class="slider-container">
-      <!-- intro page -->
-      <div class="slider-page" :class="{'slide-out': currentSlide !== 'intro'}">
-        <!-- title -->
-        <div class="main-title-container text-center py-4">
-          <h1 class="mb-3 page-title">Supporting Autism Families</h1>
-          <p class="mb-4 page-subtitle">
-            Personalised recommendations based on your child's daily behaviors
-          </p>
-          
-          <!-- scenecard -->
-          <div class="scenarios-cards-container">
-            <p class="intro-text page-subtitle">We provide support for six common scenarios:</p>
-            <div class="scenarios-cards-row">
-              <div class="scenario-card-item" style="cursor: pointer;" @click="jumpToScenario(0)">
-                <div class="card-icon-placeholder">
-                  <img src="../components/icons/sleep-icon.png" alt="Sleep Icon" class="scenario-icon">
-                </div>
-                <div class="card-title">Sleep Issues</div>
-                <div class="card-description">Trouble falling or staying asleep?</div>
-              </div>
-              <div class="scenario-card-item" style="cursor: pointer;" @click="jumpToScenario(1)">
-                <div class="card-icon-placeholder">
-                  <img src="../components/icons/diet-icon.png" alt="Diet Icon" class="scenario-icon">
-                </div>
-                <div class="card-title">Diet & Nutrition</div>
-                <div class="card-description">Selective eating or mealtime struggles?</div>
-              </div>
-              <div class="scenario-card-item" style="cursor: pointer;" @click="jumpToScenario(2)">
-                <div class="card-icon-placeholder">
-                  <img src="../components/icons/social-icon.png" alt="Social Icon" class="scenario-icon larger-icon">
-                </div>
-                <div class="card-title">Social Interaction</div>
-                <div class="card-description">Find it hard to connect with peers?</div>
-              </div>
-            </div>
-            <div class="scenarios-cards-row">
-              <div class="scenario-card-item" style="cursor: pointer;" @click="jumpToScenario(3)">
-                <div class="card-icon-placeholder">
-                  <img src="../components/icons/communication-icon.png" alt="Communication Icon" class="scenario-icon larger-icon">
-                </div>
-                <div class="card-title">Communication</div>
-                <div class="card-description">Limited language or unclear speech?</div>
-              </div>
-              <div class="scenario-card-item" style="cursor: pointer;" @click="jumpToScenario(4)">
-                <div class="card-icon-placeholder">
-                  <img src="../components/icons/emotion-icon.png" alt="Emotion Icon" class="scenario-icon larger-icon">
-                </div>
-                <div class="card-title">Emotional Management</div>
-                <div class="card-description">Frequent meltdowns or aggression?</div>
-              </div>
-              <div class="scenario-card-item" style="cursor: pointer;" @click="jumpToScenario(5)">
-                <div class="card-icon-placeholder">
-                  <img src="../components/icons/sensory-icon.png" alt="Sensory Icon" class="scenario-icon larger-icon">
-                </div>
-                <div class="card-title">Sensory Sensitivity</div>
-                <div class="card-description">Overreact to lights, sound or touch?</div>
-              </div>
-            </div>
-            
-            <!-- Attribution line -->
-            <div class="attribution-line">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank"><span class="green-text">Better Health Channel</span></a></div>
-          </div>
-        </div>
+    <div class="main-title-container text-center py-4">
+      <h1 class="mb-3 page-title">Supporting Autism Families</h1>
+      <p class="mb-4 page-subtitle">
+        Personalised recommendations based on your child's daily behaviors
+      </p>
+      
+      <div class="scenarios-cards-container">
+  <p class="intro-text page-subtitle">We provide support for six common scenarios:</p>
+  <div class="scenarios-cards-row">
+    <div class="scenario-card-item" :class="{'selected-card': currentScenario === 0}" style="cursor: pointer;" @click="jumpToScenario(0)">
+      <div class="card-icon-placeholder">
+        <img src="../components/icons/sleep-icon.png" alt="Sleep Icon" class="scenario-icon">
+      </div>
+      <div class="card-title">Sleep Issues</div>
+      <div class="card-description">Trouble falling or staying asleep?</div>
+    </div>
+    <div class="scenario-card-item" :class="{'selected-card': currentScenario === 1}" style="cursor: pointer;" @click="jumpToScenario(1)">
+      <div class="card-icon-placeholder">
+        <img src="../components/icons/diet-icon.png" alt="Diet Icon" class="scenario-icon">
+      </div>
+      <div class="card-title">Diet & Nutrition</div>
+      <div class="card-description">Selective eating or mealtime struggles?</div>
+    </div>
+    <div class="scenario-card-item" :class="{'selected-card': currentScenario === 2}" style="cursor: pointer;" @click="jumpToScenario(2)">
+      <div class="card-icon-placeholder">
+        <img src="../components/icons/social-icon.png" alt="Social Icon" class="scenario-icon larger-icon">
+      </div>
+      <div class="card-title">Social Interaction</div>
+      <div class="card-description">Find it hard to connect with peers?</div>
+    </div>
+  </div>
+  <div class="scenarios-cards-row">
+    <div class="scenario-card-item" :class="{'selected-card': currentScenario === 3}" style="cursor: pointer;" @click="jumpToScenario(3)">
+      <div class="card-icon-placeholder">
+        <img src="../components/icons/communication-icon.png" alt="Communication Icon" class="scenario-icon larger-icon">
+      </div>
+      <div class="card-title">Communication</div>
+      <div class="card-description">Limited language or unclear speech?</div>
+    </div>
+    <div class="scenario-card-item" :class="{'selected-card': currentScenario === 4}" style="cursor: pointer;" @click="jumpToScenario(4)">
+      <div class="card-icon-placeholder">
+        <img src="../components/icons/emotion-icon.png" alt="Emotion Icon" class="scenario-icon larger-icon">
+      </div>
+      <div class="card-title">Emotional Management</div>
+      <div class="card-description">Frequent meltdowns or aggression?</div>
+    </div>
+    <div class="scenario-card-item" :class="{'selected-card': currentScenario === 5}" style="cursor: pointer;" @click="jumpToScenario(5)">
+      <div class="card-icon-placeholder">
+        <img src="../components/icons/sensory-icon.png" alt="Sensory Icon" class="scenario-icon larger-icon">
+      </div>
+      <div class="card-title">Sensory Sensitivity</div>
+      <div class="card-description">Overreact to lights, sound or touch?</div>
+    </div>
+  </div>
+</div>
         
-        <!-- Start Journey  -->
-        <div class="start-journey-section">
-          <div class="container">
-            <div class="row">
-              <div class="col-md-6 intro-image-container">
-                <img src="/scenario-start.png" alt="Start Your Journey" class="intro-image" onerror="this.src='/sleep_scenario_example.png'">
-              </div>
-              <div class="col-md-6 intro-content-container">
-                <h2 class="intro-title">Begin Your Personalised Journey</h2>
-                <p class="intro-description">
-                  Take the first step towards understanding your child's unique needs. 
-                  Our personalised recommendations will help you navigate the challenges of supporting a child with autism.
-                </p>
-                <p class="intro-description">
-                  Select from the scenarios above or click the button below to start with the first scenario.
-                </p>
-                <button class="btn start-journey-button" @click="startJourney">
-                  Start Journey
-                </button>
+        <!-- Attribution line -->
+        <div class="attribution-line">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank"><span class="green-text">Better Health Channel</span></a></div>
+      </div>
+    </div>
+    
+    <div v-if="!showResults" class="row g-0 h-100">
+      <!-- Left fixed image area -->
+      <div class="col-md-5 d-flex align-items-center justify-content-center sidebar-container">
+        <div class="position-sticky sidebar-content">
+          <div class="scenario-header mb-3">
+            <h2 class="current-scenario-title" v-if="scenarios[currentScenario]">
+              Scenario {{ currentScenario + 1 }}: {{ scenarios[currentScenario].title }}
+            </h2>
+
+          </div>
+          <div class="main-image-container">
+            <img 
+              :src="'/scenario-' + currentScenario + '.jpg'" 
+              alt="Scenario Illustration" 
+              class="img-fluid main-image"
+              onerror="this.src='/sleep_scenario_example.png'"
+            />
+          </div>
+          
+          <!-- Progress indicator -->
+          <div class="progress-container mt-4">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="progress-text">Scenario {{ currentScenario + 1 }}/{{ scenarios.length }}</span>
+              <!-- <span class="progress-percentage">{{ Math.round(((currentScenario + 1) / scenarios.length) * 100) }}% Complete</span> -->
+            </div>
+            <div class="progress">
+              <div class="progress-bar" 
+                   :style="{ width: ((currentScenario + 1) / scenarios.length * 100) + '%' }">
               </div>
             </div>
+            <div class="scenario-dots mt-3 d-flex justify-content-between">
+            <div v-for="(scenario, index) in scenarios" :key="index" 
+                class="scenario-dot" 
+                :class="{ 'active': index <= currentScenario, 'current': index === currentScenario }"
+                @click="navigateToScenario(index)"
+                :title="scenario.title">
+            </div>
+          </div>
           </div>
         </div>
       </div>
       
-      <!-- scene -->
-      <div class="slider-page" :class="{'slide-in': currentSlide !== 'intro', 'hidden': currentSlide === 'intro'}">
-        <div class="scenario-page-header">
-          <!-- go back -->
-          <div class="return-home-btn-container">
-            <button class="btn return-home-btn" @click="returnToIntro">
-              &larr; Return to Introduction
-            </button>
-          </div>
-          
-          <!-- scene title -->
-          <h2 class="scenario-page-title text-center">Scenario {{ currentScenario + 1}}: {{ scenarios[currentScenario].title }}</h2>
-        </div>
-        
-        <div v-if="!showResults" class="row g-0 h-100">
-          <!-- Left fixed image area -->
-          <div class="col-md-5 d-flex align-items-center justify-content-center sidebar-container">
-            <div class="position-sticky sidebar-content">
-              <div class="main-image-container">
-                <img 
-                  :src="'/scenario-' + currentScenario + '.jpg'" 
-                  alt="Scenario Illustration" 
-                  class="img-fluid main-image"
-                  onerror="this.src='/sleep_scenario_example.png'"
-                />
+      <!-- Right question and options area -->
+      <div class="col-md-7 d-flex align-items-center">
+        <div class="card w-100 border-0 shadow-sm content-card">
+          <div v-if="!currentSelectedOption" class="card-body p-md-5 p-4">
+            <div class="scenario-title mb-2">
+              {{ scenarios[currentScenario].title }}
+            </div>
+            <h3 class="mb-4 scenario-question">
+              {{ scenarios[currentScenario].question }}
+            </h3>
+            
+            <div class="options-container">
+              <div 
+                v-for="(opt, index) in scenarios[currentScenario].options" 
+                :key="index"
+                class="option-card my-3 p-3" 
+                :class="{'selected-option': selected === index}"
+                @click="selected = index"
+              >
+                <input class="form-check-input visually-hidden" type="radio" :id="'opt' + index" :value="index" v-model="selected">
+                <label class="form-check-label d-block" :for="'opt' + index">
+                  <div class="d-flex align-items-center">
+                    <div class="option-indicator me-3" :class="{'selected-indicator': selected === index}"></div>
+                    <div class="option-text">{{ opt.text }}</div>
+                  </div>
+                </label>
               </div>
               
-              <!-- Progress indicator with intro dot -->
-              <div class="progress-container mt-4">
-                <div class="d-flex justify-content-between mb-2">
-                  <span class="progress-text">Scenario {{ currentScenario + 1 }}/{{ scenarios.length }}</span>
-                </div>
-                <div class="progress">
-                  <div class="progress-bar" 
-                       :style="{ width: ((currentScenario + 1) / scenarios.length * 100) + '%' }">
+              <button 
+                class="btn mt-4 w-100 py-3 action-button" 
+                @click="showRecommendation" 
+                :disabled="selected === null"
+              >
+                {{ currentScenario === 0 ? 'View Sleep Scenario' : 
+                  currentScenario === 1 ? 'View Diet Scenario' : 
+                  currentScenario === 2 ? 'View Social Interaction Scenario' : 
+                  currentScenario === 3 ? 'View Communication Scenario' : 
+                  currentScenario === 4 ? 'View Emotional Management Scenario' : 
+                  currentScenario === 5 ? 'View Sensory Sensitivity Scenario' : 
+                  'View Recommendations' }}
+              </button>
+            </div>
+          </div>
+          
+          <div v-else class="recommendation-container card-body p-md-5 p-4">
+            <div class="scenario-title mb-2">
+              {{ scenarios[currentScenario].title }}
+            </div>
+            <h3 class="mb-4 recommendations-heading">Professional Recommendations</h3>
+            
+            <div class="recommendation-content p-4 mb-4">
+              <h4 class="mb-3 recommendation-subtitle">Recommendations for "{{ currentSelectedOption.text }}"</h4>
+              
+              <div class="recommendation-cards">
+                <div v-for="(rec, i) in formatRecommendations(currentSelectedOption.recommendations)" :key="i" 
+                     class="recommendation-card mb-4">
+                  <div class="card-header d-flex align-items-center p-3">
+                    <div class="rec-icon me-3">
+                      <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h5 class="m-0 recommendation-title">{{ rec.title }}</h5>
                   </div>
-                </div>
-                <div class="scenario-dots mt-3 d-flex justify-content-between">
-                  <!-- intro -->
-                  <div class="scenario-dot intro-dot" 
-                       :class="{ 'active': currentSlide === 'intro' }"
-                       @click="returnToIntro">
-                    <span class="dot-tooltip">Introduction</span>
-                  </div>
-                  <!-- scene-->
-                  <div v-for="(scenario, index) in scenarios" :key="index" 
-                       class="scenario-dot" 
-                       :class="{ 'active': index <= currentScenario && currentSlide !== 'intro', 'current': index === currentScenario && currentSlide !== 'intro' }"
-                       @click="navigateToScenario(index)">
-                    <span class="dot-tooltip">{{ scenario.title }}</span>
+                  
+                  <div class="card-body p-3">
+                    <div class="content">
+                      {{ rec.content }}
+                    </div>
+                    
+                    <div v-if="rec.example" class="example mt-3 p-2">
+                      <div class="example-title">Practical Application:</div>
+                      <div class="example-content">{{ rec.example }}</div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          
-          <!-- Right question and options area -->
-          <div class="col-md-7 d-flex align-items-center">
-            <div class="card w-100 border-0 shadow-sm content-card">
-              <div v-if="!currentSelectedOption" class="card-body p-md-4 p-3">
-                <div class="scenario-title mb-2">
-                  {{ scenarios[currentScenario].title }}
-                </div>
-                <h3 class="mb-3 scenario-question">
-                  {{ scenarios[currentScenario].question }}
-                </h3>
-                
-                <div class="options-container">
-                  <div 
-                    v-for="(opt, index) in scenarios[currentScenario].options" 
-                    :key="index"
-                    class="option-card my-3 p-3" 
-                    :class="{'selected-option': selected === index}"
-                    @click="selected = index"
-                  >
-                    <input class="form-check-input visually-hidden" type="radio" :id="'opt' + index" :value="index" v-model="selected">
-                    <label class="form-check-label d-block" :for="'opt' + index">
-                      <div class="d-flex align-items-center">
-                        <div class="option-indicator me-3" :class="{'selected-indicator': selected === index}"></div>
-                        <div class="option-text">{{ opt.text }}</div>
-                      </div>
-                    </label>
-                  </div>
-                  
-                  <button 
-                    class="btn mt-4 w-100 py-3 action-button" 
-                    @click="showRecommendation" 
-                    :disabled="selected === null"
-                  >
-                    {{ currentScenario === 0 ? 'View Sleep Scenario' : 
-                      currentScenario === 1 ? 'View Diet Scenario' : 
-                      currentScenario === 2 ? 'View Social Interaction Scenario' : 
-                      currentScenario === 3 ? 'View Communication Scenario' : 
-                      currentScenario === 4 ? 'View Emotional Management Scenario' : 
-                      currentScenario === 5 ? 'View Sensory Sensitivity Scenario' : 
-                      'View Recommendations' }}
-                  </button>
-                </div>
-              </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+              <button 
+                class="btn back-button" 
+                @click="resetCurrentScenario"
+              >
+                Choose Again
+              </button>
               
-              <div v-else class="recommendation-container card-body p-md-5 p-4">
-                <div class="scenario-title mb-2">
-                  {{ scenarios[currentScenario].title }}
-                </div>
-                <h3 class="mb-4 recommendations-heading">Professional Recommendations</h3>
-                
-                <div class="recommendation-content p-4 mb-4">
-                  <h4 class="mb-3 recommendation-subtitle">Recommendations for "{{ currentSelectedOption.text }}"</h4>
-                  
-                  <div class="recommendation-cards">
-                    <div v-for="(rec, i) in formatRecommendations(currentSelectedOption.recommendations)" :key="i" 
-                         class="recommendation-card mb-4">
-                      <div class="card-header d-flex align-items-center p-3">
-                        <div class="rec-icon me-3">
-                          <i class="fas fa-check-circle"></i>
-                        </div>
-                        <h5 class="m-0 recommendation-title">{{ rec.title }}</h5>
-                      </div>
-                      
-                      <div class="card-body p-3">
-                        <div class="content">
-                          {{ rec.content }}
-                        </div>
-                        
-                        <div v-if="rec.example" class="example mt-3 p-2">
-                          <div class="example-title">Practical Application:</div>
-                          <div class="example-content">{{ rec.example }}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="d-flex justify-content-between mt-4">
-                  <button 
-                    class="btn back-button" 
-                    @click="resetCurrentScenario"
-                  >
-                    Choose Again
-                  </button>
-                  
-                  <button 
-                    v-if="currentScenario < scenarios.length - 1"
-                    class="btn next-button" 
-                    @click="navigateToNextScenario"
-                  >
-                    Next Scenario
-                  </button>
-                  
-                  <button 
-                    v-else
-                    class="btn finish-button" 
-                    @click="completeScenarios"
-                  >
-                    Finish
-                  </button>
-                </div>
-              </div>
+              <button 
+                v-if="currentScenario < scenarios.length - 1"
+                class="btn next-button" 
+                @click="navigateToNextScenario"
+              >
+                Next Scenario
+              </button>
+              
+              <button 
+                v-else
+                class="btn finish-button" 
+                @click="completeScenarios"
+              >
+                Finish
+              </button>
             </div>
           </div>
         </div>
@@ -316,9 +269,8 @@
             @close-modal="resetCurrentScenario">
           </SleepScene>
         </div>
-        <div class="modal-footer d-flex justify-content-between align-items-center">
-          <div class="attribution-line text-left mb-0">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank"><span class="green-text">Better Health Channel</span></a></div>
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Scenario Options</button>
+        <div class="modal-footer">
+          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
         </div>
       </div>
             </div>
@@ -337,9 +289,8 @@
             @close-modal="resetCurrentScenario">
           </DietScene>
                 </div>
-        <div class="modal-footer d-flex justify-content-between align-items-center">
-          <div class="attribution-line text-left mb-0">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank"><span class="green-text">Better Health Channel</span></a></div>
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Scenario Options</button>
+        <div class="modal-footer">
+          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
               </div>
       </div>
     </div>
@@ -358,9 +309,8 @@
             @close-modal="resetCurrentScenario">
           </SocialScene>
         </div>
-        <div class="modal-footer d-flex justify-content-between align-items-center">
-          <div class="attribution-line text-left mb-0">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank"><span class="green-text">Better Health Channel</span></a></div>
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Scenario Options</button>
+        <div class="modal-footer">
+          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
             </div>
           </div>
         </div>
@@ -379,9 +329,8 @@
             @close-modal="resetCurrentScenario">
           </CommunicationScene>
       </div>
-        <div class="modal-footer d-flex justify-content-between align-items-center">
-          <div class="attribution-line text-left mb-0">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank"><span class="green-text">Better Health Channel</span></a></div>
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Scenario Options</button>
+        <div class="modal-footer">
+          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
         </div>
       </div>
     </div>
@@ -400,9 +349,8 @@
             @close-modal="resetCurrentScenario">
           </EmotionScene>
         </div>
-        <div class="modal-footer d-flex justify-content-between align-items-center">
-          <div class="attribution-line text-left mb-0">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank"><span class="green-text">Better Health Channel</span></a></div>
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Scenario Options</button>
+        <div class="modal-footer">
+          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
         </div>
       </div>
     </div>
@@ -421,9 +369,8 @@
             @close-modal="resetCurrentScenario">
           </SensoryScene>
         </div>
-        <div class="modal-footer d-flex justify-content-between align-items-center">
-          <div class="attribution-line text-left mb-0">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank"><span class="green-text">Better Health Channel</span></a></div>
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Scenario Options</button>
+        <div class="modal-footer">
+          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
         </div>
       </div>
     </div>
@@ -438,23 +385,15 @@
         <div class="modal-body">
           <Summary></Summary>
         </div>
-        <div class="modal-footer d-flex justify-content-between align-items-center">
-          <div class="attribution-line text-left mb-0">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank"><span class="green-text">Better Health Channel</span></a></div>
+        <div class="modal-footer">
           <button type="button" class="btn back-button" @click="showSummary = false">Return</button>
         </div>
       </div>
     </div>
+    
     <MyFooter />
-  </div>
   
   <!-- no data attention -->
-  <div v-else class="loading-overlay">
-    <div class="loading-content">
-      <div class="error-icon">⚠️</div>
-      <p class="loading-text">Unable to load scenario data, please try again later</p>
-      <button @click="setupDefaultScenarios" class="retry-button">Use Default Data</button>
-    </div>
-  </div>
 </template>
 
 <script>
@@ -486,7 +425,6 @@ export default {
       selected: null,
       currentSelectedOption: null,
       currentScenario: 0,
-      currentSlide: 'intro',
       showResults: false,
       showSleepScene: false,
       showDietScene: false,
@@ -504,55 +442,29 @@ export default {
       userSelections: [],
       scenarios: [],
       loading: false,
-      error: null
+      error: null,
+      selectedCardIndex: null, 
     };
   },
   methods: {
-    // start journey - intro
-    startJourney() {
-      this.currentScenario = 0;
-      this.selected = null;
-      this.currentSelectedOption = null;
-      this.currentSlide = 'scenarios';
-      
-      // go to the top
-      this.$nextTick(() => {
-        window.scrollTo({ top: 0, behavior: 'auto' });
-      });
-    },
-    
-    // go back to intro
-    returnToIntro() {
-      this.currentSlide = 'intro';
-      
-      // go to the top
-      this.$nextTick(() => {
-        window.scrollTo({ top: 0, behavior: 'auto' });
-      });
-    },
-    
-    // navigate to the scene
     jumpToScenario(index) {
       this.currentScenario = index;
       this.selected = null;
       this.currentSelectedOption = null;
-      this.currentSlide = 'scenarios';
+      this.selectedCardIndex = index;
       
-      // go to the top
+      // scroll to the appropriate position
       this.$nextTick(() => {
-        window.scrollTo({ top: 0, behavior: 'auto' });
-      });
-    },
-    
-    // navigate to the scene
-    navigateToScenario(index) {
-      this.currentScenario = index;
-      this.selected = null;
-      this.currentSelectedOption = null;
-      
-      // go to the top
-      this.$nextTick(() => {
-        window.scrollTo({ top: 0, behavior: 'auto' });
+        // try to scroll to the scenario title position
+        const scenarioTitle = document.querySelector('.current-scenario-title');
+        if (scenarioTitle) {
+          const yOffset = -50; // adjust the offset, so the title is below the top
+          const y = scenarioTitle.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({top: y, behavior: 'smooth'});
+        } else {
+          // if the element is not found, scroll to the top
+          window.scrollTo({top: 0, behavior: 'smooth'});
+        }
       });
     },
     
@@ -685,22 +597,6 @@ export default {
         console.error('Failed to fetch categories and options data:', err);
         this.error = `Data loading failed: ${err.message}. Please ensure that the backend server is running and the database contains valid data.`;
         this.setupDefaultScenarios();
-      } finally {
-        // count the past time
-        const elapsedTime = Date.now() - startTime;
-        // if less than 1sec close
-        const minLoadingTime = 500;
-        
-        if (elapsedTime < minLoadingTime) {
-          const remainingTime = minLoadingTime - elapsedTime;
-          console.log(`Waiting additional ${remainingTime}ms to ensure minimum loading time`);
-          
-          setTimeout(() => {
-            this.loading = false;
-          }, remainingTime);
-        } else {
-          this.loading = false;
-        }
       }
     },
     showRecommendation() {
@@ -819,6 +715,11 @@ export default {
         window.scrollTo({ top: scrollPosition });
       });
     },
+    navigateToScenario(index) {
+      this.currentScenario = index;
+      this.selected = null;
+      this.currentSelectedOption = null;
+    },
     navigateToNextScenario() {
       const scrollPosition = window.scrollY;
       
@@ -865,9 +766,6 @@ export default {
       
       // Display results page
       this.showResults = true;
-      
-      // hide return button
-      document.querySelector('.scenario-page-header')?.classList.add('d-none');
     },
     resetAllScenarios() {
       this.currentScenario = 0;
@@ -877,9 +775,6 @@ export default {
     backToScenarios() {
       this.showResults = false;
       this.resetAllScenarios();
-      
-      // show title and button
-      document.querySelector('.scenario-page-header')?.classList.remove('d-none');
     },
     formatRecommendations(recommendations) {
       if (!recommendations || !Array.isArray(recommendations)) {
@@ -1009,6 +904,7 @@ export default {
   display: block;
 }
 
+/* Apply extra scaling for specific icons */
 .scenario-card-item:nth-child(3) .scenario-icon,
 .scenario-card-item:nth-child(4) .scenario-icon,
 .scenario-card-item:nth-child(6) .scenario-icon {
@@ -1035,11 +931,15 @@ export default {
 
 .sidebar-container {
   position: relative;
+  background-color: #F8EFED;
 }
-
+.row.g-0.h-100 {
+  background-color: #F8EFED !important;
+}
 .sidebar-content {
+  background-color: #F8EFED;
   top: 0;
-  padding: 0.5rem 2rem;
+  padding: 2rem;
 }
 
 .center-title-container {
@@ -1092,33 +992,22 @@ export default {
 }
 
 .main-image-container {
+  background-color: #F8EFED;
   text-align: center;
   padding: 0 1rem;
   transition: all 0.5s ease;
-  margin-top: 0;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: visible;
 }
 
 .main-image {
   border-radius: 15px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  max-height: 500px;
-  object-fit: contain;
+  max-height: 60vh;
+  object-fit: cover;
   transition: transform 0.5s ease;
-  width: 100%;
-  max-width: 500px;
-  height: auto;
 }
 
 .progress-container {
   margin-top: 1rem;
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .progress-text, .progress-percentage {
@@ -1129,33 +1018,138 @@ export default {
 .progress {
   height: 8px;
   background-color: #E9E9E9;
-  margin-bottom: 0.5rem;
-  width: 100%;
-  border-radius: 4px;
 }
 
 .progress-bar {
   background-color: #3E5C2B;
   transition: width 0.5s ease;
-  border-radius: 4px;
 }
 
-.scenario-dots {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 0.5rem;
-  width: 100%;
+.content-card {
+  background-color: #F8EFED;
+  border-radius: 15px;
+  margin: 2rem;
+}
+
+.scenario-title {
+  color: #4d2f20;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.scenario-question {
+  color: #4d2f20;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.option-card {
+  border-left: 4px solid #3E5C2B;
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  color: #333333;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.option-card:hover {
+  transform: translateX(5px);
+  background-color: #F7F0ED;
+  box-shadow: 0 4px 8px rgba(77, 47, 32, 0.1);
+}
+
+.selected-option {
+  background-color: #F7F0ED;
+  transform: translateX(5px);
+  box-shadow: 0 4px 8px rgba(77, 47, 32, 0.1);
+}
+
+.option-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #4d2f20;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.selected-indicator::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #3E5C2B;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.option-text {
+  color: #4d2f20;
+}
+
+.action-button {
+  background-color: #3E5C2B;
+  color: white;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.action-button:hover:not(:disabled) {
+  background-color: #3E5C2B;
+  box-shadow: 0 4px 10px rgba(77, 47, 32, 0.3);
+  transform: translateY(-2px);
+}
+
+.action-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.back-button {
+  background-color: #5a6268;
+  color: white;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  padding: 10px 20px;
+  border: none;
+}
+
+.back-button:hover {
+  background-color: #444b52;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.next-button, .finish-button {
+  background-color: #3E5C2B;
+  color: white;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  padding: 10px 20px;
+  border: none;
+}
+
+.next-button:hover, .finish-button:hover {
+  background-color: #3E5C2B;
+  box-shadow: 0 4px 10px rgba(77, 47, 32, 0.3);
+  transform: translateY(-2px);
 }
 
 .scenario-dot {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background-color: #D8D8D8;
   cursor: pointer;
   transition: all 0.3s ease;
-  position: relative;
-  margin: 0 3px;
 }
 
 .scenario-dot.active {
@@ -1165,46 +1159,6 @@ export default {
 .scenario-dot.current {
   transform: scale(1.3);
   box-shadow: 0 0 0 3px rgba(77, 47, 32, 0.2);
-}
-
-.scenario-dot:hover .dot-tooltip {
-  opacity: 1;
-  visibility: visible;
-}
-
-.intro-dot {
-  margin-right: 10px;
-  background-color: #3E5C2B;
-  width: 14px;
-  height: 14px;
-}
-
-.dot-tooltip {
-  position: absolute;
-  top: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #333;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease;
-  z-index: 10;
-}
-
-.dot-tooltip:after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #333 transparent transparent transparent;
 }
 
 .recommendations-heading {
@@ -1412,9 +1366,8 @@ export default {
   }
   
   .main-image {
-    max-height: 350px;
-    margin-bottom: 1.5rem;
-    width: 90%;
+    max-height: 40vh;
+    margin-bottom: 2rem;
   }
   
   .recommendation-cards {
@@ -1753,386 +1706,11 @@ export default {
 .green-text {
   color: #3E5C2B;
 }
-
-/* 幻灯片相关样式 */
-.slider-container {
-  position: relative;
-  width: 100%;
-  flex: 1;
-  overflow: hidden;
-}
-
-.slider-page {
-  width: 100%;
-  transition: transform 0.8s ease, opacity 0.8s ease;
-  position: relative;
-}
-
-.slide-out {
-  transform: translateX(-100%);
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-}
-
-.slide-in {
-  transform: translateX(0);
-  opacity: 1;
-}
-
-.hidden {
-  display: none;
-}
-
-.start-journey-section {
-  background-color: #F8EFED;
-  padding: 2rem 0 4rem;
-  margin-top: 2rem;
-}
-
-.intro-image-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-}
-
-.intro-image {
-  max-width: 100%;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.intro-content-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.intro-title {
-  color: #4d2f20;
-  font-size: 2.2rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-}
-
-.intro-description {
-  color: #4d2f20;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-}
-
-.start-journey-button {
-  background-color: #3E5C2B;
-  color: white;
-  font-size: 1.3rem;
-  padding: 12px 30px;
-  border-radius: 8px;
-  border: none;
-  transition: all 0.3s ease;
-  align-self: flex-start;
-  margin-top: 1rem;
-}
-
-.start-journey-button:hover {
-  background-color: #2c4320;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 15px rgba(62, 92, 43, 0.3);
-}
-
-.return-home-btn-container {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 10;
-}
-
-.return-home-btn {
-  background-color: #5a6268;
-  color: white;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  padding: 8px 16px;
-  border: none;
-  font-size: 1rem;
-}
-
-.return-home-btn:hover {
-  background-color: #444b52;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.scenario-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: #D8D8D8;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.scenario-dot.active {
-  background-color: #3E5C2B;
-}
-
-.scenario-dot.current {
-  transform: scale(1.3);
-  box-shadow: 0 0 0 3px rgba(77, 47, 32, 0.2);
-}
-
-.scenario-dot:hover .dot-tooltip {
-  opacity: 1;
-  visibility: visible;
-}
-
-.intro-dot {
-  margin-right: 10px;
-  background-color: #3E5C2B;
-  width: 14px;
-  height: 14px;
-}
-
-.dot-tooltip {
-  position: absolute;
-  top: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #333;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease;
-  z-index: 10;
-}
-
-.dot-tooltip:after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #333 transparent transparent transparent;
-}
-
-@media (max-width: 768px) {
-  .intro-content-container {
-    padding: 1rem;
-  }
-  
-  .intro-title {
-    font-size: 1.8rem;
-    margin-top: 1rem;
-  }
-  
-  .intro-description {
-    font-size: 1rem;
-  }
-  
-  .start-journey-button {
-    font-size: 1.1rem;
-    padding: 10px 20px;
-    align-self: center;
-  }
-  
-  .return-home-btn-container {
-    top: 10px;
-    left: 10px;
-  }
-  
-  .return-home-btn {
-    font-size: 0.85rem;
-    padding: 6px 12px;
-  }
-}
-
-.attribution-line.text-left {
-  text-align: left;
-  margin-top: 0;
-}
-
-.scenario-page-header {
-  position: relative;
-  width: 100%;
-  padding: 0.7rem 0;
-  margin-bottom: 0.5rem;
-  background-color: #F8EFED;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-}
-
-.scenario-page-title {
-  color: #3E5C2B;
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin: 0;
-  padding: 0.3rem 0;
-}
-
-.return-home-btn-container {
-  position: absolute;
-  top: 50%;
-  left: 20px;
-  transform: translateY(-50%);
-  z-index: 10;
-}
-
-.return-home-btn {
-  background-color: #5a6268;
-  color: white;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  padding: 8px 16px;
-  border: none;
-  font-size: 1rem;
-}
-
-.return-home-btn:hover {
-  background-color: #444b52;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-@media (max-width: 768px) {
-  .scenario-page-title {
-    font-size: 1.4rem;
-    padding: 0.5rem 70px;
-  }
-  
-  .return-home-btn {
-    padding: 6px 12px;
-    font-size: 0.85rem;
-  }
-}
-
-.content-card {
-  background-color: #F8EFED;
-  border-radius: 15px;
-  margin: 1rem 2rem 2rem;
-}
-
-.scenario-title {
-  color: #4d2f20;
-  font-size: 1.2rem;
-  font-weight: 500;
-}
-
-.scenario-question {
-  color: #4d2f20;
-  font-size: 1.8rem;
-  font-weight: 600;
-}
-
-.option-card {
+.selected-card {
+  background-color: #f0f7eb;
   border-left: 4px solid #3E5C2B;
-  background-color: #FFFFFF;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  font-size: 1.2rem;
-  color: #333333;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.option-card:hover {
-  transform: translateX(5px);
-  background-color: #F7F0ED;
-  box-shadow: 0 4px 8px rgba(77, 47, 32, 0.1);
-}
-
-.selected-option {
-  background-color: #F7F0ED;
-  transform: translateX(5px);
-  box-shadow: 0 4px 8px rgba(77, 47, 32, 0.1);
-}
-
-.option-indicator {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid #4d2f20;
-  flex-shrink: 0;
-  position: relative;
-}
-
-.selected-indicator::after {
-  content: '';
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: #3E5C2B;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.option-text {
-  color: #4d2f20;
-}
-
-.action-button {
-  background-color: #3E5C2B;
-  color: white;
-  font-size: 1.2rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  border: none;
-}
-
-.action-button:hover:not(:disabled) {
-  background-color: #3E5C2B;
-  box-shadow: 0 4px 10px rgba(77, 47, 32, 0.3);
-  transform: translateY(-2px);
-}
-
-.action-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.back-button {
-  background-color: #5a6268;
-  color: white;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  padding: 10px 20px;
-  border: none;
-}
-
-.back-button:hover {
-  background-color: #444b52;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.next-button, .finish-button {
-  background-color: #3E5C2B;
-  color: white;
-  font-size: 1.1rem;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  padding: 10px 20px;
-  border: none;
-}
-
-.next-button:hover, .finish-button:hover {
-  background-color: #3E5C2B;
-  box-shadow: 0 4px 10px rgba(77, 47, 32, 0.3);
-  transform: translateY(-2px);
+  transform: translateX(2px);
+  box-shadow: 0 4px 15px rgba(62, 92, 43, 0.3);
 }
 
 </style>

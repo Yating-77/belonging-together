@@ -3,6 +3,7 @@ import Homepage from '../views/homepage.vue'
 import Recommendation from '../views/recommendation.vue'
 import resource from '../views/resource.vue'
 import ArticleView from '../views/ArticleView.vue'
+import IntroPage from '../views/IntroPage.vue'
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: '/article/:id',
     name: 'article',
     component: ArticleView
+  },
+  {
+    path: '/intro',
+    name: 'intro',
+    component: IntroPage
   }
 ]
 

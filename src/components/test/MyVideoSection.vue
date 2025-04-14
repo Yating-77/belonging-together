@@ -26,7 +26,7 @@
         
         <p>We're here to support you on that journey. Through warm, situation-based tools grounded in real-life parenting challenges, we help you better understand your child's unique needs, and build more confident, connected, and compassionate moments together.</p>
       </div>
-      <router-link to="/recommendation" class="cta-button button-secondary">Get Personalised Recommendations</router-link>
+      <router-link to="/intro" class="cta-button button-secondary">Get Personalised Recommendations</router-link>
     </div>
   </div>
 </section>
