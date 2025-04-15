@@ -269,8 +269,11 @@
             @close-modal="resetCurrentScenario">
           </SleepScene>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
+        <div class="modal-footer d-flex justify-content-between align-items-center">
+          <span class="text-muted small">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a></span>
+          <button class="btn back-button" @click="resetCurrentScenario">
+            Back to Options
+          </button>
         </div>
       </div>
             </div>
@@ -289,9 +292,12 @@
             @close-modal="resetCurrentScenario">
           </DietScene>
                 </div>
-        <div class="modal-footer">
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
-              </div>
+        <div class="modal-footer d-flex justify-content-between align-items-center">
+          <span class="text-muted small">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a></span>
+          <button class="btn back-button" @click="resetCurrentScenario">
+            Back to Options
+          </button>
+        </div>
       </div>
     </div>
     
@@ -309,11 +315,14 @@
             @close-modal="resetCurrentScenario">
           </SocialScene>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
-            </div>
-          </div>
+        <div class="modal-footer d-flex justify-content-between align-items-center">
+          <span class="text-muted small">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a></span>
+          <button class="btn back-button" @click="resetCurrentScenario">
+            Back to Options
+          </button>
         </div>
+      </div>
+    </div>
         
     <!-- Communication Scene Modal -->
     <div v-if="showCommunicationScene" class="sleep-scene-modal" @keydown.escape="resetCurrentScenario">
@@ -329,8 +338,11 @@
             @close-modal="resetCurrentScenario">
           </CommunicationScene>
       </div>
-        <div class="modal-footer">
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
+        <div class="modal-footer d-flex justify-content-between align-items-center">
+          <span class="text-muted small">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a></span>
+          <button class="btn back-button" @click="resetCurrentScenario">
+            Back to Options
+          </button>
         </div>
       </div>
     </div>
@@ -349,8 +361,11 @@
             @close-modal="resetCurrentScenario">
           </EmotionScene>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
+        <div class="modal-footer d-flex justify-content-between align-items-center">
+          <span class="text-muted small">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a></span>
+          <button class="btn back-button" @click="resetCurrentScenario">
+            Back to Options
+          </button>
         </div>
       </div>
     </div>
@@ -369,8 +384,11 @@
             @close-modal="resetCurrentScenario">
           </SensoryScene>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
+        <div class="modal-footer d-flex justify-content-between align-items-center">
+          <span class="text-muted small">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a></span>
+          <button class="btn back-button" @click="resetCurrentScenario">
+            Back to Scenario Options
+          </button>
         </div>
       </div>
     </div>
