@@ -20,7 +20,7 @@
             :key="card.title"
             :title="card.title"
             :description="card.description"
-            :imagePath="`/${card.imageName}.jpg`"  
+            :imagePath="`/iteration1/${card.imageName}.jpg`" 
             :colorAccent="card.colorAccent"
             data-aos="fade-up"
             :data-aos-delay="index * 100"
