@@ -83,10 +83,10 @@
           </div>
           <div class="main-image-container">
             <img 
-              :src="'/scenario-' + currentScenario + '.jpg'" 
-              alt="Scenario Illustration" 
+              :src="`/iteration1/scenario-${currentScenario}.jpg`" 
+              alt="Scenario Illustration"
               class="img-fluid main-image"
-              onerror="this.src='/sleep_scenario_example.png'"
+              @error="onImageError"
             />
           </div>
           
