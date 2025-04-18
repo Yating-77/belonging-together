@@ -4,7 +4,7 @@ import Recommendation from '../views/recommendation.vue'
 import resource from '../views/resource.vue'
 import ArticleView from '../views/ArticleView.vue'
 import IntroPage from '../views/IntroPage.vue'
-
+import ThankYouPage from '../views/ThankYouPage.vue'; 
 const routes = [
   {
     path: '/',
@@ -30,6 +30,11 @@ const routes = [
     path: '/intro',
     name: 'intro',
     component: IntroPage
+  },
+  {
+    path: '/thank-you',
+    name: 'ThankYou',
+    component: ThankYouPage
   }
 ]
 

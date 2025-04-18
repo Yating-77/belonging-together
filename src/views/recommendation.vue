@@ -16,24 +16,24 @@
         Personalised recommendations based on your child's daily behaviors
       </p>
       
-      <div class="scenarios-cards-container">
+      <div v-if="!showResults" class="scenarios-cards-container">
   <p class="intro-text page-subtitle">We provide support for six common scenarios:</p>
   <div class="scenarios-cards-row">
-    <div class="scenario-card-item" :class="{'selected-card': currentScenario === 0}" style="cursor: pointer;" @click="jumpToScenario(0)">
+    <div class="scenario-card-item" :class="{'selected-card': selectedCardIndex === 0}" style="cursor: pointer;" @click="jumpToScenario(0)">
       <div class="card-icon-placeholder">
         <img src="../components/icons/sleep-icon.png" alt="Sleep Icon" class="scenario-icon">
       </div>
       <div class="card-title">Sleep Issues</div>
       <div class="card-description">Trouble falling or staying asleep?</div>
     </div>
-    <div class="scenario-card-item" :class="{'selected-card': currentScenario === 1}" style="cursor: pointer;" @click="jumpToScenario(1)">
+    <div class="scenario-card-item" :class="{'selected-card': selectedCardIndex === 1}" style="cursor: pointer;" @click="jumpToScenario(1)">
       <div class="card-icon-placeholder">
         <img src="../components/icons/diet-icon.png" alt="Diet Icon" class="scenario-icon">
       </div>
       <div class="card-title">Diet & Nutrition</div>
       <div class="card-description">Selective eating or mealtime struggles?</div>
     </div>
-    <div class="scenario-card-item" :class="{'selected-card': currentScenario === 2}" style="cursor: pointer;" @click="jumpToScenario(2)">
+    <div class="scenario-card-item" :class="{'selected-card': selectedCardIndex === 2}" style="cursor: pointer;" @click="jumpToScenario(2)">
       <div class="card-icon-placeholder">
         <img src="../components/icons/social-icon.png" alt="Social Icon" class="scenario-icon larger-icon">
       </div>
@@ -42,21 +42,21 @@
     </div>
   </div>
   <div class="scenarios-cards-row">
-    <div class="scenario-card-item" :class="{'selected-card': currentScenario === 3}" style="cursor: pointer;" @click="jumpToScenario(3)">
+    <div class="scenario-card-item" :class="{'selected-card': selectedCardIndex === 3}" style="cursor: pointer;" @click="jumpToScenario(3)">
       <div class="card-icon-placeholder">
         <img src="../components/icons/communication-icon.png" alt="Communication Icon" class="scenario-icon larger-icon">
       </div>
       <div class="card-title">Communication</div>
       <div class="card-description">Limited language or unclear speech?</div>
     </div>
-    <div class="scenario-card-item" :class="{'selected-card': currentScenario === 4}" style="cursor: pointer;" @click="jumpToScenario(4)">
+    <div class="scenario-card-item" :class="{'selected-card': selectedCardIndex === 4}" style="cursor: pointer;" @click="jumpToScenario(4)">
       <div class="card-icon-placeholder">
         <img src="../components/icons/emotion-icon.png" alt="Emotion Icon" class="scenario-icon larger-icon">
       </div>
       <div class="card-title">Emotional Management</div>
       <div class="card-description">Frequent meltdowns or aggression?</div>
     </div>
-    <div class="scenario-card-item" :class="{'selected-card': currentScenario === 5}" style="cursor: pointer;" @click="jumpToScenario(5)">
+    <div class="scenario-card-item" :class="{'selected-card': selectedCardIndex === 5}" style="cursor: pointer;" @click="jumpToScenario(5)">
       <div class="card-icon-placeholder">
         <img src="../components/icons/sensory-icon.png" alt="Sensory Icon" class="scenario-icon larger-icon">
       </div>
@@ -270,33 +270,37 @@
           </SleepScene>
         </div>
         <div class="modal-footer d-flex justify-content-between align-items-center">
-          <span class="text-muted small">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a></span>
           <button class="btn back-button" @click="resetCurrentScenario">
-            Back to Options
+            Back to Question
           </button>
+          <div class="attribution-line text-right mb-0">
+            All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a>
+          </div>
         </div>
       </div>
-            </div>
-            
+    </div>
+    
     <!-- Diet Scene Modal -->
     <div v-if="showDietScene" class="sleep-scene-modal" @keydown.escape="resetCurrentScenario">
       <div class="sleep-scene-content">
         <div class="modal-header">
           <h3 class="modal-title">Scenario Scene - Diet Issues</h3>
           <button type="button" class="close-btn" @click="resetCurrentScenario">&times;</button>
-                  </div>
+        </div>
         <div class="modal-body">
           <DietScene 
             :option="dietSceneOption" 
             @next-scenario="navigateToNextScenario" 
             @close-modal="resetCurrentScenario">
           </DietScene>
-                </div>
+        </div>
         <div class="modal-footer d-flex justify-content-between align-items-center">
-          <span class="text-muted small">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a></span>
           <button class="btn back-button" @click="resetCurrentScenario">
-            Back to Options
+            Back to Question
           </button>
+          <div class="attribution-line text-right mb-0">
+            All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a>
+          </div>
         </div>
       </div>
     </div>
@@ -316,10 +320,12 @@
           </SocialScene>
         </div>
         <div class="modal-footer d-flex justify-content-between align-items-center">
-          <span class="text-muted small">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a></span>
           <button class="btn back-button" @click="resetCurrentScenario">
-            Back to Options
+            Back to Question
           </button>
+          <div class="attribution-line text-right mb-0">
+            All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a>
+          </div>
         </div>
       </div>
     </div>
@@ -337,12 +343,14 @@
             @next-scenario="navigateToNextScenario" 
             @close-modal="resetCurrentScenario">
           </CommunicationScene>
-      </div>
+        </div>
         <div class="modal-footer d-flex justify-content-between align-items-center">
-          <span class="text-muted small">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a></span>
           <button class="btn back-button" @click="resetCurrentScenario">
-            Back to Options
+            Back to Question
           </button>
+          <div class="attribution-line text-right mb-0">
+            All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a>
+          </div>
         </div>
       </div>
     </div>
@@ -362,37 +370,41 @@
           </EmotionScene>
         </div>
         <div class="modal-footer d-flex justify-content-between align-items-center">
-          <span class="text-muted small">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a></span>
           <button class="btn back-button" @click="resetCurrentScenario">
-            Back to Options
+            Back to Question
           </button>
+          <div class="attribution-line text-right mb-0">
+            All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a>
+          </div>
         </div>
       </div>
     </div>
     
     <!-- Sensory Scene Modal -->
     <div v-if="showSensoryScene" class="sleep-scene-modal" @keydown.escape="resetCurrentScenario">
-      <div class="sleep-scene-content">
-        <div class="modal-header">
-          <h3 class="modal-title">Scenario Scene - Sensory Sensitivity</h3>
-          <button type="button" class="close-btn" @click="resetCurrentScenario">&times;</button>
-        </div>
-        <div class="modal-body">
-          <SensoryScene 
-            :option="sensorySceneOption" 
-            @next-scenario="navigateToNextScenario" 
-            @close-modal="resetCurrentScenario">
-          </SensoryScene>
-        </div>
-        <div class="modal-footer d-flex justify-content-between align-items-center">
-          <span class="text-muted small">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a></span>
-          <button class="btn back-button" @click="resetCurrentScenario">
-            Back to Scenario Options
-          </button>
-        </div>
+  <div class="sleep-scene-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Scenario Scene - Sensory Sensitivity</h3>
+      <button type="button" class="close-btn" @click="resetCurrentScenario">&times;</button>
+    </div>
+    <div class="modal-body">
+      <SensoryScene 
+        :option="sensorySceneOption" 
+        @next-scenario="navigateToNextScenario" 
+        @close-modal="resetCurrentScenario">
+      </SensoryScene>
+    </div>
+    <div class="modal-footer d-flex justify-content-between align-items-center">
+      <button class="btn back-button" @click="resetCurrentScenario">
+        Back to Question
+      </button>
+      <div class="attribution-line text-right mb-0">
+        All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a>
       </div>
     </div>
-    
+  </div>
+</div>
+
     <!-- Summary Modal -->
     <div v-if="showSummary" class="sleep-scene-modal" @keydown.escape="showSummary = false">
       <div class="sleep-scene-content" style="max-width: 1200px; width: 95%;">
@@ -425,6 +437,8 @@ import SensoryScene from '../components/SensoryScene.vue';
 import Summary from '../components/Summary.vue';
 import MyFooter from '../components/test/MyFooter.vue';
 import MyNavBar from '../components/test/MyNavBar.vue';
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 export default {
   components: {

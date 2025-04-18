@@ -101,6 +101,7 @@ import SensoryOption0 from '@/assets/sensory-option0.png';
 import SensoryOption1 from '@/assets/sensory-option1.png';
 import SensoryOption2 from '@/assets/sensory-option2.png';
 import SensoryOption3 from '@/assets/sensory-option3.png';
+import { useRouter } from 'vue-router';
 
 export default {
   props: {
@@ -108,6 +109,10 @@ export default {
       type: Number,
       default: null
     }
+  },
+  setup() {
+    const router = useRouter();
+    return { router };
   },
   data() {
     return {
@@ -257,26 +262,22 @@ export default {
       }
     },
     goToNextScenario(event) {
-      console.log('SensoryScene: Triggering next-scenario event');
-      
-      if (event && event.currentTarget) {
-        event.currentTarget.classList.add('button-clicked');
-        setTimeout(() => {
-          if (event.currentTarget) {
-            event.currentTarget.classList.remove('button-clicked');
-          }
-        }, 200);
+      console.log('SensoryScene: Navigating to ThankYouPage');
+  
+  
+  if (event && event.currentTarget) {
+    event.currentTarget.classList.add('button-clicked');
+    setTimeout(() => {
+      if (event.currentTarget) {
+        event.currentTarget.classList.remove('button-clicked');
       }
-      
-      this.$emit('next-scenario');
-      
-      setTimeout(() => {
-        console.log('SensoryScene: Delayed re-triggering of next-scenario event');
-        this.$emit('next-scenario');
-        this.$emit('close-modal');
-      }, 50);
-      
-      this.$emit('close-modal');
+    }, 200);
+  }
+  
+
+  this.$emit('close-modal');
+
+  this.$router.push('/thank-you');
     }
   },
   async created() {
