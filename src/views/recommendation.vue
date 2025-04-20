@@ -76,17 +76,19 @@
       <div class="col-md-5 d-flex align-items-center justify-content-center sidebar-container">
         <div class="position-sticky sidebar-content">
           <div class="scenario-header mb-3">
-            <h2 class="current-scenario-title" v-if="scenarios[currentScenario]">
+            <h2 class="current-scenario-title" v-if="scenarios && scenarios.length > 0 && currentScenario >= 0 && scenarios[currentScenario]">
               Scenario {{ currentScenario + 1 }}: {{ scenarios[currentScenario].title }}
             </h2>
-
+            <h2 class="current-scenario-title" v-else>
+              loading...
+            </h2>
           </div>
           <div class="main-image-container">
             <img 
-              :src="`/iteration1/scenario-${currentScenario}.jpg`" 
-              alt="Scenario Illustration"
+              :src="'/scenario-' + currentScenario + '.jpg'" 
+              alt="Scenario Illustration" 
               class="img-fluid main-image"
-              @error="onImageError"
+              onerror="this.src='/sleep_scenario_example.png'"
             />
           </div>
           
@@ -117,14 +119,14 @@
       <div class="col-md-7 d-flex align-items-center">
         <div class="card w-100 border-0 shadow-sm content-card">
           <div v-if="!currentSelectedOption" class="card-body p-md-5 p-4">
-            <div class="scenario-title mb-2">
+            <div class="scenario-title mb-2" v-if="scenarios && scenarios.length > 0 && currentScenario >= 0 && scenarios[currentScenario]">
               {{ scenarios[currentScenario].title }}
             </div>
-            <h3 class="mb-4 scenario-question">
+            <h3 class="mb-4 scenario-question" v-if="scenarios && scenarios.length > 0 && currentScenario >= 0 && scenarios[currentScenario]">
               {{ scenarios[currentScenario].question }}
             </h3>
             
-            <div class="options-container">
+            <div class="options-container" v-if="scenarios && scenarios.length > 0 && currentScenario >= 0 && scenarios[currentScenario] && scenarios[currentScenario].options">
               <div 
                 v-for="(opt, index) in scenarios[currentScenario].options" 
                 :key="index"
@@ -158,7 +160,7 @@
           </div>
           
           <div v-else class="recommendation-container card-body p-md-5 p-4">
-            <div class="scenario-title mb-2">
+            <div class="scenario-title mb-2" v-if="scenarios && scenarios.length > 0 && currentScenario >= 0 && scenarios[currentScenario]">
               {{ scenarios[currentScenario].title }}
             </div>
             <h3 class="mb-4 recommendations-heading">Professional Recommendations</h3>
