@@ -3,7 +3,10 @@ import Homepage from '../views/homepage.vue'
 import Recommendation from '../views/recommendation.vue'
 import resource from '../views/resource.vue'
 import ArticleView from '../views/ArticleView.vue'
-
+import IntroPage from '../views/IntroPage.vue'
+import ThankYouPage from '../views/ThankYouPage.vue'; 
+import detectpage from '../views/detectpage.vue'
+import sensoryVenue from '../views/sensoryVenue.vue'
 const routes = [
   {
     path: '/',
@@ -24,11 +27,31 @@ const routes = [
     path: '/article/:id',
     name: 'article',
     component: ArticleView
+  },
+  {
+    path: '/intro',
+    name: 'intro',
+    component: IntroPage
+  },
+  {
+    path: '/detectpage',
+    name: 'detectpage',
+    component: detectpage
+  },
+  {
+    path: '/thank-you',
+    name: 'ThankYou',
+    component: ThankYouPage
+  },
+  {
+    path: '/sensoryVenue',
+    name: 'sensoryVenue',
+    component: sensoryVenue
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/iteration1'),
   routes,
   scrollBehavior(to, from, savedPosition) {
     return { top: 0 }

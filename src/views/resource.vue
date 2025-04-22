@@ -16,7 +16,7 @@
             v-model="searchKeyword" 
             type="text" 
             class="form-control" 
-            placeholder="Enter your keyword" 
+            placeholder="Type a keyword (e.g., 'social')" 
             @keyup.enter="searchArticles"
           />
           <button class="search-button" @click="searchArticles">Search</button>

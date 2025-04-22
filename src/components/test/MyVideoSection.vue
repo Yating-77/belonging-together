@@ -13,19 +13,20 @@
         ></iframe>
       </div>
       <p class="video-source">
-        Source: <a href="https://www.youtube.com/watch?v=0idZghw97dc" target="_blank" rel="noopener">Autism Speaks</a>
+        Video by <a href="https://www.autismspeaks.org/" target="_blank" rel="noopener">Autism Speaks</a> on 
+        <a href="https://www.youtube.com/watch?v=0idZghw97dc" target="_blank" rel="noopener">YouTube</a>
       </p>
     </div>
     <div class="promo-text-box">
       <h2 class="section-title">Does this sound familiar?</h2>
-      <p class="promo-subtitle">
+      <div class="promo-subtitle">
         <p>Every child has a world inside, full of thoughts, feelings, and ways of seeing the world that may not always be easy to express.</p>
         
         <p>As a parent, you might sometimes wonder: "Why does my child react this way?" or "Am I doing the right thing?"</p>
         
         <p>We're here to support you on that journey. Through warm, situation-based tools grounded in real-life parenting challenges, we help you better understand your child's unique needs, and build more confident, connected, and compassionate moments together.</p>
-      </p>
-      <router-link to="/recommendation" class="cta-button button-secondary">Get Personalised Recommendations</router-link>
+      </div>
+      <router-link to="/intro" class="cta-button button-secondary">Get Personalised Recommendations</router-link>
     </div>
   </div>
 </section>

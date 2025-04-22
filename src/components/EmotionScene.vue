@@ -23,7 +23,7 @@
       <h2 class="drama-title">{{ currentScene.title }}</h2>
       
       <div class="scenario-content">
-        <!-- Left image area -->
+        <!-- Image area -->
         <div class="image-section">
           <img :src="currentScene.image" alt="Scenario Illustration" class="illustration" />
         </div>
@@ -32,9 +32,11 @@
         <div class="dialogue-section">
           <div class="dialogue-bubbles">
             <div class="parent-bubble">
+              <span class="speaker-label parent-label">Parent:</span>
               <p>{{ currentScene.parentDialogue }}</p>
             </div>
             <div class="child-bubble">
+              <span class="speaker-label child-label">Child:</span>
               <p>{{ currentScene.childDialogue }}</p>
             </div>
           </div>
@@ -45,32 +47,33 @@
           
           <div class="advice-content" v-else>
             <h3>Parent Advice</h3>
-            <!-- 显示加载状态 -->
             <div v-if="loading" class="loading-indicator">
               Loading recommendations...
             </div>
-            
-            <!-- 显示错误信息 -->
+          
             <div v-else-if="error" class="error-message">
               {{ error }}
             </div>
             
-            <!-- 显示建议内容 -->
             <p v-else>{{ currentAdvice }}</p>
             <div class="advice-progress">
               {{ adviceProgress }}
             </div>
             <div class="advice-navigation">
-              <button class="advice-btn" 
-                      @click="prevAdvice" 
-                      :disabled="currentAdviceIndex === 0">
+              <button 
+                class="advice-btn" 
+                @click="prevAdvice" 
+                v-if="currentAdviceIndex > 0">
                 &larr; Previous
               </button>
-              <button class="advice-btn" 
-                      @click="nextAdvice" 
-                      :disabled="currentAdviceIndex === totalAdvices - 1">
+              <div v-else class="placeholder-btn"></div>
+              <button 
+                class="advice-btn" 
+                @click="nextAdvice" 
+                v-if="currentAdviceIndex < totalAdvices - 1">
                 Next &rarr;
               </button>
+              <div v-else class="placeholder-btn"></div>
             </div>
             
             <!-- Show continue button after reading all advice -->
@@ -398,7 +401,7 @@ export default {
   gap: 1rem;
 }
 .parent-bubble, .child-bubble {
-  padding: 0.8rem;
+  padding: 1rem;
   border-radius: 16px;
   position: relative;
   max-width: 90%;
@@ -416,6 +419,22 @@ export default {
 .parent-bubble p, .child-bubble p {
   margin: 0;
   font-size: 0.95rem;
+  padding-left: 0.2rem;
+}
+
+.speaker-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+  display: block;
+}
+
+.parent-label {
+  color: #3E5C2B;
+}
+
+.child-label {
+  color: #CD5C5C;
 }
 
 /* Advice Section Styles */
@@ -477,6 +496,12 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-top: 1rem;
+  width: 100%;
+}
+
+.placeholder-btn {
+  width: 120px;
+  visibility: hidden;
 }
 
 /* Button Group Styles */
