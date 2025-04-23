@@ -232,6 +232,256 @@ app.get('/api/recommendations/:optionId', async (req, res) => {
   }
 });
 
+app.get('/api/scenes', async (req, res) => {
+  console.log('Request received for /api/scenes');
+  try {
+      // Fetch id, name (for dropdown), title, subtitle, and image filename
+      const result = await pool.query(`
+          SELECT id, name, title, subtitle, image_filename
+          FROM scenes
+          ORDER BY name ASC
+      `);
+      console.log(`Found ${result.rows.length} scenes.`);
+      // Prepend the base URL path for images
+      const scenesWithImagePath = result.rows.map(scene => ({
+          ...scene,
+          // Construct the full URL path the frontend will use
+          image_url: `/image/${scene.image_filename}`
+      }));
+      res.json({ success: true, data: scenesWithImagePath });
+  } catch (error) {
+      console.error('Error fetching scenes:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch scenes', details: error.message });
+  }
+});
+
+// Endpoint to get sensory expectations for a specific scene
+app.get('/api/scenes/:id/sensory-expectations', async (req, res) => {
+  const { id } = req.params;
+  console.log(`Request received for sensory expectations for scene ID: ${id}`);
+  try {
+      // Validate ID
+      const sceneId = parseInt(id, 10);
+      if (isNaN(sceneId)) {
+          return res.status(400).json({ success: false, error: 'Invalid scene ID provided.' });
+      }
+
+      const result = await pool.query(`
+          SELECT id, category, description
+          FROM scene_sensory_expectations
+          WHERE scene_id = $1
+          ORDER BY
+              CASE category
+                  WHEN 'hearing' THEN 1
+                  WHEN 'sight' THEN 2
+                  WHEN 'smell' THEN 3
+                  WHEN 'touch' THEN 4
+                  ELSE 5 -- Default order for any other categories
+              END
+      `, [sceneId]);
+
+      console.log(`Found ${result.rows.length} sensory expectations for scene ID: ${sceneId}`);
+      res.json({ success: true, data: result.rows });
+  } catch (error) {
+      console.error(`Error fetching sensory expectations for scene ID ${id}:`, error);
+      res.status(500).json({ success: false, error: 'Failed to fetch sensory expectations', details: error.message });
+  }
+});
+// Endpoint to get distinct venue types for filtering
+app.get('/api/sensory-venues/types', async (req, res) => {
+  console.log('Request received for /api/sensory-venues/types');
+  try {
+      const result = await pool.query('SELECT DISTINCT venue_type FROM sensory_venues WHERE venue_type IS NOT NULL ORDER BY venue_type ASC');
+      res.json({ success: true, data: result.rows.map(row => row.venue_type) });
+  } catch (error) {
+      console.error('Error fetching distinct venue types:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch venue types', details: error.message });
+  }
+});
+
+// Endpoint to get distinct locations (simple version - might need refinement)
+app.get('/api/sensory-venues/locations', async (req, res) => {
+  console.log('Request received for /api/sensory-venues/locations');
+  try {
+      // This is basic, might return full addresses. Consider extracting suburbs later if needed.
+      const result = await pool.query('SELECT DISTINCT venue_location FROM sensory_venues WHERE venue_location IS NOT NULL ORDER BY venue_location ASC');
+      res.json({ success: true, data: result.rows.map(row => row.venue_location) });
+  } catch (error) {
+      console.error('Error fetching distinct locations:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch locations', details: error.message });
+  }
+});
+
+// Endpoint to get distinct sensory features/types (simple version)
+app.get('/api/sensory-venues/sensory-categories', async (req, res) => {
+  console.log('Request received for /api/sensory-venues/sensory-categories');
+  try {
+      // This fetches the raw combined text. Ideally, you'd have predefined categories.
+      const result = await pool.query('SELECT DISTINCT venue_sensory_type FROM sensory_venues WHERE venue_sensory_type IS NOT NULL ORDER BY venue_sensory_type ASC');
+      res.json({ success: true, data: result.rows.map(row => row.venue_sensory_type) });
+  } catch (error) {
+      console.error('Error fetching distinct sensory types:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch sensory categories', details: error.message });
+  }
+});
+
+
+// Main endpoint to get venues with filtering and pagination
+app.get('/api/sensory-venues', async (req, res) => {
+  console.log('Request received for /api/sensory-venues with query:', req.query);
+  const {
+      search = '',
+      sensoryCategory = '',
+      location = '',
+      venueType = '',
+      page = 1,
+      limit = 6 // Number of venues per page
+  } = req.query;
+
+  const currentPage = parseInt(page, 10) || 1;
+  const itemsPerPage = parseInt(limit, 10) || 6;
+  const offset = (currentPage - 1) * itemsPerPage;
+
+  let queryParams = [];
+  let paramIndex = 1;
+  let whereClauses = [];
+
+  // Build WHERE clauses based on filters
+  if (search) {
+      whereClauses.push(`(venue_title ILIKE $${paramIndex} OR venue_description ILIKE $${paramIndex})`);
+      queryParams.push(`%${search}%`);
+      paramIndex++;
+  }
+  if (sensoryCategory) {
+      // Basic search within the combined text field
+      whereClauses.push(`venue_sensory_type ILIKE $${paramIndex}`);
+      queryParams.push(`%${sensoryCategory}%`); // Use the exact value or parts depending on need
+      paramIndex++;
+  }
+  if (location) {
+      whereClauses.push(`venue_location ILIKE $${paramIndex}`);
+      queryParams.push(`%${location}%`); // Use exact location from dropdown
+      paramIndex++;
+  }
+  if (venueType) {
+      whereClauses.push(`venue_type = $${paramIndex}`);
+      queryParams.push(venueType); // Exact match for type
+      paramIndex++;
+  }
+
+  const whereCondition = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+  try {
+      // Query to get the filtered and paginated venues
+      const venuesQuery = `
+          SELECT id, venue_title, venue_location, venue_sensory_type,
+                 venue_sensory_info_link, venue_description, venue_type, image_url
+          FROM sensory_venues
+          ${whereCondition}
+          ORDER BY venue_title ASC
+          LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      `;
+      const venuesResult = await pool.query(venuesQuery, [...queryParams, itemsPerPage, offset]);
+      console.log(`Venue query executed. Params: ${JSON.stringify([...queryParams, itemsPerPage, offset])}. Found ${venuesResult.rows.length} venues for this page.`);
+
+      // Query to get the total count of filtered venues (for pagination)
+      const countQuery = `SELECT COUNT(*) FROM sensory_venues ${whereCondition}`;
+      const countResult = await pool.query(countQuery, queryParams); // Use only filter params for count
+      const totalItems = parseInt(countResult.rows[0].count, 10);
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+      console.log(`Total count query executed. Params: ${JSON.stringify(queryParams)}. Total matching items: ${totalItems}. Total pages: ${totalPages}`);
+
+      // Add image path prefix (similar to scenes)
+       const venuesWithImagePath = venuesResult.rows.map(venue => ({
+          ...venue,
+          // Construct the full URL path, use placeholder if null
+          image_full_url: venue.image_url ? `/image/${venue.image_url}` : '/image/placeholder-venue.png' // Assumes a placeholder in public/image
+      }));
+
+
+      res.json({
+          success: true,
+          data: {
+              venues: venuesWithImagePath, // Use the updated array
+              totalPages: totalPages,
+              currentPage: currentPage,
+              totalItems: totalItems
+          }
+      });
+
+  } catch (error) {
+      console.error('Error fetching sensory venues:', error);
+      res.status(500).json({ success: false, error: 'Failed to fetch sensory venues', details: error.message });
+  }
+});
+// Endpoint to get checklist items for a specific scene
+app.get('/api/scenes/:sceneId/checklist', async (req, res) => {
+  const { sceneId } = req.params;
+  console.log(`Request received for checklist for scene ID: ${sceneId}`);
+  try {
+    const sceneIdInt = parseInt(sceneId, 10);
+    if (isNaN(sceneIdInt)) {
+      return res.status(400).json({ success: false, error: 'Invalid scene ID provided.' });
+    }
+
+    const result = await pool.query(
+      `SELECT id, title, description, child_reaction 
+       FROM checklist_items 
+       WHERE scene_id = $1 
+       ORDER BY id ASC`, // Or however you want to order them
+      [sceneIdInt]
+    );
+
+    console.log(`Found ${result.rows.length} checklist items for scene ID: ${sceneIdInt}`);
+    res.json({ success: true, data: result.rows });
+  } catch (error) {
+    console.error(`Error fetching checklist items for scene ID ${sceneId}:`, error);
+    res.status(500).json({ success: false, error: 'Failed to fetch checklist items', details: error.message });
+  }
+});
+
+// Endpoint to get a combined list of image keywords AND image labels for a specific scene
+app.get('/api/scenes/:sceneId/terms', async (req, res) => { // Renamed from /keywords to /terms
+  const { sceneId } = req.params;
+  console.log(`Request received for terms (keywords & labels) for scene ID: ${sceneId}`);
+  try {
+    const sceneIdInt = parseInt(sceneId, 10);
+    if (isNaN(sceneIdInt)) {
+      return res.status(400).json({ success: false, error: 'Invalid scene ID provided.' });
+    }
+
+    // SQL Query using UNION to combine keywords and labels, ensuring distinctness
+    const query = `
+      SELECT ik.keyword AS term -- Select keyword, alias as 'term'
+      FROM image_keywords ik
+      JOIN checklist_items ci ON ik.checklist_item_id = ci.id
+      WHERE ci.scene_id = $1
+      
+      UNION -- Combine results and automatically make them distinct
+      
+      SELECT il.image_label AS term -- Select image_label, alias as 'term'
+      FROM image_labels il
+      JOIN checklist_items ci ON il.checklist_item_id = ci.id
+      WHERE ci.scene_id = $1
+    `;
+
+    const result = await pool.query(query, [sceneIdInt]);
+
+    // Extract just the terms into an array of lowercase strings
+    // The 'term' alias makes this easy
+    const terms = result.rows.map(row => row.term.toLowerCase()); 
+
+    console.log(`Found ${terms.length} distinct terms (keywords & labels) for scene ID: ${sceneIdInt}`);
+    // Send the combined list
+    res.json({ success: true, data: terms }); 
+
+  } catch (error) {
+    console.error(`Error fetching terms for scene ID ${sceneId}:`, error);
+    res.status(500).json({ success: false, error: 'Failed to fetch terms', details: error.message });
+  }
+});
+
+
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
   console.log(`API available at http://localhost:${port}/api/`);
