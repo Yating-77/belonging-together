@@ -29,7 +29,7 @@
             :src="currentScene.image" 
             alt="Scenario illustration" 
             class="illustration" 
-            :onerror="`this.onerror=null; this.src='${basePublicPath}/scenario-2.jpg';`"
+            :onerror="`this.onerror=null; this.src='${$basePublicPath}/scenario-1.jpg';`"
           />
         </div>
         
@@ -123,7 +123,6 @@ export default {
       hasViewedLastAdvice: false,
       loading: false,
       error: null,
-      basePublicPath: '',
       options: [
         {
           label: 'Option 0: Plays completely alone, rarely initiates contact with peers',
@@ -277,17 +276,6 @@ export default {
     }
   },
   async created() {
-    // 确定当前的基础路径
-    const currentPath = window.location.pathname;
-    if (currentPath.includes('/iteration1/')) {
-      this.basePublicPath = '/iteration1';
-    } else if (currentPath.includes('/iteration2/')) {
-      this.basePublicPath = '/iteration2';
-    } else {
-      this.basePublicPath = '';
-    }
-    console.log('SocialScene - Base public path:', this.basePublicPath);
-    
     // Preload recommendation data for all options when component is created
     console.log('SocialScene component created, preparing to preload recommendation data');
     for (let i = 0; i < this.options.length; i++) {

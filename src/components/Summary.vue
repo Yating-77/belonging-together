@@ -18,7 +18,7 @@
         <h1>Belonging Together</h1>
         <h2>Support Handbook for Parents of Children with Autism</h2>
         <div class="handbook-image">
-          <img src="/handbook.png" alt="Belonging Together Handbook Cover" />
+          <img :src="$basePublicPath + '/handbook.png'" alt="Belonging Together Handbook Cover" />
         </div>
       </div>
       

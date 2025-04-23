@@ -20,7 +20,7 @@
             :key="card.title"
             :title="card.title"
             :description="card.description"
-            :imagePath="`/iteration1/${card.imageName}.jpg`" 
+            :imagePath="`${$basePublicPath}/${card.imageName}.jpg`" 
             :colorAccent="card.colorAccent"
             data-aos="fade-up"
             :data-aos-delay="index * 100"
@@ -44,6 +44,7 @@
       data-aos-once="true"
       data-aos-offset="200"
       data-aos-delay="150"
+      :style="{backgroundImage: `url('${$basePublicPath}/777.jpg')`}"
     >
       <div class="content-wrapper">
       
@@ -236,7 +237,6 @@ p {
 
 .background-image-section {
   background-color: #f8f7f6;
-  background-image: url('/777.jpg');
   background-size: cover;
   background-position: center center;
   background-repeat: no-repeat;

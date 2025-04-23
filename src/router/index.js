@@ -5,6 +5,12 @@ import resource from '../views/resource.vue'
 import ArticleView from '../views/ArticleView.vue'
 import IntroPage from '../views/IntroPage.vue'
 import ThankYouPage from '../views/ThankYouPage.vue'; 
+
+// 从环境变量中获取基础路径，默认为'/iteration1/'
+// 注意：此值应与vite.config.js中的base值保持一致
+const baseUrl = import.meta.env.BASE_URL || '/iteration1/';
+console.log(`Router using base URL: ${baseUrl}`);
+
 const routes = [
   {
     path: '/',
@@ -39,7 +45,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory('/iteration1/'),
+  history: createWebHistory(baseUrl),
   routes,
   scrollBehavior(to, from, savedPosition) {
     return { top: 0 }

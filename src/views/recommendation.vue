@@ -456,29 +456,32 @@ export default {
   },
   data() {
     return {
-      selected: null,
-      currentSelectedOption: null,
-      currentScenario: 0,
-      showResults: false,
-      showSleepScene: false,
-      showDietScene: false,
-      showSocialScene: false,
-      showCommunicationScene: false,
-      showEmotionScene: false,
-      showSensoryScene: false,
-      showSummary: false,
-      sleepSceneOption: null,
-      dietSceneOption: null,
-      socialSceneOption: null,
-      communicationSceneOption: null,
-      emotionSceneOption: null,
-      sensorySceneOption: null,
-      userSelections: [],
-      scenarios: [],
+      categories: [],
+      scenario: null,
       loading: false,
       error: null,
+      scenarioRefs: {
+        sleep: 0,
+        diet: 1,
+        social: 2,
+        communication: 3,
+        emotion: 4,
+        sensory: 5
+      },
+      showSleepModal: false,
+      showDietModal: false,
+      showSocialModal: false,
+      showCommunicationModal: false,
+      showEmotionModal: false,
+      showSensoryModal: false,
+      sleepOption: null,
+      dietOption: null,
+      socialOption: null,
+      communicationOption: null,
+      emotionOption: null,
+      sensoryOption: null,
       selectedCardIndex: null,
-      basePublicPath: '', // 基础公共路径
+      journeyStarted: false,
     };
   },
   computed: {
@@ -861,17 +864,6 @@ export default {
     }
   },
   created() {
-    // 确定当前的基础路径
-    const currentPath = window.location.pathname;
-    if (currentPath.includes('/iteration1/')) {
-      this.basePublicPath = '/iteration1';
-    } else if (currentPath.includes('/iteration2/')) {
-      this.basePublicPath = '/iteration2';
-    } else {
-      this.basePublicPath = '';
-    }
-    console.log('Base public path:', this.basePublicPath);
-    
     // 获取数据
     this.fetchCategories();
   }
