@@ -16,16 +16,6 @@ import scrollSlideDirective from './directives/scrollSlide'
 
 const app = createApp(App)
 
-// 添加全局基础路径属性
-app.config.globalProperties.$basePublicPath = (() => {
-  const path = window.location.pathname;
-  if (path.includes('/iteration1/')) return '/iteration1';
-  if (path.includes('/iteration2/')) return '/iteration2';
-  return '';
-})();
-
-// 记录当前环境
-console.log('应用运行在环境：', app.config.globalProperties.$basePublicPath || '默认环境');
 
 library.add(faBalanceScale, faLink, faClock, faAppleAlt) 
 

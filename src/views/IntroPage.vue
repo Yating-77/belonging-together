@@ -4,12 +4,12 @@
       <div class="intro-content">
         <h1 class="main-title">Understand. Support. Grow Together.</h1>
         <p class="main-subtitle">
-            Every child is unique. Begin your journey with personalised guidance tailored to your child's daily experiences.
+            Every child is unique. Begin your journey with personalised guidance tailored to your child’s daily experiences.
         </p>
         
         <div class="flex-container">
           <div class="image-container">
-            <img :src="$basePublicPath + '/scenario-start.png'" alt="Begin Your Journey of Support" class="intro-image">
+            <img src="/scenario-start.png" alt="Begin Your Journey of Support" class="intro-image">
           </div>
           
           <div class="journey-section">
@@ -39,7 +39,7 @@
     components: {
       MyNavBar,
       MyFooter
-    }
+    },
   }
   </script>
   

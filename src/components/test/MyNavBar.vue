@@ -3,7 +3,7 @@
     <div class="navbar-container">
       <div class="navbar-logo">
         <router-link to="/">
-          <img :src="$basePublicPath + '/Logo.png'" alt="Autism Care Logo" class="logo-image">
+          <img src="/Logo.png" alt="Autism Care Logo" class="logo-image">
         </router-link>
       </div>
       

@@ -21,7 +21,7 @@
 
         
         <div class="hero-visual-content" data-aos="fade-left" data-aos-delay="100">
-          <img :src="$basePublicPath + '/slideshow-1.png'" alt="Support for families with autistic children" class="slideshow-image">
+          <img src="/slideshow-1.png" alt="Support for families with autistic children" class="slideshow-image">
         </div>
       </div>
 
@@ -42,7 +42,7 @@
 
      
         <div class="hero-visual-content" data-aos="fade-left" data-aos-delay="100">
-          <img :src="$basePublicPath + '/222.jpg'" alt="We support families" class="slideshow-image">
+          <img src="/222.jpg" alt="We support families" class="slideshow-image">
         </div>
       </div>
 
@@ -62,7 +62,7 @@
 
        
         <div class="hero-visual-content" data-aos="fade-left" data-aos-delay="100">
-          <img :src="$basePublicPath + '/slideshow-2.jpg'" alt="Social inclusion for children" class="slideshow-image">
+          <img src="/slideshow-2.jpg" alt="Social inclusion for children" class="slideshow-image">
         </div>
       </div>
     </div>

@@ -29,7 +29,7 @@
             :src="currentScene.image" 
             alt="Scenario illustration" 
             class="illustration" 
-            :onerror="`this.onerror=null; this.src='${$basePublicPath}/scenario-1.jpg';`"
+            :onerror="`this.onerror=null; this.src='${basePublicPath}/scenario-3.jpg';`"
           />
         </div>
         
@@ -119,6 +119,7 @@ export default {
       hasViewedLastAdvice: false,
       loading: false,
       error: null,
+      basePublicPath: '',
       options: [
         {
           label: 'Option 0: Uses few words and expresses needs through other means (weak non-verbal expression)',
@@ -279,7 +280,17 @@ export default {
     }
   },
   async created() {
-    // Preload recommendation data for all options when component is created
+    // 确定当前的基础路径
+    const currentPath = window.location.pathname;
+    if (currentPath.includes('/iteration1/')) {
+      this.basePublicPath = '/iteration1';
+    } else if (currentPath.includes('/iteration2/')) {
+      this.basePublicPath = '/iteration2';
+    } else {
+      this.basePublicPath = '';
+    }
+    console.log('CommunicationScene - Base public path:', this.basePublicPath);
+    
     console.log('CommunicationScene component created, preparing to preload recommendation data');
     
     // Preload recommendation data for each option
