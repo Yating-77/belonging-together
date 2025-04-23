@@ -29,7 +29,7 @@
             :src="currentScene.image" 
             alt="Scenario illustration" 
             class="illustration" 
-            onerror="this.src='/scenario-3.jpg'"
+            onerror="this.src='/iteration1/scenario-3.jpg'"
           />
         </div>
         
