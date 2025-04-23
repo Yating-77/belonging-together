@@ -85,10 +85,10 @@
           </div>
           <div class="main-image-container">
             <img 
-              :src="'/iteration1/scenario-' + currentScenario + '.jpg'" 
+              :src="getScenarioImagePath(currentScenario)" 
               alt="Scenario Illustration" 
               class="img-fluid main-image"
-              onerror="this.src='/iteration1/scenario-0.jpg'"
+              :onerror="`this.onerror=null; this.src='${basePublicPath}/scenario-0.jpg';`"
             />
           </div>
           
@@ -477,8 +477,16 @@ export default {
       scenarios: [],
       loading: false,
       error: null,
-      selectedCardIndex: null, 
+      selectedCardIndex: null,
+      basePublicPath: '', // 基础公共路径
     };
+  },
+  computed: {
+    getScenarioImagePath() {
+      return (index) => {
+        return `${this.basePublicPath}/scenario-${index}.jpg`;
+      }
+    }
   },
   methods: {
     jumpToScenario(index) {
@@ -853,8 +861,18 @@ export default {
     }
   },
   created() {
-    // Fetch data when component is created
-    console.log('App component created, starting to fetch data');
+    // 确定当前的基础路径
+    const currentPath = window.location.pathname;
+    if (currentPath.includes('/iteration1/')) {
+      this.basePublicPath = '/iteration1';
+    } else if (currentPath.includes('/iteration2/')) {
+      this.basePublicPath = '/iteration2';
+    } else {
+      this.basePublicPath = '';
+    }
+    console.log('Base public path:', this.basePublicPath);
+    
+    // 获取数据
     this.fetchCategories();
   }
 };
