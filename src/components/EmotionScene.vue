@@ -23,9 +23,14 @@
       <h2 class="drama-title">{{ currentScene.title }}</h2>
       
       <div class="scenario-content">
-        <!-- Image area -->
+        <!-- Left image area -->
         <div class="image-section">
-          <img :src="currentScene.image" alt="Scenario Illustration" class="illustration" />
+          <img 
+            :src="currentScene.image" 
+            alt="Scenario illustration" 
+            class="illustration" 
+            onerror="this.src='/scenario-4.jpg'"
+          />
         </div>
         
         <!-- Right dialogue and advice area -->

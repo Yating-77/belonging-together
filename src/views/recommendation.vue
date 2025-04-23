@@ -88,7 +88,7 @@
               :src="'/scenario-' + currentScenario + '.jpg'" 
               alt="Scenario Illustration" 
               class="img-fluid main-image"
-              onerror="this.src='/sleep_scenario_example.png'"
+              onerror="this.src='/scenario-0.jpg'"
             />
           </div>
           

@@ -25,7 +25,12 @@
       <div class="scenario-content">
         <!-- Left image area -->
         <div class="image-section">
-          <img :src="currentScene.image" alt="Scenario Illustration" class="illustration" />
+          <img 
+            :src="currentScene.image" 
+            alt="Scenario illustration" 
+            class="illustration" 
+            onerror="this.src='/scenario-2.jpg'"
+          />
         </div>
         
         <!-- Right dialogue and advice area -->
