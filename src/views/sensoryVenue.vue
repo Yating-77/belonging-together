@@ -358,7 +358,7 @@
   const handleImageError = (event) => {
     console.warn(`Image failed to load: ${event.target.src}. Using placeholder.`);
     // 修改为正确的后端图片路径
-    event.target.src = 'http://localhost:3000/image/ngv.png';
+    event.target.src = '/image/ngv.png';
   };
   
   const getImageUrl = (venue) => {
@@ -379,11 +379,11 @@
     
     // 如果只有image_url (无前缀)
     if (venue.image_url) {
-      return `http://localhost:3000/image/${venue.image_url}`;
+      return `/image/${venue.image_url}`;
     }
     
     // 兜底使用默认图片
-    return 'http://localhost:3000/image/ngv.png';
+    return '/image/ngv.png';
   };
   
   // --- Computed ---
