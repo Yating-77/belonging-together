@@ -390,7 +390,7 @@ app.get('/api/sensory-venues', async (req, res) => {
        const venuesWithImagePath = venuesResult.rows.map(venue => ({
           ...venue,
           // Construct the full URL path, use placeholder if null
-          image_full_url: venue.image_url ? `/image/${venue.image_url}` : '/image/placeholder-venue.png' // Assumes a placeholder in public/image
+          image_full_url: venue.image_url ? `/image/${venue.image_url}` : '/image/ngv.jpg' // Assumes a placeholder in public/image
           
       }));
 
