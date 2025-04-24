@@ -371,9 +371,9 @@
     if (venue.image_full_url) {
       // 检查是否已经包含/image/前缀
       if (venue.image_full_url.startsWith('/image/')) {
-        return `http://localhost:3000${venue.image_full_url}`;
+        return `${venue.image_full_url}`;
       } else {
-        return `http://localhost:3000/image/${venue.image_full_url}`;
+        return `/image/${venue.image_full_url}`;
       }
     }
     
