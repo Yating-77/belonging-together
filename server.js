@@ -235,25 +235,21 @@ app.get('/api/recommendations/:optionId', async (req, res) => {
 app.get('/api/scenes', async (req, res) => {
   console.log('Request received for /api/scenes');
   try {
-      // Fetch id, name (for dropdown), title, subtitle, and image filename
-      const result = await pool.query(`
-          SELECT id, name, title, subtitle, image_filename
-          FROM scenes
-          ORDER BY name ASC
-      `);
-      console.log(`Found ${result.rows.length} scenes.`);
-      // Prepend the base URL path for images
-      const scenesWithImagePath = result.rows.map(scene => ({
-          ...scene,
-          // Construct the full URL path the frontend will use
-          image_url: `/image/${scene.image_filename}`
-      }));
-      res.json({ success: true, data: scenesWithImagePath });
+    const result = await pool.query(`
+      SELECT id, name, display_name AS title, description AS subtitle
+      FROM scenes
+      ORDER BY name ASC
+    `);
+
+    console.log(`Found ${result.rows.length} scenes.`);
+    
+    res.json({ success: true, data: result.rows });
   } catch (error) {
-      console.error('Error fetching scenes:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch scenes', details: error.message });
+    console.error('Error fetching scenes:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch scenes', details: error.message });
   }
 });
+
 
 // Endpoint to get sensory expectations for a specific scene
 app.get('/api/scenes/:id/sensory-expectations', async (req, res) => {
