@@ -5,6 +5,10 @@ import resource from '../views/resource.vue'
 import ArticleView from '../views/ArticleView.vue'
 import IntroPage from '../views/IntroPage.vue'
 import ThankYouPage from '../views/ThankYouPage.vue'; 
+import detectpage from '../views/detectpage.vue'
+import sensoryVenue from '../views/sensoryVenue.vue'
+import detectImage from '../views/detectImage.vue'
+import detectSummary from '../views/detectSummary.vue'
 const routes = [
   {
     path: '/',
@@ -32,14 +36,34 @@ const routes = [
     component: IntroPage
   },
   {
+    path: '/detectpage',
+    name: 'detectpage',
+    component: detectpage
+  },
+  {
     path: '/thank-you',
     name: 'ThankYou',
     component: ThankYouPage
+  },
+  {
+    path: '/sensoryVenue',
+    name: 'sensoryVenue',
+    component: sensoryVenue
+  },
+  {
+    path: '/detectImage',
+    name: 'detectImage',
+    component: detectImage
+  },
+  {
+    path: '/detectSummary',
+    name: 'detectSummary',
+    component: detectSummary
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory('/iteration1/'),
+  history: createWebHistory('/iteration2'),
   routes,
   scrollBehavior(to, from, savedPosition) {
     return { top: 0 }

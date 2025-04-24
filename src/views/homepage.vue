@@ -1,26 +1,17 @@
 <template>
   <div id="app-container">
-
-    <!-- Top navigation bar -->
     <MyNavBar />
-
-    <!-- Hero section -->
     <MyHeroSection data-aos="fade-in" data-aos-duration="1200" />
-
-    <!-- Introduction section with autism information cards -->
     <section class="info-grid-section" aria-labelledby="autism-facts-heading">
       <div class="info-grid-container-wrapper">
-        
         <h2 id="autism-facts-heading" class="section-title">Understanding Autism</h2>
-        
-        <!-- Card grid-->
         <div class="info-grid-container">
           <MyInfoCard
             v-for="(card, index) in autismIntroCards"
             :key="card.title"
             :title="card.title"
             :description="card.description"
-            :imagePath="`/iteration1/${card.imageName}.jpg`" 
+            :imagePath="`/iteration2/${card.imageName}.jpg`"  
             :colorAccent="card.colorAccent"
             data-aos="fade-up"
             :data-aos-delay="index * 100"
@@ -31,11 +22,36 @@
         </div>
       </div>
     </section>
-
-    <!-- Video explanation section -->
-    <MyVideoSection />
-
-    
+      <MyVideoSection />
+      
+    <section class="navigate-section" aria-labelledby="navigate-heading">
+      <div class="navigate-container">
+        <div class="navigate-content" data-aos="fade-right" data-aos-duration="1200">
+          <h2 id="navigate-heading" class="navigate-title">Navigate the World, Feel You Belong</h2>
+          <p class="navigate-subtitle">Every child deserves to feel included in the world around them.</p>
+          <p class="navigate-description">
+            From a first school tour to a family supermarket trip, these everyday outings can either open doors, or present barriers.
+          </p>
+          <p class="navigate-description">
+            Our Outing Guide and Sensory-Friendly Venues are designed to support inclusion at every step:
+            <br>🧭 offering practical tools for preparation,
+            <br>🧒 reducing anxiety through environmental previews,
+            <br>🎒 and helping your child participate in shared community spaces with confidence.
+          </p>
+          <p class="navigate-description">
+            Together, we create not just smoother outings, but moments of true belonging.
+          </p>
+          <div class="navigate-buttons">
+            <router-link to="/sensoryVenue" class="navigate-button">Find Sensory Venues</router-link>
+            <router-link to="/detectpage" class="navigate-button">Explore Outing Guides</router-link>
+          </div>
+        </div>
+        <div class="navigate-image-container" data-aos="fade-left" data-aos-duration="1200">
+          <img src="/999.jpg" alt="Child exploring the world" class="navigate-image">
+        </div>
+      </div>
+    </section>
+      
     <div
       class="full-width-section background-image-section"
       data-aos="fade-left"
@@ -46,23 +62,14 @@
       data-aos-delay="150"
     >
       <div class="content-wrapper">
-      
         <h2 class="content-item">Resources & Support: Walking With You</h2>
-        <p class="content-item">
-          Explore our curated resources, including practical tools, professional guides, family support strategies, and community connection opportunities, as we journey together.
-        </p>
-
-       
-        <router-link to="/resource" class="resource-button content-item">
-          Explore Resource Center
-        </router-link>
+        <p class="content-item">Explore our curated resources, including practical tools, professional guides, family support strategies, and community connection opportunities, as we journey together.</p>
+        <router-link to="/resource" class="resource-button content-item">Explore Resource Center</router-link>
       </div>
     </div>
-
     <MyFooter />
   </div>
 </template>
-
 
 <script setup>
 import { ref, onMounted } from 'vue';
@@ -97,7 +104,7 @@ const autismIntroCards = ref([
     colorAccent: "tertiary"
   }
 ]);
-// Initialize AOS animations when component is mounted
+
 onMounted(() => {
   AOS.init({
     duration: 1200, 
@@ -375,6 +382,116 @@ p {
   }
   .hero-text-content {
     text-align: center;
+  }
+}
+
+.navigate-section {
+  padding: 4rem 1%;
+  background-color: #F8EFED;
+  overflow: hidden;
+}
+
+.navigate-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.navigate-image-container {
+  flex: 1.2;
+  min-width: 380px;
+  padding-left: 3rem;
+  padding-right: 0;
+}
+
+.navigate-image {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: perspective(1000px) rotateY(5deg);
+  transition: transform 0.5s ease;
+}
+
+.navigate-image:hover {
+  transform: perspective(1000px) rotateY(0deg);
+}
+
+.navigate-content {
+  flex: 0.8;
+  min-width: 320px;
+}
+
+.navigate-title {
+  font-size: clamp(1.8rem, 4vw, 2.2rem);
+  font-weight: 700;
+  color: #4d2f20;
+  margin-bottom: 1rem;
+}
+
+.navigate-subtitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #4d2f20;
+  margin-bottom: 1rem;
+}
+
+.navigate-description {
+  font-size: 1rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.navigate-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.navigate-button {
+  flex: 1;
+  padding: 12px 24px;
+  background-color: #3E5C2B;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  white-space: nowrap;
+  min-width: 220px;
+}
+
+.navigate-button:hover {
+  background-color: #4d7234;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 992px) {
+  .navigate-container {
+    flex-direction: column;
+  }
+  
+  .navigate-content {
+    order: 1;
+    text-align: center;
+  }
+  
+  .navigate-image-container {
+    order: 2;
+    width: 90%;
+    margin: 0 auto;
+    padding-left: 0;
+  }
+  
+  .navigate-buttons {
+    justify-content: center;
   }
 }
 </style>

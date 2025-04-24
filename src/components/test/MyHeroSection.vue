@@ -56,7 +56,7 @@
           </p>
           <div class="hero-actions">
             
-            <router-link to="/resource" class="cta-button button-secondary">Explore Our Resources</router-link>
+            <router-link to="/detectpage" class="cta-button button-secondary">Get Outing Guides</router-link>
           </div>
         </div>
 
@@ -78,7 +78,7 @@
         :key="index" 
         class="indicator" 
         :class="{ active: currentSlide === index }" 
-        @click="goToSlide(index)">
+        @mouseenter="goToSlide(index)">
       </span>
     </div>
   </section>
@@ -255,13 +255,20 @@ const goToSlide = (index) => {
   border-radius: 50%;
   background-color: #999999;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   border: 1px solid #666666;
+  position: relative;
+}
+
+.indicator:hover {
+  background-color: #5a7f3f;
+  transform: scale(1.2);
 }
 
 .indicator.active {
   background-color: #3E5C2B;
   border: 2px solid #ffffff;
+  transform: scale(1.2);
 }
 
 @media (max-width: 992px) {
