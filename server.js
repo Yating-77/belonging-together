@@ -386,12 +386,13 @@ app.get('/api/sensory-venues', async (req, res) => {
       const totalItems = parseInt(countResult.rows[0].count, 10);
       const totalPages = Math.ceil(totalItems / itemsPerPage);
       console.log(`Total count query executed. Params: ${JSON.stringify(queryParams)}. Total matching items: ${totalItems}. Total pages: ${totalPages}`);
-
+      const BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
       // Add image path prefix (similar to scenes)
        const venuesWithImagePath = venuesResult.rows.map(venue => ({
           ...venue,
           // Construct the full URL path, use placeholder if null
-          image_full_url: venue.image_url ? `/image/${venue.image_url}` : '/image/placeholder-venue.png' // Assumes a placeholder in public/image
+          image_full_url: venue.image_url ? `${BASE_URL}/image/${venue.image_url}` : `${BASE_URL}/image/ngv.jpg`
+          
       }));
 
 
