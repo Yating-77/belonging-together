@@ -23,6 +23,36 @@
       </div>
     </section>
       <MyVideoSection />
+      
+    <!-- 新添加的section -->
+    <section class="navigate-section" aria-labelledby="navigate-heading">
+      <div class="navigate-container">
+        <div class="navigate-content" data-aos="fade-right" data-aos-duration="1200">
+          <h2 id="navigate-heading" class="navigate-title">Navigate the World, Feel You Belong</h2>
+          <p class="navigate-subtitle">Every child deserves to feel included in the world around them.</p>
+          <p class="navigate-description">
+            From a first school tour to a family supermarket trip, these everyday outings can either open doors, or present barriers.
+          </p>
+          <p class="navigate-description">
+            Our Outing Guide and Sensory-Friendly Venues are designed to support inclusion at every step:
+            <br>🧭 offering practical tools for preparation,
+            <br>🧒 reducing anxiety through environmental previews,
+            <br>🎒 and helping your child participate in shared community spaces with confidence.
+          </p>
+          <p class="navigate-description">
+            Together, we create not just smoother outings, but moments of true belonging.
+          </p>
+          <div class="navigate-buttons">
+            <router-link to="/sensoryVenue" class="navigate-button">Find Sensory Venues</router-link>
+            <router-link to="/detectpage" class="navigate-button">Explore Outing Guides</router-link>
+          </div>
+        </div>
+        <div class="navigate-image-container" data-aos="fade-left" data-aos-duration="1200">
+          <img src="/999.jpg" alt="Child exploring the world" class="navigate-image">
+        </div>
+      </div>
+    </section>
+      
     <div
       class="full-width-section background-image-section"
       data-aos="fade-left"
@@ -353,6 +383,180 @@ p {
   }
   .hero-text-content {
     text-align: center;
+  }
+}
+
+.navigate-section {
+  padding: 4rem 3%;
+  background-color: #F8EFED;
+  overflow: hidden;
+}
+
+.navigate-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.navigate-image-container {
+  flex: 1.2;
+  min-width: 380px;
+  padding-left: 2rem;
+  padding-right: 0;
+}
+
+.navigate-image {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: perspective(1000px) rotateY(5deg);
+  transition: transform 0.5s ease;
+}
+
+.navigate-image:hover {
+  transform: perspective(1000px) rotateY(0deg);
+}
+
+.navigate-content {
+  flex: 0.8;
+  min-width: 320px;
+}
+
+.navigate-title {
+  font-size: clamp(1.8rem, 4vw, 2.2rem);
+  font-weight: 700;
+  color: #4d2f20;
+  margin-bottom: 1rem;
+}
+
+.navigate-subtitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #4d2f20;
+  margin-bottom: 1rem;
+}
+
+.navigate-description {
+  font-size: 1rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.navigate-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.navigate-button {
+  flex: 1;
+  padding: 12px 24px;
+  background-color: #3E5C2B;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  white-space: nowrap;
+  min-width: 220px;
+}
+
+.navigate-button:hover {
+  background-color: #4d7234;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* 改进响应式设计 */
+@media (max-width: 1100px) {
+  .navigate-container {
+    gap: 1.5rem;
+  }
+  
+  .navigate-image-container {
+    padding-left: 1rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .navigate-section {
+    padding: 3.5rem 4%;
+  }
+  
+  .navigate-container {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+  
+  .navigate-content {
+    order: 1;
+    text-align: center;
+    max-width: 90%;
+  }
+  
+  .navigate-image-container {
+    order: 2;
+    width: 80%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding-left: 0;
+  }
+  
+  .navigate-buttons {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .navigate-section {
+    padding: 3rem 5%;
+  }
+  
+  .navigate-title {
+    font-size: 1.6rem;
+  }
+  
+  .navigate-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .navigate-image-container {
+    width: 90%;
+  }
+  
+  .navigate-buttons {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .navigate-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .navigate-section {
+    padding: 2.5rem 4%;
+  }
+  
+  .navigate-content {
+    max-width: 100%;
+  }
+  
+  .navigate-image-container {
+    width: 95%;
+    min-width: auto;
+  }
+  
+  .navigate-description {
+    font-size: 0.95rem;
   }
 }
 </style>

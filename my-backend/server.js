@@ -9,11 +9,14 @@ app.use(cors());
 app.use(express.json());
 app.use('/image', express.static(path.join(__dirname, 'public/image')));
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
+  user: 'postgres',   
+  host: 'autism-database.c9gms0e0w8ty.ap-southeast-2.rds.amazonaws.com',
   database: 'postgres',
-  password: '12345678',
-  port: 5432
+  password: 'Yt139130.',
+  port: 5432,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 
@@ -201,20 +204,20 @@ app.get('/api/options/:categoryId', async (req, res) => {
 });
 
 app.get('/api/recommendations/:optionId', async (req, res) => {
-  const { optionId } = req.params;
+    const { optionId } = req.params;
   
   console.log(`Received recommendation request for option ID: ${optionId}`);
   
-  try {
+    try {
 
     if (!optionId || isNaN(parseInt(optionId))) {
       return res.status(400).json({ error: 'Invalid option ID' });
     }
     
-    const result = await pool.query(
-      'SELECT title, content, example, display_order FROM recommendations WHERE option_id = $1 ORDER BY display_order',
-      [optionId]
-    );
+      const result = await pool.query(
+        'SELECT title, content, example, display_order FROM recommendations WHERE option_id = $1 ORDER BY display_order',
+        [optionId]
+      );
     
     console.log(`Option ID ${optionId} returned ${result.rows.length} recommendations`);
     
@@ -222,9 +225,9 @@ app.get('/api/recommendations/:optionId', async (req, res) => {
       console.warn(`No recommendations found for option ID ${optionId}`);
     }
     
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching recommendations:', error);
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
@@ -232,23 +235,18 @@ app.get('/api/recommendations/:optionId', async (req, res) => {
 app.get('/api/scenes', async (req, res) => {
   console.log('Request received for /api/scenes');
   try {
-      // Fetch id, name (for dropdown), title, subtitle, and image filename
-      const result = await pool.query(`
-          SELECT id, name, title, subtitle, image_filename
-          FROM scenes
-          ORDER BY name ASC
-      `);
-      console.log(`Found ${result.rows.length} scenes.`);
-      // Prepend the base URL path for images
-      const scenesWithImagePath = result.rows.map(scene => ({
-          ...scene,
-          // Construct the full URL path the frontend will use
-          image_url: `/image/${scene.image_filename}`
-      }));
-      res.json({ success: true, data: scenesWithImagePath });
+    const result = await pool.query(`
+      SELECT id, name, display_name AS title, description AS subtitle
+      FROM scenes
+      ORDER BY name ASC
+    `);
+
+    console.log(`Found ${result.rows.length} scenes.`);
+    
+    res.json({ success: true, data: result.rows });
   } catch (error) {
-      console.error('Error fetching scenes:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch scenes', details: error.message });
+    console.error('Error fetching scenes:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch scenes', details: error.message });
   }
 });
 
@@ -387,12 +385,15 @@ app.get('/api/sensory-venues', async (req, res) => {
       const totalItems = parseInt(countResult.rows[0].count, 10);
       const totalPages = Math.ceil(totalItems / itemsPerPage);
       console.log(`Total count query executed. Params: ${JSON.stringify(queryParams)}. Total matching items: ${totalItems}. Total pages: ${totalPages}`);
-
+    
       // Add image path prefix (similar to scenes)
        const venuesWithImagePath = venuesResult.rows.map(venue => ({
           ...venue,
           // Construct the full URL path, use placeholder if null
-          image_full_url: venue.image_url ? `/image/${venue.image_url}` : '/image/placeholder-venue.png' // Assumes a placeholder in public/image
+        
+
+          image_full_url: venue.image_url ? `/image/${venue.image_url}` : '/image/ngv.jpg' // Assumes a placeholder in public/image
+          
       }));
 
 
@@ -409,6 +410,78 @@ app.get('/api/sensory-venues', async (req, res) => {
   } catch (error) {
       console.error('Error fetching sensory venues:', error);
       res.status(500).json({ success: false, error: 'Failed to fetch sensory venues', details: error.message });
+  }
+});
+// Endpoint to get checklist items for a specific scene
+app.get('/api/scenes/:sceneId/checklist', async (req, res) => {
+  const { sceneId } = req.params;
+  console.log(`Request received for checklist for scene ID: ${sceneId}`);
+  try {
+    const sceneIdInt = parseInt(sceneId, 10);
+    if (isNaN(sceneIdInt)) {
+      return res.status(400).json({ success: false, error: 'Invalid scene ID provided.' });
+    }
+
+    const result = await pool.query(
+      `SELECT id, title, description, child_reaction, image_url 
+       FROM checklist_items 
+       WHERE scene_id = $1 
+       ORDER BY id ASC`, // Or however you want to order them
+      [sceneIdInt]
+    );
+
+    // 为每个物品添加完整的图片URL
+    const itemsWithImagePath = result.rows.map(item => ({
+      ...item,
+      image_url: item.image_url || null
+    }));
+
+    console.log(`Found ${result.rows.length} checklist items for scene ID: ${sceneIdInt}`);
+    res.json({ success: true, data: itemsWithImagePath });
+  } catch (error) {
+    console.error(`Error fetching checklist items for scene ID ${sceneId}:`, error);
+    res.status(500).json({ success: false, error: 'Failed to fetch checklist items', details: error.message });
+  }
+});
+
+// Endpoint to get a combined list of image keywords AND image labels for a specific scene
+app.get('/api/scenes/:sceneId/terms', async (req, res) => { // Renamed from /keywords to /terms
+  const { sceneId } = req.params;
+  console.log(`Request received for terms (keywords & labels) for scene ID: ${sceneId}`);
+  try {
+    const sceneIdInt = parseInt(sceneId, 10);
+    if (isNaN(sceneIdInt)) {
+      return res.status(400).json({ success: false, error: 'Invalid scene ID provided.' });
+    }
+
+    // SQL Query using UNION to combine keywords and labels, ensuring distinctness
+    const query = `
+      SELECT ik.keyword AS term -- Select keyword, alias as 'term'
+      FROM image_keywords ik
+      JOIN checklist_items ci ON ik.checklist_item_id = ci.id
+      WHERE ci.scene_id = $1
+      
+      UNION -- Combine results and automatically make them distinct
+      
+      SELECT il.image_label AS term -- Select image_label, alias as 'term'
+      FROM image_labels il
+      JOIN checklist_items ci ON il.checklist_item_id = ci.id
+      WHERE ci.scene_id = $1
+    `;
+
+    const result = await pool.query(query, [sceneIdInt]);
+
+    // Extract just the terms into an array of lowercase strings
+    // The 'term' alias makes this easy
+    const terms = result.rows.map(row => row.term.toLowerCase()); 
+
+    console.log(`Found ${terms.length} distinct terms (keywords & labels) for scene ID: ${sceneIdInt}`);
+    // Send the combined list
+    res.json({ success: true, data: terms }); 
+
+  } catch (error) {
+    console.error(`Error fetching terms for scene ID ${sceneId}:`, error);
+    res.status(500).json({ success: false, error: 'Failed to fetch terms', details: error.message });
   }
 });
 

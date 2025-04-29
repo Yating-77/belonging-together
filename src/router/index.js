@@ -7,6 +7,8 @@ import IntroPage from '../views/IntroPage.vue'
 import ThankYouPage from '../views/ThankYouPage.vue'; 
 import detectpage from '../views/detectpage.vue'
 import sensoryVenue from '../views/sensoryVenue.vue'
+import detectImage from '../views/detectImage.vue'
+import detectSummary from '../views/detectSummary.vue'
 const routes = [
   {
     path: '/',
@@ -47,6 +49,16 @@ const routes = [
     path: '/sensoryVenue',
     name: 'sensoryVenue',
     component: sensoryVenue
+  },
+  {
+    path: '/detectImage',
+    name: 'detectImage',
+    component: detectImage
+  },
+  {
+    path: '/detectSummary',
+    name: 'detectSummary',
+    component: detectSummary
   }
 ]
 

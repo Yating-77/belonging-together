@@ -126,21 +126,30 @@
 <script setup>
 // Script content remains IDENTICAL
 import { ref, onMounted, watch, computed } from 'vue';
-  import axios from 'axios';
+import axios from 'axios';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import MyNavBar from '../components/test/MyNavBar.vue';
 import MyFooter from '../components/test/MyFooter.vue';
+import { useRouter } from 'vue-router';
 
 const frontendScenes = ref([ { id: 1, name: 'Medical Visit', title: 'Going to the Doctor/Dentist', subtitle: 'Preparing for a check-up or appointment.' }, { id: 2, name: 'Airport Travel', title: 'Traveling by Plane', subtitle: 'Navigating the airport environment.' }, { id: 3, name: 'Leisure Outing', title: 'Visiting a Park or Cinema', subtitle: 'Enjoying community spaces and events.' }, { id: 4, name: 'School Visit', title: 'Going to School', subtitle: 'Getting ready for the classroom setting.' } ]);
 const selectedSceneId = ref(null); const sensoryExpectations = ref([]); const isLoading = ref(false); const error = ref(null);
 const API_BASE_URL = 'http://localhost:3000/api';
+const router = useRouter();
 
 const selectedSceneDetails = computed(() => { if (!selectedSceneId.value) return null; return frontendScenes.value.find(scene => scene.id === selectedSceneId.value) || null; });
 
 const fetchSensoryExpectations = async (sceneId) => { if (!sceneId) { sensoryExpectations.value = []; return; } isLoading.value = true; error.value = null; sensoryExpectations.value = []; console.log("Fetching expectations for scene ID:", sceneId); try { const response = await axios.get(`${API_BASE_URL}/scenes/${sceneId}/sensory-expectations`); console.log("Fetch expectations response:", response); if (response.data.success && Array.isArray(response.data.data)) { sensoryExpectations.value = response.data.data; console.log("Expectations loaded:", sensoryExpectations.value.length); } else { throw new Error(response.data.error || 'Invalid data format received for expectations'); } } catch (err) { console.error(`Error fetching sensory expectations for scene ${sceneId}:`, err); let message = `Could not load sensory details for "${selectedSceneDetails.value?.name || 'this scene'}". `; if (err.response) { message += `Server responded with status ${err.response.status}.`; if (err.response.data?.details) { message += ` Details: ${err.response.data.details}`; } else if (err.response.data?.error) { message += ` Message: ${err.response.data.error}`; } } else if (err.request) { message += ' No response from server.'; } else { message += ` Error: ${err.message}`; } error.value = message; sensoryExpectations.value = []; } finally { isLoading.value = false; } };
 const getIconForCategory = (category) => { switch (category?.toLowerCase()) { case 'hearing': return '👂'; case 'sight': return '💡'; case 'smell': return '👃'; case 'touch': return '🖐️'; default: return '🧠'; } };
-const goToNext = () => { if (!selectedSceneId.value) return; console.log('Navigating to next step for scene ID:', selectedSceneId.value); alert(`Proceeding to next step for scene: ${selectedSceneDetails.value?.name || 'Selected Scene'}`); };
+const goToNext = () => {
+  if (!selectedSceneId.value) return;
+  console.log('Navigating to next step for scene ID:', selectedSceneId.value);
+  router.push({
+    path: '/detectImage',
+    query: { sceneId: selectedSceneId.value }
+  });
+};
 onMounted(() => { AOS.init({ duration: 600, once: false, offset: 50 }); });
 watch(selectedSceneId, (newId) => { console.log(`Selected scene ID changed to ${newId}`); if (newId !== null) { sensoryExpectations.value = []; error.value = null; fetchSensoryExpectations(newId); } else { sensoryExpectations.value = []; error.value = null; isLoading.value = false; } });
   </script>
@@ -323,41 +332,65 @@ select option:checked {
 /* Expectations section styling */
 .expectations-section { margin-top: 2rem; }
 
-/* 卡片间距和布局 */
+/* 宽屏卡片容器 */
+.expectations-container-wide {
+  width: 100%;
+  min-height: 400px;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+  background-color: rgba(248, 249, 250, 0.4);
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
 .expectations-list {
-  padding: 1rem 0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .expectation-item.card {
   background-color: rgba(255, 255, 255, 0.95);
-  border: 1px solid var(--border-color);
+  border: none;
   border-left: 4px solid #3E5C2B;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  margin-bottom: 2vh;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+  max-width: 600px;
 }
 
 .expectation-item.card:hover {
-  transform: translateY(-3px); 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 
 .expectation-icon { 
-  color: #3E5C2B !important; 
-  margin-top: 0.1rem;
+  color: #3E5C2B !important;
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
 }
 
 .expectation-category {
   color: #3E5C2B !important; 
   font-weight: 600;
-  font-size: 1.05rem;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
 }
 
 .expectation-description {
   color: #4d2f20 !important; 
-  font-size: 0.95rem; 
-  line-height: 1.4;
+  font-size: 1rem; 
+  line-height: 1.5;
 }
 
 /* Button styling */
@@ -396,8 +429,81 @@ select option:checked {
   .interactive-content {
     max-width: 95%;
   }
+  
+  .hero-banner {
+    height: 400px;
+  }
+  
   .hero-image {
+    height: 100%;
+  }
+  
+  .main-title {
+    font-size: 2.2rem;
+  }
+  
+  .main-subtitle {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-banner {
     height: 300px;
+  }
+  
+  .main-title {
+    font-size: 1.8rem;
+    padding: 0 1rem;
+  }
+  
+  .main-subtitle {
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+  
+  .expectations-container-wide {
+    min-height: auto;
+    padding: 1rem;
+  }
+  
+  .expectation-item.card {
+    margin-bottom: 0.8rem;
+  }
+  
+  .expectation-category {
+    font-size: 1.1rem;
+  }
+  
+  .expectation-description {
+    font-size: 0.95rem;
+  }
+  
+  .expectation-icon {
+    font-size: 1.5rem;
+    min-width: 30px;
+  }
+}
+
+@media (max-width: 575px) {
+  .scene-intro-card .card-body {
+    padding: 1.2rem;
+  }
+  
+  .expectation-icon {
+    margin-right: 0.5rem !important;
+  }
+  
+  .label-text {
+    font-size: 1rem;
+  }
+  
+  .scene-content-title {
+    font-size: 1.4rem;
+  }
+  
+  .expectation-item.card .card-body {
+    padding: 0.8rem;
   }
 }
 
@@ -441,22 +547,6 @@ select option:checked {
   margin-bottom: 2rem;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   border: 1px solid #e0e0e0;
-}
-
-/* 宽屏卡片容器 */
-.expectations-container-wide {
-  width: 100vw;
-  height: 40vw;
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-  padding: 2rem calc(50vw - 50% + 1.5rem);
-  margin-bottom: 2rem;
-  margin-top: 2rem;
-  background-color: rgba(248, 249, 250, 0.4);
-  background-size: cover;
-  background-position: center;
-  position: relative;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
 }
 
 /* 场景背景样式 */

@@ -25,7 +25,12 @@
       <div class="scenario-content">
         <!-- Left image area -->
         <div class="image-section">
-          <img :src="currentScene.image" alt="Scenario illustration" class="illustration" />
+          <img 
+            :src="currentScene.image" 
+            alt="Scenario illustration" 
+            class="illustration" 
+            onerror="this.src='/scenario-0.jpg'"
+          />
         </div>
         
         <!-- Right dialogue and advice area -->
@@ -510,7 +515,6 @@ export default {
   width: 100%;
 }
 
-/* Button Group Styles */
 .button-group {
   display: flex;
   justify-content: space-around;
@@ -579,7 +583,7 @@ export default {
   box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
   .scenario-content {
     flex-direction: column;
@@ -589,7 +593,6 @@ export default {
   }
 }
 
-/* Continue to Next Scene Button Styles */
 .next-scenario-container {
   margin-top: 1.5rem;
   text-align: center;
@@ -614,14 +617,12 @@ export default {
   transform: translateY(-2px);
 }
 
-/* Loading Indicator Styles */
 .loading-indicator {
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
   color: #666;
 }
 
-/* Error Message Styles */
 .error-message {
   margin-bottom: 0.5rem;
   font-size: 0.9rem;

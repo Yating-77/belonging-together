@@ -11,8 +11,8 @@
           <li><router-link to="/">Home</router-link></li>
           <li><router-link to="/resource">Resource Center</router-link></li>
           <li><router-link to="/intro">Personalised Recommendations</router-link></li>
-          <li><router-link to="/detectpage">Detect</router-link></li>
-          <li><router-link to="/sensoryVenue">Sensory Venue</router-link></li>
+          <li><router-link to="/detectpage">Outing Guides</router-link></li>
+          <li><router-link to="/sensoryVenue">Sensory Venues</router-link></li>
         </ul>
       </div>
     </div>
