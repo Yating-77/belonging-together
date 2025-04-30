@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/image', express.static(path.join(__dirname, 'public/image')));
 const pool = new Pool({
-  user: 'postgres',
+  user: 'postgres',   
   host: 'autism-database.c9gms0e0w8ty.ap-southeast-2.rds.amazonaws.com',
   database: 'postgres',
   password: 'Yt139130.',
@@ -204,20 +204,20 @@ app.get('/api/options/:categoryId', async (req, res) => {
 });
 
 app.get('/api/recommendations/:optionId', async (req, res) => {
-  const { optionId } = req.params;
+    const { optionId } = req.params;
   
   console.log(`Received recommendation request for option ID: ${optionId}`);
   
-  try {
+    try {
 
     if (!optionId || isNaN(parseInt(optionId))) {
       return res.status(400).json({ error: 'Invalid option ID' });
     }
     
-    const result = await pool.query(
-      'SELECT title, content, example, display_order FROM recommendations WHERE option_id = $1 ORDER BY display_order',
-      [optionId]
-    );
+      const result = await pool.query(
+        'SELECT title, content, example, display_order FROM recommendations WHERE option_id = $1 ORDER BY display_order',
+        [optionId]
+      );
     
     console.log(`Option ID ${optionId} returned ${result.rows.length} recommendations`);
     
@@ -225,9 +225,9 @@ app.get('/api/recommendations/:optionId', async (req, res) => {
       console.warn(`No recommendations found for option ID ${optionId}`);
     }
     
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching recommendations:', error);
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
@@ -249,7 +249,6 @@ app.get('/api/scenes', async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to fetch scenes', details: error.message });
   }
 });
-
 
 // Endpoint to get sensory expectations for a specific scene
 app.get('/api/scenes/:id/sensory-expectations', async (req, res) => {
@@ -386,10 +385,13 @@ app.get('/api/sensory-venues', async (req, res) => {
       const totalItems = parseInt(countResult.rows[0].count, 10);
       const totalPages = Math.ceil(totalItems / itemsPerPage);
       console.log(`Total count query executed. Params: ${JSON.stringify(queryParams)}. Total matching items: ${totalItems}. Total pages: ${totalPages}`);
+    
       // Add image path prefix (similar to scenes)
        const venuesWithImagePath = venuesResult.rows.map(venue => ({
           ...venue,
           // Construct the full URL path, use placeholder if null
+        
+
           image_full_url: venue.image_url ? `/image/${venue.image_url}` : '/image/ngv.jpg' // Assumes a placeholder in public/image
           
       }));
@@ -421,15 +423,21 @@ app.get('/api/scenes/:sceneId/checklist', async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT id, title, description, child_reaction 
+      `SELECT id, title, description, child_reaction, image_url 
        FROM checklist_items 
        WHERE scene_id = $1 
        ORDER BY id ASC`, // Or however you want to order them
       [sceneIdInt]
     );
 
+    // 为每个物品添加完整的图片URL
+    const itemsWithImagePath = result.rows.map(item => ({
+      ...item,
+      image_url: item.image_url || null
+    }));
+
     console.log(`Found ${result.rows.length} checklist items for scene ID: ${sceneIdInt}`);
-    res.json({ success: true, data: result.rows });
+    res.json({ success: true, data: itemsWithImagePath });
   } catch (error) {
     console.error(`Error fetching checklist items for scene ID ${sceneId}:`, error);
     res.status(500).json({ success: false, error: 'Failed to fetch checklist items', details: error.message });
@@ -477,8 +485,134 @@ app.get('/api/scenes/:sceneId/terms', async (req, res) => { // Renamed from /key
   }
 });
 
+/*
+  Get data for Autism Prevalence Trend Chart
+ */
+  app.get('/api/charts/prevalence-trends', async (req, res) => {
+    console.log('Request received for /api/charts/prevalence-trends');
+    try {
+      const result = await pool.query(`
+        SELECT age_group, prevalence_2015, prevalence_2018, prevalence_2022
+        FROM autism_prevalence_by_age
+        ORDER BY
+          CASE age_group
+            WHEN '0-4' THEN 1
+            WHEN '5-9' THEN 2
+            WHEN '10-14' THEN 3
+            WHEN '15-19' THEN 4
+            ELSE 5
+          END;
+      `);
+  
+      // Transform data for ECharts line chart
+      const xAxisData = result.rows.map(row => row.age_group);
+      const seriesData = [
+        { name: '2015', type: 'line', data: result.rows.map(row => row.prevalence_2015) },
+        { name: '2018', type: 'line', data: result.rows.map(row => row.prevalence_2018) },
+        { name: '2022', type: 'line', data: result.rows.map(row => row.prevalence_2022) }
+      ];
+  
+      console.log('Sending data for prevalence trends chart');
+      res.json({ success: true, data: { xAxis: xAxisData, series: seriesData } });
+  
+    } catch (error) {
+      console.error('Error fetching prevalence trend data:', error);
+      res.status(500).json({ success: false, error: 'Internal server error', details: error.message });
+    }
+  });
+  
+  /*
+    Get data for Autism Gender/Age Chart
+   */
+  app.get('/api/charts/gender-age-prevalence', async (req, res) => {
+    console.log('Request received for /api/charts/gender-age-prevalence');
+    try {
+      const result = await pool.query(`
+        SELECT age_group, autistic_percent, ci_lower, ci_upper, gender
+        FROM autism_gender_age
+        ORDER BY
+          CASE age_group
+            WHEN '0-4' THEN 1
+            WHEN '5-14' THEN 2
+            ELSE 3
+          END,
+          gender;
+      `);
+  
+      // Transform data for ECharts grouped bar chart
+      const xAxisData = [...new Set(result.rows.map(row => row.age_group))].sort((a, b) => {
+          // Custom sort for age groups
+          const order = {'0-4': 1, '5-14': 2};
+          return (order[a] || 99) - (order[b] || 99);
+      });
+  
+      const seriesMap = {}; // Use a map for easier construction
+  
+      result.rows.forEach(row => {
+        const genderLower = row.gender.toLowerCase();
+        if (!seriesMap[genderLower]) {
+          seriesMap[genderLower] = {
+            name: genderLower, // Frontend expects 'male'/'female'
+            type: 'bar',
+            data: new Array(xAxisData.length).fill(null), // Initialize with nulls
+            // Prepare markLine data structure if needed by frontend directly
+            markLineData: []
+          };
+        }
+  
+        const index = xAxisData.indexOf(row.age_group);
+        if (index !== -1) {
+          seriesMap[genderLower].data[index] = row.autistic_percent;
+          // Add markLine data for this specific bar
+          seriesMap[genderLower].markLineData.push([
+             { name: `${genderLower}-${row.age_group}-lower`, coord: [index, row.ci_lower], symbol: 'none' },
+             { name: `${genderLower}-${row.age_group}-upper`, coord: [index, row.ci_upper], symbol: 'none' }
+          ]);
+        }
+      });
+  
+      // Convert map values to array
+      const seriesData = Object.values(seriesMap);
+  
+      console.log('Sending data for gender/age prevalence chart');
+      res.json({ success: true, data: { xAxis: xAxisData, series: seriesData } });
+  
+    } catch (error) {
+      console.error('Error fetching gender/age prevalence data:', error);
+      res.status(500).json({ success: false, error: 'Internal server error', details: error.message });
+    }
+  });
+  
+  /*
+    Get data for Autism Behavior Difficulty Chart
+   */
+  app.get('/api/charts/behavioral-difficulties', async (req, res) => {
+    console.log('Request received for /api/charts/behavioral-difficulties');
+    try {
+      // Order by percentage ASC to match the frontend's current Y-axis order
+      const result = await pool.query(`
+        SELECT behavior_difficulty, proportion_percent
+        FROM autism_behavior_difficulty
+        ORDER BY proportion_percent ASC;
+      `);
+  
+      // Transform data for ECharts horizontal bar chart
+      const yAxisData = result.rows.map(row => row.behavior_difficulty);
+      const seriesData = result.rows.map(row => row.proportion_percent);
+  
+      console.log('Sending data for behavioral difficulties chart');
+      res.json({ success: true, data: { yAxis: yAxisData, seriesData: seriesData } });
+  
+    } catch (error) {
+      console.error('Error fetching behavioral difficulty data:', error);
+      res.status(500).json({ success: false, error: 'Internal server error', details: error.message });
+    }
+  });
+  
+
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
+  console.log(`Chart API available at http://localhost:${port}/api/charts/`);
   console.log(`API available at http://localhost:${port}/api/`);
 });
