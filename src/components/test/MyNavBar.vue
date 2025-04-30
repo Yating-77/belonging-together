@@ -15,22 +15,22 @@
       </div>
       
       <ul class="navbar-links">
-        <li><router-link to="/">Home</router-link></li>
-        <li><router-link to="/resource">Resource Center</router-link></li>
+        <li><router-link to="/insights">Our Insights</router-link></li>
         <li><router-link to="/intro">Personalised Recommendations</router-link></li>
         <li><router-link to="/detectpage">Outing Guides</router-link></li>
         <li><router-link to="/sensoryVenue">Sensory Venues</router-link></li>
+        <li><router-link to="/resource">Resource Center</router-link></li>
       </ul>
     </div>
     
    
     <div class="mobile-menu" :class="{ 'active': mobileMenuOpen }">
       <ul class="mobile-links">
-        <li><router-link to="/" @click="closeMobileMenu">Home</router-link></li>
-        <li><router-link to="/resource" @click="closeMobileMenu">Resource Center</router-link></li>
+        <li><router-link to="/insights" @click="closeMobileMenu">Our Insights</router-link></li>
         <li><router-link to="/intro" @click="closeMobileMenu">Personalised Recommendations</router-link></li>
         <li><router-link to="/detectpage" @click="closeMobileMenu">Outing Guides</router-link></li>
         <li><router-link to="/sensoryVenue" @click="closeMobileMenu">Sensory Venues</router-link></li>
+        <li><router-link to="/resource" @click="closeMobileMenu">Resource Center</router-link></li>
       </ul>
     </div>
   </nav>

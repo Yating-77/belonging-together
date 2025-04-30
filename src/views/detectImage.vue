@@ -21,20 +21,29 @@
           </p>
         </div>
       </div>
-    </div>
-
+          </div>
+          
     <!-- Main Detection Section Container -->
     <div class="interactive-section-container container my-4">
       <div class="interactive-content mx-auto">
-        <!-- Back Button (改为靠左对齐) -->
+        <!-- Back Button (Align to the left) -->
         <div class="text-left mb-3">
           <button class="btn btn-secondary" @click="goBack">
             <i class="fas fa-arrow-left me-2"></i> Back
           </button>
         </div>
         <!-- Step Title -->
-        <h3 class="step-title mb-4">3. Upload the item to check whether it is suitable</h3>
+        <h3 class="step-title mb-3">3. Is this item suitable to bring?</h3>
+        <p class="step-subtitle mb-4">Let's check if what you plan to bring fits the needs of your child in this environment.</p>
 
+        <!-- Add image -->
+        <div class="check-item-image-container mb-4">
+          <img 
+            src="/check-item.png" 
+            alt="Check if item is suitable" 
+            class="check-item-image" 
+          />
+        </div>
 
         <!-- File Upload Card -->
         <div class="upload-card mb-4">
@@ -68,31 +77,31 @@
               
               <div class="mt-3 d-flex justify-content-center">
                 <button 
-                  class="btn btn-action" 
-                  @click="analyzeImage" 
-                  :disabled="!selectedFile || isLoading"
-                >
-                  <i class="fas fa-search me-2"></i>
-                  {{ isLoading ? 'Analyzing...' : 'Analyze Item' }}
-                </button>
-                <button 
-                  class="btn btn-reset ms-3" 
+                  class="btn btn-reset me-3" 
                   @click="resetDetection"
                   v-if="selectedFile"
                 >
                   <i class="fas fa-undo me-2"></i> Reset
                 </button>
+                <button 
+                  class="btn btn-action" 
+                  @click="analyzeImage" 
+                  :disabled="!selectedFile || isLoading"
+                >
+                  <i class="fas fa-search me-2"></i>
+                  {{ isLoading ? 'Analysing...' : 'Analyse Item' }}
+                </button>
               </div>
             </div>
           </div>
         </div>
-
+        
         <!-- Loading Indicator -->
         <div v-if="isLoading" class="text-center my-4">
           <div class="spinner-border text-primary-custom" role="status">
             <span class="visually-hidden">Loading...</span>
-          </div>
-          <p class="loading-text mt-2">Analyzing your item...</p>
+      </div>
+          <p class="loading-text mt-2">Analysing your item...</p>
         </div>
 
         <!-- Results Section -->
@@ -105,100 +114,119 @@
                 Detection Results
               </h4>
 
-              <!-- Item description from image analysis -->
-              <div class="item-description mb-4" v-if="results.description && results.description.captions.length">
-                <h5 class="section-subtitle">We detected:</h5>
-                <p class="description-text">
-                  {{ results.description.captions[0].text }}
-                </p>
-              </div>
-
-              <!-- Detection Status -->
-              <div v-if="isSuitableItem" class="detection-status success">
-                <div class="status-icon">
-                  <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="status-message">
-                  <h5>This item is suitable!</h5>
-                  <p>This matches our recommended items list for this activity.</p>
-                </div>
-              </div>
-
-              <div v-else class="detection-status warning">
-                <div class="status-icon">
-                  <i class="fas fa-exclamation-circle"></i>
-                </div>
-                <div class="status-message">
-                  <h5>This item might not be suitable</h5>
-                  <p>We couldn't find this item in our recommended list.</p>
-                </div>
-              </div>
-
-              <!-- Detected Labels -->
-              <div class="detected-labels mt-4">
-                <h5 class="section-subtitle">Detected Labels:</h5>
-                <div class="labels-container">
-                  <span 
-                    v-for="(tag, index) in results.tags" 
-                    :key="'tag-'+index" 
-                    class="label-tag"
-                    :class="{ 'label-matched': matchedTerms.includes(tag.name.toLowerCase()) }"
-                  >
-                    {{ tag.name }}
-                    <i v-if="matchedTerms.includes(tag.name.toLowerCase())" class="fas fa-check ms-1"></i>
-                  </span>
-                </div>
-              </div>
-
-              <!-- Recommended Items -->
-              <div class="recommended-items mt-4">
-                <h5 class="section-subtitle">Consider bringing these recommended items:</h5>
-                <ul class="checklist">
-                  <li v-for="item in checklistItems" :key="item.id" class="checklist-item">
-                    <i class="fas fa-check-circle me-2"></i>
-                    <div>
-                      <strong>{{ item.title }}</strong>
-                      <p class="item-description">{{ item.description }}</p>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-
-              <!-- Navigation Buttons -->
-              <div class="text-center mt-4">
-                <button class="btn btn-secondary me-3" @click="goBack">
-                  <i class="fas fa-arrow-left me-2"></i> Back
-                </button>
-                <button class="btn btn-action" @click="goToNext">
-                  Next Step <i class="fas fa-arrow-right ms-2"></i>
-                </button>
-              </div>
-            </div>
+          <!-- Item description from image analysis -->
+          <div class="item-description mb-4" v-if="results.description && results.description.captions.length">
+            <h5 class="section-subtitle">We detected:</h5>
+            <p class="description-text">
+              {{ results.description.captions[0].text }}
+            </p>
+      </div>
+      
+          <!-- Detection Status -->
+          <div v-if="isSuitableItem" class="detection-status success">
+            <div class="status-icon">
+              <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="status-message">
+            <h5>This item is suitable!</h5>
+            <p>This matches our recommended items list for this activity.</p>
           </div>
         </div>
+        
+          <div v-else class="detection-status warning">
+            <div class="status-icon">
+              <i class="fas fa-exclamation-circle"></i>
+        </div>
+            <div class="status-message">
+              <h5>This item might not be essential for this outing.</h5>
+              <p>It's not included in our top recommended list for this scenario, but feel free to bring it if it helps your child.</p>
+        </div>
+        </div>
+        
+        <!--
+        <div class="detected-labels mt-4">
+          <h5 class="section-subtitle">Detected Labels:</h5>
+          <div class="labels-container">
+            <span 
+              v-for="(tag, index) in results.tags" 
+              :key="'tag-'+index" 
+              class="label-tag"
+              :class="{ 'label-matched': matchedTerms.includes(tag.name.toLowerCase()) }"
+            >
+              {{ tag.name }}
+              <i v-if="matchedTerms.includes(tag.name.toLowerCase())" class="fas fa-check ms-1"></i>
+            </span>
+          </div>
+        </div>
+        -->
 
+        
+        <!-- Recommended Items -->
+        <div class="recommended-items mt-4">
+          <h5 class="section-subtitle">Consider bringing these recommended items:</h5>
+          <ul class="checklist">
+            <li v-for="item in checklistItems" :key="item.id" class="checklist-item">
+              <div class="checklist-item-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+
+              <div class="checklist-item-content">
+                <div class="item-row">
+                  <div class="item-text">
+                    <strong>{{ item.title }}</strong>
+                    <p class="item-description">{{ item.description }}</p>
+                  </div>
+                  <div class="item-image-container" v-if="item.image_url">
+                    <img 
+                      :src="getImageUrl(item)" 
+                      :alt="item.title"
+                      class="item-image"
+                      @error="handleImageError($event, item)"
+                      @load="onImageLoaded(item)"
+                    >
+                  </div>
+                </div>
+              </div>
+            </li>
+
+          </ul>
+        </div>
+        
+        <!-- Navigation Buttons -->
+        <div class="text-center mt-4">
+          <button class="btn btn-secondary me-3" @click="goBack">
+            <i class="fas fa-arrow-left me-2"></i> Back
+          </button>
+          <button class="btn btn-action" @click="goToNext">
+            View My Summary <i class="fas fa-arrow-right ms-2"></i>
+              </button>
+        </div>
+      </div>
+        </div>
+      </div>
+      
         <!-- Error Message -->
         <div v-if="error" class="alert alert-danger error-box mx-auto" style="max-width: 700px;">
           <strong>Error:</strong> {{ error }}
-          <p class="mb-0 mt-1"><small>Unable to analyze the image. Please try again with a clearer photo.</small></p>
+          <p class="mb-0 mt-1"><small>Unable to analyse the image. Please try again with a clearer photo.</small></p>
         </div>
       </div>
     </div>
 
     <MyFooter />
-  </div>
-</template>
-
-<script>
+    </div>
+  </template>
+  
+  <script>
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
+  import axios from 'axios';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import MyNavBar from '../components/test/MyNavBar.vue';
 import MyFooter from '../components/test/MyFooter.vue';
 import { useRouter, useRoute } from 'vue-router';
-
-export default {
+  
+  export default {
   name: 'DetectImage',
   components: {
     MyNavBar,
@@ -219,11 +247,13 @@ export default {
     const checklistItems = ref([]);
     const validTerms = ref([]);
     const isDragging = ref(false);
+    const debugImageInfo = ref(false);
     
     // Get sceneId from route query or use default
     const sceneId = ref(parseInt(route.query.sceneId || '1'));
 
     const API_BASE_URL = '/api';
+    const IMAGE_BASE_URL = '/image';
 
     // Computed properties
     const matchedTerms = computed(() => {
@@ -240,7 +270,7 @@ export default {
       return matchedTerms.value.length > 0;
     });
 
-    // 根据场景ID获取场景标题
+    // Get scene title based on scene ID
     const getSceneTitleText = computed(() => {
       switch(sceneId.value) {
         case 1:
@@ -295,8 +325,8 @@ export default {
       error.value = null;
 
       // Create image preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
         imagePreview.value = e.target.result;
       };
       reader.readAsDataURL(file);
@@ -314,28 +344,28 @@ export default {
     const analyzeImage = async () => {
       if (!selectedFile.value) {
         error.value = 'Please select an image file first';
-        return;
-      }
-
+          return;
+        }
+        
       isLoading.value = true;
       error.value = null;
-
-      try {
+        
+        try {
         // Read file as binary data
         const fileData = await readFileAsArrayBuffer(selectedFile.value);
-
+          
         // Call Azure Computer Vision API
-        const response = await axios({
-          method: 'post',
+          const response = await axios({
+            method: 'post',
           url: 'https://5120.cognitiveservices.azure.com/vision/v3.2/analyze?visualFeatures=Objects,Tags,Description',
-          headers: {
-            'Content-Type': 'application/octet-stream',
+            headers: {
+              'Content-Type': 'application/octet-stream',
             'Ocp-Apim-Subscription-Key': 'EdLSbueKzPgxgxulSFPvVJkH4dOFmJp3IwC9Y1SQBZq56LqCoWEaJQQJ99BDACL93NaXJ3w3AAAFACOGI0sm'
-          },
-          data: fileData,
-          transformRequest: [(data) => data]
-        });
-
+            },
+            data: fileData,
+            transformRequest: [(data) => data]
+          });
+          
         results.value = response.data;
         console.log("API response:", results.value);
 
@@ -368,9 +398,18 @@ export default {
       try {
         // Fetch checklist items for the current scene
         const checklistResponse = await axios.get(`${API_BASE_URL}/scenes/${sceneId.value}/checklist`);
+        console.log("API:", checklistResponse.data);
+        
         if (checklistResponse.data.success) {
           checklistItems.value = checklistResponse.data.data;
-          console.log("Checklist items loaded:", checklistItems.value.length);
+          console.log("Loading:", checklistItems.value);
+          
+          // image_url
+          const hasImages = checklistItems.value.some(item => item.image_url);
+          console.log("URL:", hasImages);
+          if (!hasImages) {
+            console.warn("API return the URL");
+          }
         }
 
         // Fetch valid terms for matching
@@ -395,6 +434,29 @@ export default {
         path: '/detectSummary',
         query: { sceneId: sceneId.value }
       });
+    };
+
+    const onImageLoaded = (item) => {
+      console.log(`Image loaded successfully: ${item.title}`);
+    };
+
+    const handleImageError = (event, item) => {
+      console.log(`Image failed to load: ${item.title}`, event);
+      // Use generic placeholder image
+      event.target.src = `${IMAGE_BASE_URL}/Sunglasses.png`;
+    };
+
+    const getImageUrl = (item) => {
+      if (!item.image_url) return null;
+      
+      // Check special case
+      if (item.title === "Fun-pattern bandage or sticker" && 
+          item.image_url === "Fun-pattern bandage.png") {
+        return `${IMAGE_BASE_URL}/Fun-pattern bandage.png`;
+      }
+
+      // Regular case
+      return `${IMAGE_BASE_URL}/${item.image_url}`;
     };
 
     // Lifecycle hooks
@@ -430,7 +492,13 @@ export default {
       goBack,
       goToNext,
       sceneId,
-      isDragging
+      isDragging,
+      handleImageError,
+      API_BASE_URL,
+      IMAGE_BASE_URL,
+      debugImageInfo,
+      onImageLoaded,
+      getImageUrl
     };
   }
 };
@@ -522,10 +590,19 @@ export default {
 
 .step-title {
   color: #4d2f20;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  font-size: 1.6rem;
   text-align: center;
+}
+
+.step-subtitle {
+  color: #666;
+  font-size: 1.1rem;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.5;
 }
 
 /* File Upload Section */
@@ -539,13 +616,18 @@ export default {
 
 .file-drop-area {
   border: 2px dashed #ccc;
-  border-radius: 8px;
-  padding: 2rem;
+    border-radius: 8px;
+  padding: 3.5rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
   background-color: #f8f9fa;
   position: relative;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .file-drop-area.dragging {
@@ -598,6 +680,15 @@ export default {
   margin-bottom: 1rem;
 }
 
+.upload-prompt {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
 .upload-prompt p {
   font-size: 1.15rem;
   color: #666;
@@ -605,14 +696,18 @@ export default {
 }
 
 .image-preview-container {
-  max-height: 300px;
+  max-height: 400px;
   overflow: hidden;
   border-radius: 6px;
-}
-
+  display: flex;
+  justify-content: center;
+  align-items: center;
+    width: 100%;
+  }
+  
 .image-preview {
   max-width: 100%;
-  max-height: 300px;
+  max-height: 400px;
   object-fit: contain;
 }
 
@@ -711,24 +806,25 @@ export default {
 .detection-status {
   display: flex;
   align-items: flex-start;
-  padding: 1.25rem;
-  border-radius: 8px;
+  padding: 2rem;
+  border-radius: 12px;
   margin: 1.5rem 0;
 }
 
 .detection-status.success {
   background-color: #f0f7ed;
-  border-left: 4px solid #3E5C2B;
+  border-left: 6px solid #3E5C2B;
 }
 
 .detection-status.warning {
   background-color: #fff8e6;
-  border-left: 4px solid #e59700;
+  border-left: 6px solid #e59700;
 }
 
 .status-icon {
-  font-size: 2rem;
-  margin-right: 1rem;
+  font-size: 3.5rem;
+  margin-right: 1.5rem;
+  flex-shrink: 0;
 }
 
 .detection-status.success .status-icon {
@@ -741,19 +837,22 @@ export default {
 
 .status-message h5 {
   color: #4d2f20;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
 }
 
 .status-message p {
-  color: #666;
+    color: #666;
   margin-bottom: 0;
-}
-
+  font-size: 1.15rem;
+  line-height: 1.5;
+  }
+  
 /* Detected Labels */
 .labels-container {
-  display: flex;
-  flex-wrap: wrap;
+    display: flex;
+    flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 0.75rem;
 }
@@ -765,7 +864,7 @@ export default {
   border-radius: 20px;
   font-size: 0.9rem;
   display: inline-flex;
-  align-items: center;
+    align-items: center;
 }
 
 .label-matched {
@@ -784,7 +883,7 @@ export default {
 .checklist-item {
   display: flex;
   align-items: flex-start;
-  padding: 0.75rem 0;
+  padding: 1rem 0;
   border-bottom: 1px solid #eee;
 }
 
@@ -792,21 +891,49 @@ export default {
   border-bottom: none;
 }
 
-.checklist-item i {
+.checklist-item-icon {
   color: #3E5C2B;
   margin-top: 0.25rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.checklist-item-content {
+  flex-grow: 1;
 }
 
 .checklist-item strong {
   color: #4d2f20;
   display: block;
   margin-bottom: 0.25rem;
+  font-size: 1.05rem;
 }
 
 .item-description {
   color: #4d2f20;
-  margin-bottom: 0;
+  margin-bottom: 0.75rem;
   font-size: 0.95rem;
+}
+
+.item-image-container {
+  width: 100%;
+  max-width: 150px;
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.item-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+    display: block;
+  transition: transform 0.3s ease;
+}
+
+.item-image:hover {
+  transform: scale(1.05);
 }
 
 /* Error box */
@@ -831,11 +958,25 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* 添加 hover 效果 */
+/* Add hover effect */
 .file-drop-area:hover {
   border-color: #3E5C2B;
   background-color: #f0f7ed;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* New image container style */
+.check-item-image-container {
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto 2rem;
+}
+
+.check-item-image {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {
@@ -861,8 +1002,37 @@ export default {
   }
 }
 
-/* 对齐样式 */
+/* Alignment style */
 .text-left {
   text-align: left;
+  }
+/* Horizontal arrangement of text and image */
+.item-row {
+    display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+    flex-wrap: wrap;
 }
-</style>
+
+.item-text {
+  flex: 1 1 60%;
+}
+
+.item-image-container {
+  flex: 0 0 150px;
+  max-width: 150px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.item-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
+  </style>
+
+

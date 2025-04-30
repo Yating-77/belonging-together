@@ -9,10 +9,11 @@
         <h4>Quick Links</h4>
         <ul>
           <li><router-link to="/">Home</router-link></li>
-          <li><router-link to="/resource">Resource Center</router-link></li>
+          <li><router-link to="/insights">Our Insights</router-link></li>
           <li><router-link to="/intro">Personalised Recommendations</router-link></li>
           <li><router-link to="/detectpage">Outing Guides</router-link></li>
           <li><router-link to="/sensoryVenue">Sensory Venues</router-link></li>
+          <li><router-link to="/resource">Resource Center</router-link></li>
         </ul>
       </div>
     </div>

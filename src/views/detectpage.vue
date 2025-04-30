@@ -17,8 +17,8 @@
         <div class="container text-center">
           <h1 class="main-title">Prepare for a Successful Outing</h1>
           <p class="main-subtitle">
-            Help your child feel confident and calm before exploring outdoor places like playgrounds, cinemas, or community events.
-            Explore what they might see, hear, and feel—and what you can bring to support them.
+            Help your child feel confident and calm before exploring outdoor places and activities.
+            Discover different environments and what you can bring to support them.
           </p>
         </div>
       </div>
@@ -26,98 +26,330 @@
     <!-- ===== End Intro Section ===== -->
 
 
-    <!-- ===== Interactive Section ===== -->
-    <div class="interactive-section-container container my-4">
-        <!-- Center the content within this section -->
-        <div class="interactive-content mx-auto">
-
-          <!-- Introduction Text -->
-          <div class="scene-intro-card mb-4">
-            <div class="card-body">
-              <h4 class="fw-bold mb-3">Prepare Your Child for Different Environments</h4>
-              <p>We've created guides for several common scenarios that might be challenging for children with sensory sensitivities:</p>
-              <ul>
-                <li><strong>Medical Visit</strong> - Doctor and dentist appointments</li>
-                <li><strong>Airport Travel</strong> - Navigating airports and flying</li>
-                <li><strong>Leisure Outing</strong> - Parks, cinemas and public spaces</li>
-                <li><strong>School Visit</strong> - Classroom and school environments</li>
-              </ul>
-              <p class="mb-0">Select a scenario above to explore what your child might experience and learn how to prepare step by step.</p>
+    <!-- ===== 改为左右布局的场景选择部分 ===== -->
+    <div class="scene-selection-section">
+      <div class="container">
+        <div class="row">
+          <!-- 左侧文字说明 -->
+          <div class="col-md-5" data-aos="fade-right" data-aos-duration="800">
+            <div class="intro-text-container">
+              <h2 class="intro-title">Prepare for a Successful Outing</h2>
+              <p class="intro-description">
+                We've created guides for several common scenarios that might be challenging for children with sensory sensitivities. Choose a scene to get tailored tips and sensory-friendly checklists.
+              </p>
             </div>
           </div>
           
-          <!-- Scene Selection Dropdown -->
-          <div class="mb-4">
-            <label for="sceneSelect" class="form-label fw-bold label-text">1. Select a Scene:</label>
-            <select id="sceneSelect" class="form-select form-select-lg dropdown-select" v-model="selectedSceneId">
-              <option :value="null" disabled>-- Choose a scene --</option>
-              <option v-for="scene in frontendScenes" :key="scene.id" :value="scene.id">
-                {{ scene.name }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Display Backend Error -->
-           <div v-if="error" class="alert alert-danger error-box" role="alert">
-             <strong>Error:</strong> {{ error }}
-             <p class="mb-0 mt-1"><small>Could not load details for the selected scene. Please check the backend or try again later.</small></p>
-        </div>
-        
-          <!-- Dynamic Content Area (Shows after selection) -->
-          <div v-if="selectedSceneId" class="dynamic-content-area mt-4">
-
-             <!-- Scene Title and Subtitle (Smaller) -->
-            <div class="title-section mb-3 text-center">
-              <transition name="fade" mode="out-in">
-                 <div v-if="selectedSceneDetails" :key="'details-' + selectedSceneDetails.id">
-                    <h2 class="scene-content-title">{{ selectedSceneDetails.title }}</h2>
-                    <p class="scene-content-subtitle">{{ selectedSceneDetails.subtitle }}</p>
-        </div>
-              </transition>
-        </div>
-        
-            <!-- Loading Indicator -->
-            <div v-if="isLoading" class="text-center my-3">
-              <div class="spinner-border spinner-border-sm text-primary-custom" role="status"> <span class="visually-hidden">Loading...</span> </div>
-              <p class="loading-text small mt-1">Loading sensory details...</p>
-        </div>
-        
-            <!-- What to Expect Section -->
-            <div v-if="!isLoading && !error && sensoryExpectations.length > 0" class="expectations-section mt-3">
-              <h4 class="label-text fw-bold">2. What to Expect in the Environment</h4>
-              
-              <!-- Card Container with Scene Background -->
-              <div class="expectations-container-wide" :class="'scene-bg-' + selectedSceneId">
-                <div class="expectations-list d-flex flex-column justify-content-between h-100">
-                  <div v-for="(item, index) in sensoryExpectations" :key="item.id"
-                       class="expectation-item card">
-                       <div class="card-body d-flex align-items-start p-3">
-                         <span class="expectation-icon me-3 fs-4">{{ getIconForCategory(item.category) }}</span>
-                         <div>
-                            <h5 class="expectation-category mb-1 text-capitalize">{{ item.category }}</h5>
-                            <p class="expectation-description mb-0">{{ item.description }}</p>
-                         </div>
-                       </div>
-                  </div>
+          <!-- 右侧场景卡片 -->
+          <div class="col-md-7" data-aos="fade-left" data-aos-duration="800">
+            <h3 class="scene-selection-heading">Choose a Scene:</h3>
+            <div class="scene-cards-grid">
+              <div 
+                v-for="scene in frontendScenes" 
+                :key="scene.id" 
+                class="scene-card" 
+                :class="{ 'active': selectedSceneId === scene.id }"
+                @click="selectScene(scene.id)"
+              >
+                <div class="scene-card-icon">
+                  <img 
+                    :src="getSceneIcon(scene.id)" 
+                    :alt="scene.name + ' icon'"
+                    class="scene-icon-image"
+                  >
+                </div>
+                <div class="scene-card-content">
+                  <h4 class="scene-card-title">{{ scene.name }}</h4>
+                  <p class="scene-card-description">{{ scene.subtitle }}</p>
                 </div>
               </div>
-              
-              <!-- Next Button -->
-              <div class="text-center mt-4">
-                  <button class="btn btn-action btn-lg" @click="goToNext" :disabled="!selectedSceneId">
-                      Next Step →
-              </button>
+            </div>
+          </div>
         </div>
       </div>
-      
-             <!-- Message if no expectations found -->
-             <div v-else-if="!isLoading && !error && sensoryExpectations.length === 0" class="alert alert-info mt-4 info-box">
-                No specific sensory expectations were found for this scene.
-      </div>
-          </div> <!-- End Dynamic Content Area -->
+          </div>
 
-        </div> <!-- End interactive-content -->
-    </div> <!-- End interactive-section-container -->
+    <!-- ===== Sensory Expectations Section ===== -->
+    <div v-if="selectedSceneId && !isLoading && sensoryExpectations.length > 0" class="sensory-expectations-section">
+      <div class="container">
+        <div class="expectations-header text-center">
+          <h3>What Your Child Might Sense in {{ selectedSceneDetails?.name || 'this Environment' }}</h3>
+          <p class="expectations-subtitle">{{ selectedSceneDetails?.subtitle }}</p>
+        </div>
+        
+        <div class="sensory-content-container">
+          <div class="sensory-image-container" :class="'scene-bg-' + selectedSceneId">
+          </div>
+          
+          <!-- card-->
+          <div class="sensory-cards-container">
+            <div 
+              v-for="(item, index) in sensoryExpectations" 
+              :key="item.id"
+              class="sensory-card"
+            >
+              <div class="sensory-card-icon">
+                <span class="sensory-icon">{{ getIconForCategory(item.category) }}</span>
+        </div>
+              <div class="sensory-card-content">
+                <h4 class="sensory-category text-capitalize">{{ item.category }}</h4>
+                <p class="sensory-description">{{ item.description }}</p>
+                
+                <!-- audio icon -->
+                <div v-if="item.category.toLowerCase() === 'hearing'" class="audio-controls mt-3">
+                  <!-- medical audio -->
+                  <template v-if="selectedSceneId === 1">
+                    <!-- buzzing -->
+                    <div class="audio-player-container">
+                      <div class="audio-player">
+                        <button 
+                          class="audio-play-button"
+                          :class="{ 'playing': activeSoundId === 'buzzing' }"
+                          @click="playSound('buzzing')"
+                          aria-label="Play or pause buzzing sounds"
+                        >
+                          <span class="play-icon" v-if="activeSoundId !== 'buzzing'"></span>
+                          <span class="pause-icon" v-else></span>
+                        </button>
+                        
+                        <div class="audio-info">
+                          <div class="audio-title">Buzzing Sounds</div>
+                          <div class="audio-timeline">
+                            <span class="current-time">{{ formatTime(audioCurrentTimes.buzzing || 0) }}</span>
+                            <div class="progress-bar-container" @click="setAudioProgress('buzzing', $event)">
+                              <div class="progress-bar-bg"></div>
+                              <div class="progress-bar" :style="{ width: `${audioProgress.buzzing || 0}%` }"></div>
+                            </div>
+                            <span class="duration">{{ formatTime(audioDurations.buzzing || 0) }}</span>
+                          </div>
+                        </div>
+                      </div>
+        </div>
+        
+                    <!-- people -->
+                    <div class="audio-player-container">
+                      <div class="audio-player">
+                        <button 
+                          class="audio-play-button"
+                          :class="{ 'playing': activeSoundId === 'people-talking' }"
+                          @click="playSound('people-talking')"
+                          aria-label="Play or pause people talking sounds"
+                        >
+                          <span class="play-icon" v-if="activeSoundId !== 'people-talking'"></span>
+                          <span class="pause-icon" v-else></span>
+                        </button>
+                        
+                        <div class="audio-info">
+                          <div class="audio-title">People Talking</div>
+                          <div class="audio-timeline">
+                            <span class="current-time">{{ formatTime(audioCurrentTimes['people-talking'] || 0) }}</span>
+                            <div class="progress-bar-container" @click="setAudioProgress('people-talking', $event)">
+                              <div class="progress-bar-bg"></div>
+                              <div class="progress-bar" :style="{ width: `${audioProgress['people-talking'] || 0}%` }"></div>
+        </div>
+                            <span class="duration">{{ formatTime(audioDurations['people-talking'] || 0) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                  
+                  <!-- airport -->
+                  <template v-if="selectedSceneId === 2">
+                    <div class="audio-player-container">
+                      <div class="audio-player">
+                        <button 
+                          class="audio-play-button"
+                          :class="{ 'playing': activeSoundId === 'airport-announcement' }"
+                          @click="playSound('airport-announcement')"
+                          aria-label="Play or pause airport announcement sounds"
+                        >
+                          <span class="play-icon" v-if="activeSoundId !== 'airport-announcement'"></span>
+                          <span class="pause-icon" v-else></span>
+                        </button>
+                        
+                        <div class="audio-info">
+                          <div class="audio-title">Airport Announcements</div>
+                          <div class="audio-timeline">
+                            <span class="current-time">{{ formatTime(audioCurrentTimes['airport-announcement'] || 0) }}</span>
+                            <div class="progress-bar-container" @click="setAudioProgress('airport-announcement', $event)">
+                              <div class="progress-bar-bg"></div>
+                              <div class="progress-bar" :style="{ width: `${audioProgress['airport-announcement'] || 0}%` }"></div>
+                            </div>
+                            <span class="duration">{{ formatTime(audioDurations['airport-announcement'] || 0) }}</span>
+                       </div>
+                     </div>
+                </div>
+        </div>
+        
+                    <div class="audio-player-container">
+                      <div class="audio-player">
+                        <button 
+                          class="audio-play-button"
+                          :class="{ 'playing': activeSoundId === 'airport-call' }"
+                          @click="playSound('airport-call')"
+                          aria-label="Play or pause boarding call sounds"
+                        >
+                          <span class="play-icon" v-if="activeSoundId !== 'airport-call'"></span>
+                          <span class="pause-icon" v-else></span>
+              </button>
+                        
+                        <div class="audio-info">
+                          <div class="audio-title">Boarding Call</div>
+                          <div class="audio-timeline">
+                            <span class="current-time">{{ formatTime(audioCurrentTimes['airport-call'] || 0) }}</span>
+                            <div class="progress-bar-container" @click="setAudioProgress('airport-call', $event)">
+                              <div class="progress-bar-bg"></div>
+                              <div class="progress-bar" :style="{ width: `${audioProgress['airport-call'] || 0}%` }"></div>
+        </div>
+                            <span class="duration">{{ formatTime(audioDurations['airport-call'] || 0) }}</span>
+      </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- outing audio -->
+                  <template v-if="selectedSceneId === 3">
+                    <div class="audio-player-container">
+                      <div class="audio-player">
+                        <button 
+                          class="audio-play-button"
+                          :class="{ 'playing': activeSoundId === 'kids-playing' }"
+                          @click="playSound('kids-playing')"
+                          aria-label="Play or pause children playing sounds"
+                        >
+                          <span class="play-icon" v-if="activeSoundId !== 'kids-playing'"></span>
+                          <span class="pause-icon" v-else></span>
+                        </button>
+                        
+                        <div class="audio-info">
+                          <div class="audio-title">Children Playing</div>
+                          <div class="audio-timeline">
+                            <span class="current-time">{{ formatTime(audioCurrentTimes['kids-playing'] || 0) }}</span>
+                            <div class="progress-bar-container" @click="setAudioProgress('kids-playing', $event)">
+                              <div class="progress-bar-bg"></div>
+                              <div class="progress-bar" :style="{ width: `${audioProgress['kids-playing'] || 0}%` }"></div>
+      </div>
+                            <span class="duration">{{ formatTime(audioDurations['kids-playing'] || 0) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- movie -->
+                    <div class="audio-player-container">
+                      <div class="audio-player">
+                        <button 
+                          class="audio-play-button"
+                          :class="{ 'playing': activeSoundId === 'movie' }"
+                          @click="playSound('movie')"
+                          aria-label="Play or pause movie theater sounds"
+                        >
+                          <span class="play-icon" v-if="activeSoundId !== 'movie'"></span>
+                          <span class="pause-icon" v-else></span>
+                        </button>
+                        
+                        <div class="audio-info">
+                          <div class="audio-title">Movie Theater Sounds</div>
+                          <div class="audio-timeline">
+                            <span class="current-time">{{ formatTime(audioCurrentTimes['movie'] || 0) }}</span>
+                            <div class="progress-bar-container" @click="setAudioProgress('movie', $event)">
+                              <div class="progress-bar-bg"></div>
+                              <div class="progress-bar" :style="{ width: `${audioProgress['movie'] || 0}%` }"></div>
+                            </div>
+                            <span class="duration">{{ formatTime(audioDurations['movie'] || 0) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- school-->
+                  <template v-if="selectedSceneId === 4">
+                    <div class="audio-player-container">
+                      <div class="audio-player">
+                        <button 
+                          class="audio-play-button"
+                          :class="{ 'playing': activeSoundId === 'school-bell' }"
+                          @click="playSound('school-bell')"
+                          aria-label="Play or pause school bell sounds"
+                        >
+                          <span class="play-icon" v-if="activeSoundId !== 'school-bell'"></span>
+                          <span class="pause-icon" v-else></span>
+                        </button>
+                        
+                        <div class="audio-info">
+                          <div class="audio-title">School Bell</div>
+                          <div class="audio-timeline">
+                            <span class="current-time">{{ formatTime(audioCurrentTimes['school-bell'] || 0) }}</span>
+                            <div class="progress-bar-container" @click="setAudioProgress('school-bell', $event)">
+                              <div class="progress-bar-bg"></div>
+                              <div class="progress-bar" :style="{ width: `${audioProgress['school-bell'] || 0}%` }"></div>
+                            </div>
+                            <span class="duration">{{ formatTime(audioDurations['school-bell'] || 0) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- chatting -->
+                    <div class="audio-player-container">
+                      <div class="audio-player">
+                        <button 
+                          class="audio-play-button"
+                          :class="{ 'playing': activeSoundId === 'children-chatting' }"
+                          @click="playSound('children-chatting')"
+                          aria-label="Play or pause children chatting sounds"
+                        >
+                          <span class="play-icon" v-if="activeSoundId !== 'children-chatting'"></span>
+                          <span class="pause-icon" v-else></span>
+                        </button>
+                        
+                        <div class="audio-info">
+                          <div class="audio-title">Children Chatting</div>
+                          <div class="audio-timeline">
+                            <span class="current-time">{{ formatTime(audioCurrentTimes['children-chatting'] || 0) }}</span>
+                            <div class="progress-bar-container" @click="setAudioProgress('children-chatting', $event)">
+                              <div class="progress-bar-bg"></div>
+                              <div class="progress-bar" :style="{ width: `${audioProgress['children-chatting'] || 0}%` }"></div>
+                            </div>
+                            <span class="duration">{{ formatTime(audioDurations['children-chatting'] || 0) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- button -->
+        <div class="text-center mt-5">
+          <button class="btn btn-action btn-lg" @click="goToNext">
+            {{ getButtonText(selectedSceneId) }} →
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div v-if="isLoading" class="container text-center my-5">
+      <div class="spinner-border spinner-border-lg text-primary-custom" role="status"> 
+        <span class="visually-hidden">Loading...</span> 
+      </div>
+      <p class="loading-text mt-3">Loading sensory details...</p>
+    </div>
+    
+    <!-- Display Backend Error -->
+    <div v-if="error" class="container my-4">
+      <div class="alert alert-danger error-box" role="alert">
+        <strong>Error:</strong> {{ error }}
+        <p class="mb-0 mt-1"><small>Could not load details for the selected scene. Please check the backend or try again later.</small></p>
+      </div>
+    </div>
 
     <MyFooter />
     </div>
@@ -126,12 +358,16 @@
 <script setup>
 // Script content remains IDENTICAL
 import { ref, onMounted, watch, computed } from 'vue';
-import axios from 'axios';
+  import axios from 'axios';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import MyNavBar from '../components/test/MyNavBar.vue';
 import MyFooter from '../components/test/MyFooter.vue';
 import { useRouter } from 'vue-router';
+import medicalIcon from '../components/icons/medical.png';
+import airportIcon from '../components/icons/airport.png';
+import outingIcon from '../components/icons/outing.png';
+import schoolIcon from '../components/icons/school.png';
 
 const frontendScenes = ref([ { id: 1, name: 'Medical Visit', title: 'Going to the Doctor/Dentist', subtitle: 'Preparing for a check-up or appointment.' }, { id: 2, name: 'Airport Travel', title: 'Traveling by Plane', subtitle: 'Navigating the airport environment.' }, { id: 3, name: 'Leisure Outing', title: 'Visiting a Park or Cinema', subtitle: 'Enjoying community spaces and events.' }, { id: 4, name: 'School Visit', title: 'Going to School', subtitle: 'Getting ready for the classroom setting.' } ]);
 const selectedSceneId = ref(null); const sensoryExpectations = ref([]); const isLoading = ref(false); const error = ref(null);
@@ -150,8 +386,176 @@ const goToNext = () => {
     query: { sceneId: selectedSceneId.value }
   });
 };
+const selectScene = async (sceneId) => {
+  // renew id
+  selectedSceneId.value = sceneId;
+  console.log(`choosing ID: ${sceneId}`);
+  isLoading.value = true;
+  error.value = null;
+  sensoryExpectations.value = [];
+  
+  try {
+    // get api
+    const response = await axios.get(`${API_BASE_URL}/scenes/${sceneId}/sensory-expectations`);
+    console.log("get data:", response);
+    
+    if (response.data.success && Array.isArray(response.data.data)) {
+      sensoryExpectations.value = response.data.data;
+      console.log("loading", sensoryExpectations.value.length, "lists");
+      
+      // Vue renew DOM
+      setTimeout(() => {
+        console.log("loading");
+        const expectationsSection = document.querySelector('.sensory-expectations-section');
+        if (expectationsSection) {
+          console.log("scrowing");
+          expectationsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          console.log("not animation");
+        }
+      }, 200);
+    }
+  } catch (err) {
+    console.error("error:", err);
+    let message = `loading scene"${selectedSceneDetails.value?.name || 'this scene'}"data failed.`;
+    error.value = message;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// add icon
+const getSceneIcon = (sceneId) => {
+  switch(sceneId) {
+    case 1: return medicalIcon;
+    case 2: return airportIcon;
+    case 3: return outingIcon;
+    case 4: return schoolIcon;
+    default: return medicalIcon;
+  }
+};
+
+const getButtonText = (sceneId) => {
+  if (!sceneId) return 'Continue to Checklist';
+  
+  switch(sceneId) {
+    case 1: return 'See What to Pack for Medical Visit';
+    case 2: return 'See What to Pack for Airport Travel';
+    case 3: return 'See What to Pack for Leisure Outing';
+    case 4: return 'See What to Pack for School Visit';
+    default: return 'Continue to Checklist';
+  }
+};
+
+// audio adding
+const activeSoundId = ref(null);
+const audioElements = ref({});
+const audioDurations = ref({});
+const audioCurrentTimes = ref({});
+const audioProgress = ref({});
+const audioInterval = ref(null);
+
+// playing audio
+const playSound = (soundId) => {
+  // if have playing audio, stop
+  if (activeSoundId.value && activeSoundId.value !== soundId) {
+    audioElements.value[activeSoundId.value].pause();
+    clearInterval(audioInterval.value);
+    audioInterval.value = null;
+  }
+  
+  // check the audio
+  if (!audioElements.value[soundId]) {
+    const audio = new Audio();
+    
+    if (soundId === 'buzzing') {
+      audio.src = '/audio/buzzing.mp3';
+    } else if (soundId === 'people-talking') {
+      audio.src = '/audio/people-talking.mp3';
+    } else if (soundId === 'airport-announcement') {
+      audio.src = '/audio/airport-announcements.mp3';
+    } else if (soundId === 'airport-call') {
+      audio.src = '/audio/airport-call.mp3';
+    } else if (soundId === 'kids-playing') {
+      audio.src = '/audio/kids-playing.mp3';
+    } else if (soundId === 'movie') {
+      audio.src = '/audio/movie.mp3';
+    } else if (soundId === 'school-bell') {
+      audio.src = '/audio/school-bell.mp3';
+    } else if (soundId === 'children-chatting') {
+      audio.src = '/audio/children-chatting.mp3';
+    }
+    
+    audio.addEventListener('loadedmetadata', () => {
+      audioDurations.value[soundId] = audio.duration;
+    });
+    
+    audio.addEventListener('ended', () => {
+      activeSoundId.value = null;
+      audioCurrentTimes.value[soundId] = 0;
+      audioProgress.value[soundId] = 0;
+      clearInterval(audioInterval.value);
+      audioInterval.value = null;
+    });
+    
+    audioDurations.value[soundId] = 0;
+    audioCurrentTimes.value[soundId] = 0;
+    audioProgress.value[soundId] = 0;
+    audioElements.value[soundId] = audio;
+  }
+  
+  // playing or stop
+  const audio = audioElements.value[soundId];
+  if (activeSoundId.value === soundId) {
+    audio.pause();
+    activeSoundId.value = null;
+    clearInterval(audioInterval.value);
+    audioInterval.value = null;
+  } else {
+    audio.play();
+    activeSoundId.value = soundId;
+    
+    // add slide
+    if (audioInterval.value) clearInterval(audioInterval.value);
+    audioInterval.value = setInterval(() => {
+      audioCurrentTimes.value[soundId] = audio.currentTime;
+      audioProgress.value[soundId] = (audio.currentTime / audio.duration) * 100;
+    }, 100);
+  }
+};
+
+// set slide
+const setAudioProgress = (soundId, event) => {
+  if (!audioElements.value[soundId]) return;
+  
+  const audio = audioElements.value[soundId];
+  const progressBar = event.currentTarget;
+  const rect = progressBar.getBoundingClientRect();
+  const clickPositionRatio = (event.clientX - rect.left) / rect.width;
+  
+  const newTime = audioDurations.value[soundId] * clickPositionRatio;
+  audio.currentTime = newTime;
+  audioCurrentTimes.value[soundId] = newTime;
+  audioProgress.value[soundId] = clickPositionRatio * 100;
+};
+
+// change to mm:ss format
+const formatTime = (seconds) => {
+  if (isNaN(seconds) || seconds === Infinity) return '0:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+  return `${mins}:${secs}`;
+};
+
 onMounted(() => { AOS.init({ duration: 600, once: false, offset: 50 }); });
-watch(selectedSceneId, (newId) => { console.log(`Selected scene ID changed to ${newId}`); if (newId !== null) { sensoryExpectations.value = []; error.value = null; fetchSensoryExpectations(newId); } else { sensoryExpectations.value = []; error.value = null; isLoading.value = false; } });
+watch(selectedSceneId, (newId) => { 
+  console.log(`选中场景ID变为 ${newId}`); 
+  if (newId === null) {
+    sensoryExpectations.value = []; 
+    error.value = null; 
+    isLoading.value = false;
+  }
+});
   </script>
   
   <style scoped>
@@ -164,7 +568,6 @@ watch(selectedSceneId, (newId) => { console.log(`Selected scene ID changed to ${
   --border-color: #e0e0e0;
 }
 
-/* 全局页面背景 */
 .outside-scene-page {
   background-color: #F8EFED !important;
   min-height: 100vh;
@@ -173,7 +576,6 @@ watch(selectedSceneId, (newId) => { console.log(`Selected scene ID changed to ${
   flex-direction: column;
 }
 
-/* Hero Banner 样式 */
 .hero-banner {
   position: relative;
   width: 100%;
@@ -262,7 +664,6 @@ watch(selectedSceneId, (newId) => { console.log(`Selected scene ID changed to ${
   box-shadow: 0 0 0 0.25rem rgba(62, 92, 43, 0.25);
 }
 
-/* 自定义下拉箭头与背景 */
 select.dropdown-select {
   background-image: linear-gradient(45deg, transparent 50%, #3E5C2B 50%), 
                     linear-gradient(135deg, #3E5C2B 50%, transparent 50%);
@@ -274,14 +675,12 @@ select.dropdown-select {
   appearance: none;
 }
 
-/* 覆盖下拉菜单选项样式 - 尝试强制样式 */
 select option {
   background-color: #F8EFED !important;
   color: #4d2f20 !important;
   padding: 12px !important;
 }
 
-/* 选中项样式 */
 select option:checked {
   background-color: #3E5C2B !important;
   color: white !important;
@@ -332,7 +731,6 @@ select option:checked {
 /* Expectations section styling */
 .expectations-section { margin-top: 2rem; }
 
-/* 宽屏卡片容器 */
 .expectations-container-wide {
   width: 100%;
   min-height: 400px;
@@ -366,13 +764,13 @@ select option:checked {
   max-width: 600px;
 }
 
-.expectation-item.card:hover {
-  transform: translateY(-3px);
+.expectation-item.card:hover { 
+  transform: translateY(-3px); 
   box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 
 .expectation-icon { 
-  color: #3E5C2B !important;
+  color: #3E5C2B !important; 
   font-size: 1.8rem;
   display: flex;
   align-items: center;
@@ -380,14 +778,14 @@ select option:checked {
   min-width: 40px;
 }
 
-.expectation-category {
+.expectation-category { 
   color: #3E5C2B !important; 
-  font-weight: 600;
+  font-weight: 600; 
   font-size: 1.2rem;
   margin-bottom: 0.5rem;
 }
 
-.expectation-description {
+.expectation-description { 
   color: #4d2f20 !important; 
   font-size: 1rem; 
   line-height: 1.5;
@@ -565,4 +963,399 @@ select option:checked {
 .scene-bg-4 {
   background-image: url('/scenes/school-bg.png');
 }
+
+/* ===== 新添加的场景选择部分样式 ===== */
+.scene-selection-section {
+  padding: 4rem 0;
+  background-color: #F8EFED;
+}
+
+/* 左侧文字容器 */
+.intro-text-container {
+  padding: 1.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.intro-title {
+  color: #4d2f20;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.intro-description {
+  color: #4d2f20;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.selected-scene-info {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  border-left: 4px solid #3E5C2B;
+}
+
+.selected-scene-text {
+  color: #4d2f20;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.scene-label {
+  font-weight: 600;
+  color: #3E5C2B;
+}
+
+.scene-name {
+  font-weight: 700;
+  color: #4d2f20;
+}
+
+/* 右侧场景卡片 */
+.scene-selection-heading {
+  color: #4d2f20;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.scene-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.scene-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 2px solid transparent;
+}
+
+.scene-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.scene-card.active {
+  border-color: #3E5C2B;
+  box-shadow: 0 10px 25px rgba(62, 92, 43, 0.2);
+}
+
+.scene-card-icon {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa;
+}
+
+.scene-icon-image {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+}
+
+.scene-card-content {
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.scene-card-title {
+  color: #3E5C2B;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.scene-card-description {
+  color: #6c757d;
+  font-size: 0.95rem;
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+/* 感官期望部分样式 */
+.sensory-expectations-section {
+  padding: 3rem 0 5rem;
+  background-color: #f8f9fa;
+}
+
+.expectations-header {
+  margin-bottom: 2.5rem;
+}
+
+.expectations-header h3 {
+  color: #4d2f20;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.expectations-subtitle {
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.sensory-content-container {
+  display: flex;
+  gap: 2rem;
+  margin: 2rem 0;
+  min-height: 450px;
+}
+
+/* 左侧图片容器 */
+.sensory-image-container {
+  flex: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* 右侧卡片容器 */
+.sensory-cards-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sensory-card {
+  display: flex;
+  align-items: flex-start;
+  background-color: white;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #3E5C2B;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sensory-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.sensory-card-icon {
+  margin-right: 1rem;
+  font-size: 1.75rem;
+  color: #3E5C2B;
+  width: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.sensory-card-content {
+  flex: 1;
+}
+
+.sensory-category {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #4d2f20;
+  margin-bottom: 0.5rem;
+}
+
+.sensory-description {
+  font-size: 1rem;
+  color: #6c757d;
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+/* 响应式设计 */
+@media (max-width: 991px) {
+  .sensory-content-container {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .sensory-image-container {
+    height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .sensory-expectations-section {
+    padding: 2rem 0 3rem;
+  }
+  
+  .expectations-header h3 {
+    font-size: 1.5rem;
+  }
+  
+  .sensory-image-container {
+    height: 280px;
+  }
+  
+  .sensory-card {
+    padding: 1rem;
+  }
+  
+  .sensory-category {
+    font-size: 1.1rem;
+  }
+  
+  .sensory-card-icon {
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+  }
+}
+
+/* 音频播放器样式 */
+.audio-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.audio-player-container {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  width: 100%;
+}
+
+.audio-player {
+  display: flex;
+  align-items: center;
+}
+
+.audio-play-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #3E5C2B;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 0.75rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(62, 92, 43, 0.3);
+  flex-shrink: 0;
+}
+
+.audio-play-button:hover {
+  background-color: #345124;
+  transform: scale(1.05);
+}
+
+/* 播放图标 - 三角形 */
+.play-icon {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 8px 0 8px 12px;
+  border-color: transparent transparent transparent #ffffff;
+  margin-left: 2px; /* 微调使三角形在视觉上居中 */
+}
+
+/* 暂停图标 - 两个竖条 */
+.pause-icon {
+  width: 12px;
+  height: 14px;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+}
+
+.pause-icon::before,
+.pause-icon::after {
+  content: "";
+  width: 4px;
+  height: 14px;
+  background-color: #ffffff;
+  border-radius: 1px;
+}
+
+.audio-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.audio-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #4d2f20;
+}
+
+.audio-timeline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.current-time, .duration {
+  min-width: 35px;
+}
+
+.progress-bar-container {
+  flex-grow: 1;
+  height: 4px;
+  background-color: #e0e0e0;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+
+.progress-bar-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #e0e0e0;
+}
+
+.progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: #3E5C2B;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+@media (max-width: 576px) {
+  .audio-controls {
+    width: 100%;
+  }
+  
+  .audio-timeline {
+    gap: 0.25rem;
+  }
+  
+  .current-time, .duration {
+    min-width: 30px;
+    font-size: 0.7rem;
+  }
+  }
   </style>
