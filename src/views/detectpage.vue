@@ -469,21 +469,21 @@ const playSound = (soundId) => {
     const audio = new Audio();
     
     if (soundId === 'buzzing') {
-      audio.src = '/audio/buzzing.mp3';
+      audio.src = 'audio/buzzing.mp3';
     } else if (soundId === 'people-talking') {
-      audio.src = '/audio/people-talking.mp3';
+      audio.src = 'audio/people-talking.mp3';
     } else if (soundId === 'airport-announcement') {
-      audio.src = '/audio/airport-announcements.mp3';
+      audio.src = 'audio/airport-announcements.mp3';
     } else if (soundId === 'airport-call') {
-      audio.src = '/audio/airport-call.mp3';
+      audio.src = 'audio/airport-call.mp3';
     } else if (soundId === 'kids-playing') {
-      audio.src = '/audio/kids-playing.mp3';
+      audio.src = 'audio/kids-playing.mp3';
     } else if (soundId === 'movie') {
-      audio.src = '/audio/movie.mp3';
+      audio.src = 'audio/movie.mp3';
     } else if (soundId === 'school-bell') {
-      audio.src = '/audio/school-bell.mp3';
+      audio.src = 'audio/school-bell.mp3';
     } else if (soundId === 'children-chatting') {
-      audio.src = '/audio/children-chatting.mp3';
+      audio.src = 'audio/children-chatting.mp3';
     }
     
     audio.addEventListener('loadedmetadata', () => {
