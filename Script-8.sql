@@ -328,7 +328,7 @@ INSERT INTO advice (option_id, advice_text, display_order) VALUES
 (24, 'Establish a structured "sensory diet" with occupational therapy guidance - a personalized activity plan that provides needed sensory input throughout the day.', 6),
 (24, 'Teach your child to recognize their own need for movement and develop appropriate ways to seek input (jumping jacks in the bathroom vs. running in the classroom).', 7);
 
-
+select * from categories;
 
 -- 创建推荐表
 CREATE TABLE recommendations (
@@ -343,6 +343,10 @@ CREATE TABLE recommendations (
 
 -- 为表添加索引以提高查询性能
 CREATE INDEX idx_recommendations_option_id ON recommendations(option_id);
+
+SELECT * FROM articles;
+DELETE FROM categories
+WHERE id BETWEEN 7 AND 12;
 
 
 -- 1. Sleep Issues - Option 1: Difficulty falling asleep
@@ -703,9 +707,321 @@ SET
 WHERE title = 'Group therapy helps preschoolers build social language';
 
 
+-- Create scenes table
+CREATE TABLE scenes (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    display_name TEXT NOT NULL,
+    description TEXT
+);
+
+-- Create checklist_items table
+CREATE TABLE checklist_items (
+    id SERIAL PRIMARY KEY,
+    scene_id INTEGER NOT NULL REFERENCES scenes(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    description TEXT,
+    child_reaction TEXT
+);
+
+-- Create image_labels table
+CREATE TABLE image_labels (
+    id SERIAL PRIMARY KEY,
+    checklist_item_id INTEGER NOT NULL REFERENCES checklist_items(id) ON DELETE CASCADE,
+    image_label TEXT NOT NULL
+);
+
+-- Insert scenes
+INSERT INTO scenes (name, display_name) VALUES
+('medical_visit', 'Medical Visit'),
+('airport_travel', 'Airport Travel'),
+('leisure_outing', 'Leisure Outing'),
+('school_visit', 'School Visit');
+
+-- Insert checklist_items with scene_id references
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (1, 'Toy medical tool (e.g., stethoscope or syringe)', 'Used to familiarise the child with medical procedures.', 'May become distressed if tools appear without warning.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (1, 'Short-sleeved zip-up shirt', 'Allows quick access for injections or checkups.', 'May resist changing clothes if the fabric is unfamiliar or tight.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (1, 'Soft plush comfort item', 'Provides emotional support during waiting and exams.', 'May seek something to hold, squeeze, or bite during stress.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (1, 'Fun-pattern bandage or sticker', 'Used after injections to comfort and distract.', 'May fixate on the site of injection or refuse bandage without a fun design.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (2, 'Child-sized U-shaped travel pillow', 'Supports head and neck comfort during flights.', 'May slump or become irritable without physical support.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (2, 'Foldable leg rest or foot hammock', 'Improves in-seat comfort for long durations.', 'May kick or shift constantly if legs are unsupported.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (2, 'Noise protection gear', 'Reduces stress caused by loud environments.', 'May cover ears or show anxiety from unexpected noise.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (2, 'Character-themed carry-on backpack', 'Gives the child a sense of ownership and stores comfort items.', 'May become anxious if they can’t access familiar belongings.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (3, 'Glow-in-the-dark fidget toy or LED light', 'Provides visual comfort in dark or overstimulating environments.', 'May feel overwhelmed or anxious in dark places without tactile distraction.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (3, 'Foldable sitting mat', 'Creates a defined, safe physical space for the child outdoors or in crowds.', 'May refuse to sit on unfamiliar surfaces or become restless.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (3, 'Chewable sensory necklace or bracelet', 'Supports oral sensory needs and calms the child.', 'May chew sleeves or fingers without suitable oral input.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (3, 'Sun hat with wide brim', 'Shields from bright light and creates a sensory boundary.', 'May squint, avoid eye contact, or cover face without a hat.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (4, 'Printed lunchbox with character design', 'Provides predictability and personal comfort during mealtime.', 'May avoid eating unfamiliar food or reject shared containers.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (4, 'Family photo keychain', 'Acts as a transitional object for separation anxiety.', 'May ask for parents repeatedly or struggle to enter classroom.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (4, 'Velcro-strap school shoes', 'Promotes independence during transitions.', 'May refuse shoes that are too tight or difficult to manage.');
+INSERT INTO checklist_items (scene_id, title, description, child_reaction) VALUES (4, 'Insulated straw water bottle', 'Encourages hydration and sensory regulation through sucking motion.', 'May refuse drinking or become distressed if thirsty and bottle is unavailable.');
+-- Insert image_labels
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (1, 'toy stethoscope');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (1, 'play syringe');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (1, 'doctor kit');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (2, 'zip-up shirt');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (2, 'short-sleeved top');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (2, 'medical visit clothing');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (3, 'plush toy');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (3, 'stuffed animal');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (3, 'comfort doll');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (4, 'bandage sticker');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (4, 'cartoon bandaid');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (4, 'fun-patterned plaster');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (5, 'u-shaped travel pillow');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (5, 'kids neck pillow');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (6, 'foot hammock');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (6, 'foldable leg rest');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (7, 'earmuffs');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (7, 'earplugs');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (7, 'noise-cancelling headphones');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (7, 'kid headphones');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (8, 'children''s backpack');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (8, 'carry-on backpack');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (8, 'character bag');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (9, 'glow toy');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (9, 'led finger light');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (9, 'glow fidget');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (10, 'sitting mat');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (10, 'picnic mat');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (10, 'foldable seat pad');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (11, 'chewy necklace');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (11, 'sensory chew bracelet');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (11, 'chewable jewelry');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (12, 'sun hat');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (12, 'brimmed hat');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (12, 'wide brim cap');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (13, 'printed lunchbox');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (13, 'bento box');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (13, 'kids lunch container');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (14, 'photo keychain');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (14, 'family photo tag');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (14, 'image charm');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (15, 'velcro shoes');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (15, 'easy strap shoes');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (15, 'school sneakers');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (16, 'straw water bottle');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (16, 'insulated water bottle');
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES (16, 'kids drink bottle');
+
+
+CREATE TABLE image_keywords (
+    id SERIAL PRIMARY KEY,
+    checklist_item_id INTEGER NOT NULL REFERENCES checklist_items(id) ON DELETE CASCADE,
+    keyword TEXT NOT NULL
+);
+INSERT INTO image_keywords (checklist_item_id, keyword) VALUES
+(1, 'toy'),
+(1, 'stethoscope'),
+(2, 'shirt'),
+(2, 'clothing'),
+(3, 'plush'),
+(3, 'stuffed'),
+(4, 'bandage'),
+(5, 'pillow'),
+(6, 'footrest'),
+(7, 'headphones'),
+(7, 'earplugs'),
+(8, 'backpack'),
+(9, 'glow'),
+(10, 'mat'),
+(11, 'necklace'),
+(12, 'hat'),
+(13, 'lunchbox'),
+(14, 'photo'),
+(15, 'shoes'),
+(16, 'bottle');
+
+CREATE TABLE scene_sensory_expectations (
+    id SERIAL PRIMARY KEY,
+    scene_id INTEGER NOT NULL REFERENCES scenes(id) ON DELETE CASCADE,
+    category TEXT NOT NULL,     
+    description TEXT NOT NULL
+);
+select * from recommendations r ;
+
+
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (1, 'hearing', 'Your child might hear buzzing, suction noises, and people talking.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (1, 'sight', 'Your child might see bright ceiling lights above the dentist or doctor chair.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (1, 'smell', 'Your child might smell mint toothpaste, cleaning chemicals, or rubber gloves.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (1, 'touch', 'Your child might feel the cold chair or strange sensations in the mouth from tools.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (2, 'hearing', 'Your child might hear luggage carts rolling, flight announcements, and boarding calls.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (2, 'sight', 'Your child might see lots of people, uniforms, security lines, and fast movement.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (2, 'smell', 'Your child might notice strong smells from food courts, coffee, or cleaning products.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (2, 'touch', 'Your child might feel pressure from seat belts, cold metal trays, or tight spaces.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (3, 'hearing', 'Your child might hear children shouting, loud movie sounds, or nearby traffic.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (3, 'sight', 'Your child might see bright lights, fast-moving visuals, or large colorful equipment.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (3, 'smell', 'Your child might smell popcorn, food, dirt, or outdoor grass and mulch.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (3, 'touch', 'Your child might touch sand, rubber flooring, swings, or shared seating surfaces.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (4, 'hearing', 'Your child might hear school bells, children chatting, and classroom noises.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (4, 'sight', 'Your child might see bright posters, unfamiliar teachers, and busy classrooms.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (4, 'smell', 'Your child might smell lunch food, markers, books, or classroom cleaning sprays.');
+INSERT INTO scene_sensory_expectations (scene_id, category, description) VALUES (4, 'touch', 'Your child might feel new clothing, hard chairs, or classroom tools like pencils and scissors.');
+UPDATE checklist_items
+SET title = 'Packet of tissues or wipes',
+    description = 'Used for tears, runny nose, or cleaning after emotional moments or physical contact.',
+    child_reaction = 'May feel messy, overwhelmed, or physically uncomfortable.'
+WHERE id = 1;
+DELETE FROM image_keywords WHERE checklist_item_id = 1;
+DELETE FROM image_labels
+WHERE checklist_item_id = 1;
+INSERT INTO image_labels (checklist_item_id, image_label) VALUES
+(1, 'tissue pack'),
+(1, 'wet wipes'),
+(1, 'baby wipes'),
+(1, 'cleaning tissue');
 
 
 
+INSERT INTO image_keywords (checklist_item_id, keyword) VALUES
+(1, 'tissue pack'),
+(1, 'wet wipes'),
+(1, 'baby wipes'),
+(1, 'cleaning tissue');
 
+
+
+CREATE TABLE sensory_venues (
+    id SERIAL PRIMARY KEY,
+    venue_title TEXT NOT NULL,
+    venue_location TEXT NOT NULL,
+    venue_sensory_type TEXT NOT NULL,
+    venue_sensory_info_link TEXT,
+    venue_description TEXT,
+    venue_type TEXT,
+    image_url TEXT 
+);
+INSERT INTO sensory_venues (
+    venue_title, venue_location, venue_sensory_type,
+    venue_sensory_info_link, venue_description, venue_type, image_url
+) VALUES
+('Melbourne Museum',
+ '11 Nicholson St, Carlton VIC 3053',
+ 'Sensory-Friendly Hours or Sessions, Staff Trained in Autism Support',
+ 'https://museumsvictoria.com.au/media/8464/sensory_friendly_museum_map_feb2019.pdf',
+ 'Offers a low-sensory session on the first Saturday of each month from 3–5pm, with dimmed lights and reduced sound for sensory-sensitive visitors. Staff are trained through the Hidden Disabilities Sunflower program and Museums Victoria’s autism-inclusive training to support neurodivergent visitors with respectful, informed interaction.',
+ 'Museum',
+ NULL
+),
+('State Library Victoria',
+ '328 Swanston St, Melbourne VIC 3000',
+ 'Sensory-Friendly Hours or Sessions',
+ 'https://www.slv.vic.gov.au/sites/default/files/SLV%20Map_10_20_1.pdf',
+ 'Provides designated quiet reading zones and maps highlighting low-noise areas—ideal for visitors who need a calm environment.',
+ 'Library',
+ NULL
+),
+('Melbourne Zoo',
+ 'Elliott Ave, Parkville VIC 3052',
+ 'Sensory-Friendly Hours or Sessions, Staff Trained in Autism Support',
+ 'https://cdn-site.zoo.org.au/media/upgojmex/mz-sensory-map-update-2024.pdf',
+ 'Weekday afternoons are recommended for a quieter experience. Sensory maps mark high vs. low stimulation zones; noise-cancelling headphones are available. Zoo staff are part of the Hidden Disabilities Sunflower program. They are trained to recognise non-visible conditions and offer guidance when sensory needs arise.',
+ 'Zoo',
+ NULL
+),
+('Scienceworks',
+ '2 Booker St, Spotswood VIC 3015',
+ 'Sensory-Friendly Hours or Sessions',
+ 'https://museumsvictoria.com.au/media/1luo5vfh/sw_sensory_map_11_12_2023.pdf',
+ 'Hosts monthly low-sensory sessions with reduced sound and lighting, limited visitor numbers, and sensory maps and social scripts.',
+ 'Science Museum',
+ NULL
+),
+('NGV International',
+ '180 St Kilda Rd, Melbourne VIC 3006',
+ 'Sensory-Friendly Hours or Sessions, Staff Trained in Autism Support',
+ 'https://www.ngv.vic.gov.au/wp-content/uploads/2021/02/ACCESS_TRIENNIAL_SENSORY_MAPS-1.pdf',
+ 'Offers relaxed sessions for certain exhibitions, allowing visitors to explore in a less crowded and softly lit setting. Gallery staff are trained to support a variety of access needs, including autism. Tours are adapted with inclusive communication and some staff provide Auslan or audio-described support.',
+ 'Art Gallery',
+ NULL
+),
+('HOYTS',
+ 'Various VIC locations',
+ 'Sensory-Friendly Hours or Sessions',
+ 'https://www.hoyts.com.au/events/sensory-screenings',
+ 'Regularly holds sensory-friendly screenings with dimmed lights (not fully dark), lower volume, and freedom to move or vocalize.',
+ 'Cinema',
+ NULL
+),
+('Coles',
+ 'Various VIC locations',
+ 'Sensory-Friendly Hours or Sessions',
+ 'https://www.coles.com.au/help/accessibility/quiet-hour?srsltid=AfmBOorqXjtGymYmtqlBK_-jew0VXleNp43CDCNFLGNsX16tpXEjyDum',
+ 'Many stores offer “Quiet Hour” at set times with dimmed lights, no PA announcements, and reduced noise for a calmer shopping experience.',
+ 'Grocery Stores',
+ NULL
+),
+('Chadstone Shopping Centre',
+ '1341 Dandenong Rd, Malvern East VIC 3145',
+ 'Staff Trained in Autism Support',
+ 'https://www.chadstone.com.au/services-facilities/facilities',
+ 'Customer service staff received training from Amaze to better understand and assist autistic shoppers. Sensory room management is included in their role.',
+ 'Shopping Mall',
+ NULL
+),
+('Marvel Stadium',
+ '740 Bourke St, Docklands VIC 3008',
+ 'Staff Trained in Autism Support',
+ 'https://www.marvelstadium.com.au/accessibility-information',
+ 'In addition to sensory rooms, staff are trained to help neurodiverse guests access them, use sensory tools, and find quieter zones during events.',
+ 'Sports Stadium',
+ NULL
+),
+('Bburwood Brickworks',
+ '70 Middleborough Rd, Burwood East VIC 3151',
+ 'Sensory-Friendly Hours or Sessions, Staff Trained in Autism Support',
+ 'https://www.burwoodbrickworks.shopping/map-accessibility',
+ 'Staff at Burwood Brickworks have received sensory awareness training to support neurodivergent visitors. The centre provides an accessibility map highlighting quiet areas, step-free routes, and inclusive amenities, creating a supportive environment for individuals with sensory sensitivities.',
+ 'Shopping Mall',
+ NULL
+);
+
+UPDATE sensory_venues
+SET image_url = 'Bburwood Brickworks.jpg' -- Match exact filename
+WHERE venue_title = 'Bburwood Brickworks';
+
+UPDATE sensory_venues
+SET image_url = 'Chadstone.jpg'
+WHERE venue_title = 'Chadstone Shopping Centre'; -- Match title used in INSERT
+
+UPDATE sensory_venues
+SET image_url = 'coles.jpg'
+WHERE venue_title = 'Coles'; -- May need refinement if you have multiple Coles
+
+UPDATE sensory_venues
+SET image_url = 'Hoyts.jpg'
+WHERE venue_title = 'HOYTS'; -- May need refinement for locations
+
+UPDATE sensory_venues
+SET image_url = 'Marvel-Stadium.jpg'
+WHERE venue_title = 'Marvel Stadium';
+
+UPDATE sensory_venues
+SET image_url = 'Melbourne-museum.jpg'
+WHERE venue_title = 'Melbourne Museum';
+
+UPDATE sensory_venues
+SET image_url = 'Melbourne-zoo.jpg'
+WHERE venue_title = 'Melbourne Zoo';
+
+UPDATE sensory_venues
+SET image_url = 'ngv.jpg'
+WHERE venue_title = 'NGV International';
+
+UPDATE sensory_venues
+SET image_url = 'Scienceworks.jpg'
+WHERE venue_title = 'Scienceworks';
+
+UPDATE sensory_venues
+SET image_url = 'State-library.jpg'
+WHERE venue_title = 'State Library Victoria';
+
+UPDATE sensory_venues
+SET venue_title = 'Burwood Brickworks'
+WHERE venue_title = 'Bburwood Brickworks';
+
+UPDATE sensory_venues
+SET image_url = 'Bburwood Brickworks.jpg'
+WHERE venue_title = 'Burwood Brickworks';
 
 
