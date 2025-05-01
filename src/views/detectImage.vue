@@ -1006,7 +1006,6 @@ import { useRouter, useRoute } from 'vue-router';
 .text-left {
   text-align: left;
   }
-/* Horizontal arrangement of text and image */
 .item-row {
     display: flex;
   align-items: flex-start;

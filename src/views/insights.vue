@@ -18,7 +18,7 @@
       </div>
   
       <div class="charts-content">
-        <!-- 第一个图表部分 -->
+        <!-- first chart section -->
         <div class="chart-section">
           <div class="container">
             <h2 class="section-title">Is Autism Becoming More Common?</h2>
@@ -36,7 +36,7 @@
                   <div class="insight-icon">✅</div>
                   <div class="insight-content">
                     <h3 class="insight-title">Key Insight</h3>
-                    <p>Autism prevalence has steadily increased across all age groups from 2015 to 2022, with the most noticeable rise among children aged 5 to 14.</p>
+                    <p>Autism prevalence has steadily increased across all age groups from 2015 to 2022 in Australia, with the most noticeable rise among children aged 5 to 14.</p>
                   </div>
                 </div>
                 
@@ -60,7 +60,7 @@
           </div>
         </div>
   
-        <!-- 第二个图表部分 -->
+        <!-- second chart section -->
         <div class="chart-section alt-bg">
           <div class="container">
             <h2 class="section-title">How Does Autism Look Different Across Genders?</h2>
@@ -70,7 +70,7 @@
                   <div class="insight-icon">✅</div>
                   <div class="insight-content">
                     <h3 class="insight-title">Key Insight</h3>
-                    <p>Boys are diagnosed with autism at a higher rate than girls, particularly between the ages of 5 and 14.</p>
+                    <p>Boys are diagnosed with autism at a higher rate than girls, particularly between the ages of 5 and 14 in Australia.</p>
                   </div>
                 </div>
                 
@@ -102,7 +102,7 @@
           </div>
         </div>
   
-        <!-- 第三个图表部分 -->
+        <!-- third chart section -->
         <div class="chart-section">
           <div class="container">
             <h2 class="section-title">What Challenges Do Autistic Children Face?</h2>
@@ -120,7 +120,7 @@
                   <div class="insight-icon">✅</div>
                   <div class="insight-content">
                     <h3 class="insight-title">Key Insight</h3>
-                    <p>Many autistic children experience difficulties with learning, emotional regulation, communication, and social behaviour. The most common challenges include delayed understanding (71.4%) and social difficulties (62.4%).</p>
+                    <p>Many autistic children experience difficulties with learning, emotional regulation, communication, and social behaviour. The most common challenges include delayed understanding (71.4%) and social difficulties (62.4%) in Australia.</p>
                   </div>
                 </div>
                 
@@ -144,7 +144,7 @@
           </div>
         </div>
         
-        <!-- 呼吁行动部分 -->
+        <!-- call to action section -->
         <div class="cta-section">
           <div class="container">
             <div class="cta-card">
@@ -192,7 +192,7 @@
     font-family: Arial, sans-serif;
   }
   
-  /* Hero Banner 样式 */
+  /* Hero Banner style */
   .hero-banner {
     position: relative;
     width: 100%;
@@ -565,7 +565,7 @@
     }
   }
   
-  /* CTA Section 样式 */
+  /* CTA Section style */
   .cta-section {
     padding: 60px 30px 100px;
     background-color: #F8EFED;
@@ -635,7 +635,7 @@
     box-shadow: 0 6px 15px rgba(62, 92, 43, 0.4);
   }
   
-  /* 新增的洞察卡片样式 */
+  /* new insight card style */
   .insight-card {
     display: flex;
     background-color: #ffffff;
@@ -694,7 +694,7 @@
   
 
   .insight-card:nth-child(1) {
-    border-left-color: #4CAF50; /* 绿色 - Key Insight */
+    border-left-color: #4CAF50;
   }
   
   .insight-card:nth-child(2) {

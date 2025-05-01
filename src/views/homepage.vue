@@ -11,14 +11,20 @@
             :key="card.title"
             :title="card.title"
             :description="card.description"
-            :imagePath="`/iteration2/${card.imageName}.jpg`"  
+            :imagePath="`/${card.imageName}.jpg`"  
             :colorAccent="card.colorAccent"
+            :stat="card.stat"
             data-aos="fade-up"
             :data-aos-delay="index * 100"
             data-aos-duration="1300"
             data-aos-easing="ease-out-cubic"
             data-aos-once="true"
           />
+        </div>
+        <div class="insights-link-container" data-aos="fade-up" data-aos-delay="300">
+          <router-link to="/insights" class="insights-link-button">
+            Explore our insights <i class="fas fa-arrow-right"></i>
+          </router-link>
         </div>
       </div>
     </section>
@@ -88,18 +94,21 @@ const autismIntroCards = ref([
   {
     title: "Unique Individual Differences",
     description: "Autism is a broad spectrum, with each child having unique strengths, interests, and support needs. No two individuals are exactly the same.",
+    stat: "Did you know? Autism was identified in <strong>3.7%</strong> of Australian children aged 5–9 in 2022 — a steady rise over recent years.",
     imageName: "333",
     colorAccent: "primary"
   },
   {
     title: "Different Ways of Perceiving",
     description: "They may experience sensory information such as sounds, lights, and touch differently. Understanding and respecting these sensory needs is important.",
+    stat: "Over <strong>60%</strong> of autistic children experience sensory or social challenges that affect how they perceive the world.",
     imageName: "555",
     colorAccent: "secondary"
   },
   {
     title: "Diverse Communication Methods",
     description: "Communication methods may include language, gestures, pictures, or behaviors. Patient observation and learning their unique expressions is key to building connection.",
+    stat: "About <strong>1 in 3</strong> autistic children in Australia have significant speech or language difficulties.",
     imageName: "666",
     colorAccent: "tertiary"
   }
@@ -386,7 +395,7 @@ p {
 }
 
 .navigate-section {
-  padding: 4rem 1%;
+  padding: 4rem 3%;
   background-color: #F8EFED;
   overflow: hidden;
 }
@@ -396,13 +405,13 @@ p {
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 1.2rem;
+  gap: 2rem;
 }
 
 .navigate-image-container {
   flex: 1.2;
   min-width: 380px;
-  padding-left: 3rem;
+  padding-left: 2rem;
   padding-right: 0;
 }
 
@@ -473,25 +482,133 @@ p {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
+@media (max-width: 1100px) {
+  .navigate-container {
+    gap: 1.5rem;
+  }
+  
+  .navigate-image-container {
+    padding-left: 1rem;
+  }
+}
+
 @media (max-width: 992px) {
+  .navigate-section {
+    padding: 3.5rem 4%;
+  }
+  
   .navigate-container {
     flex-direction: column;
+    gap: 2.5rem;
   }
   
   .navigate-content {
     order: 1;
     text-align: center;
+    max-width: 90%;
   }
   
   .navigate-image-container {
     order: 2;
-    width: 90%;
+    width: 80%;
+    max-width: 500px;
     margin: 0 auto;
     padding-left: 0;
   }
   
   .navigate-buttons {
     justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .navigate-section {
+    padding: 3rem 5%;
+  }
+  
+  .navigate-title {
+    font-size: 1.6rem;
+  }
+  
+  .navigate-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .navigate-image-container {
+    width: 90%;
+  }
+  
+  .navigate-buttons {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .navigate-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .navigate-section {
+    padding: 2.5rem 4%;
+  }
+  
+  .navigate-content {
+    max-width: 100%;
+  }
+  
+  .navigate-image-container {
+    width: 95%;
+    min-width: auto;
+  }
+  
+  .navigate-description {
+    font-size: 0.95rem;
+  }
+}
+
+.insights-link-container {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.insights-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #3E5C2B;
+  color: white;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  gap: 10px;
+}
+
+.insights-link-button i {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.insights-link-button:hover {
+  background-color: #4d7234;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.insights-link-button:hover i {
+  transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+  .insights-link-container {
+    margin-top: 2rem;
+  }
+  
+  .insights-link-button {
+    padding: 12px 28px;
   }
 }
 </style>

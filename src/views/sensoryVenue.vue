@@ -514,7 +514,7 @@ const paginationRange = computed(() => {
     return rangeWithDots;
 });
 
-// 地区分组数据
+// location data grouped by region
 const locationsByRegion = computed(() => {
   const grouped = {
     'Melbourne CBD': [],
@@ -523,7 +523,7 @@ const locationsByRegion = computed(() => {
     'Other Areas': []
   };
   
-  // 根据地址分配到不同区域
+  // assign to different regions based on address
   locations.value.forEach(loc => {
     if (loc.includes('Melbourne') && (loc.includes('3000') || loc.includes('3006'))) {
       grouped['Melbourne CBD'].push(loc);
@@ -537,7 +537,7 @@ const locationsByRegion = computed(() => {
     }
   });
   
-  // 过滤掉空数组
+  // filter out empty arrays
   Object.keys(grouped).forEach(key => {
     if (grouped[key].length === 0) {
       delete grouped[key];
@@ -594,11 +594,6 @@ const selectSensoryFeature = (category) => {
 const clearAllFilters = () => {
   searchQuery.value = '';
   selectedSensoryCategory.value = null;
-  // 移除不再需要的筛选器
-  // selectedLocation.value = null;
-  // selectedVenueType.value = null;
-  
-  // 重新获取数据
   fetchVenues(1);
 };
 
@@ -622,13 +617,13 @@ const clearAllFilters = () => {
   font-family: 'Inter', sans-serif;
 }
 
-/* 新的Hero Banner样式 */
+/* new hero banner style */
 .hero-banner {
   position: relative;
   width: 100%;
-  height: 500px; /* 从400px增加到500px */
+  height: 500px;
   overflow: hidden;
-  margin-bottom: 0; /* 移除底部边距 */
+  margin-bottom: 0;
 }
 
 .hero-image-container {
@@ -640,7 +635,7 @@ const clearAllFilters = () => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 50%; /* 图片中心偏上 */
+  object-position: center 50%;
 }
 
 .hero-text-overlay {
@@ -651,8 +646,8 @@ const clearAllFilters = () => {
   height: 100%;
   display: flex;
   align-items: center;
-  justify-content: center; /* 水平居中 */
-  background: rgba(255, 255, 255, 0.5); /* 半透明白色背景 */
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .text-center {
@@ -660,7 +655,7 @@ const clearAllFilters = () => {
 }
 
 .main-title { 
-  color: #4d2f20 !important; /* 确保使用棕色 */
+  color: #4d2f20 !important;
   font-size: 2.7rem; 
   font-weight: 700; 
   margin-bottom: 1rem; 
@@ -668,7 +663,7 @@ const clearAllFilters = () => {
 }
 
 .main-subtitle { 
-  color: #4d2f20 !important; /* 确保使用棕色 */
+  color: #4d2f20 !important;
   font-size: 1.3rem; 
   margin-bottom: 0; 
   line-height: 1.6;
@@ -678,7 +673,7 @@ const clearAllFilters = () => {
   text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
 }
 
-/* 搜索容器样式 */
+/* search container style */
 .search-container {
   background-color: #f8f9fa;
   padding-top: 0;
@@ -699,7 +694,7 @@ const clearAllFilters = () => {
   position: relative;
   z-index: 10;
   padding: 1.5rem;
-  margin-top: -20px; /* 向上偏移以减少空白 */
+  margin-top: -20px;
 }
 .filter-select, .form-control {
     border-radius: 8px;
@@ -868,7 +863,7 @@ const clearAllFilters = () => {
   -webkit-box-orient: vertical;
 }
 
-/* 自定义分页样式 */
+/* custom pagination style */
 .pagination-custom {
   display: flex;
   padding-left: 0;
@@ -922,7 +917,7 @@ const clearAllFilters = () => {
   border-color: #dee2e6;
 }
 
-/* 搜索栏增强样式 */
+/* search bar enhanced style */
 .search-box-container {
   margin-bottom: 0.5rem;
 }
@@ -987,7 +982,7 @@ const clearAllFilters = () => {
   font-size: 1.1rem;
 }
 
-/* 筛选器卡片 */
+/* filter card */
 .filter-card {
   background-color: white;
   border-radius: 10px;
@@ -1054,7 +1049,7 @@ const clearAllFilters = () => {
   color: #dc3545;
 }
 
-/* 搜索结果头部增强 */
+/* search result header enhanced */
 .search-result-header {
   background-color: #f8f7f6;
   border-radius: 10px;
@@ -1089,7 +1084,7 @@ const clearAllFilters = () => {
   font-weight: 600;
 }
 
-/* 清除搜索按钮增强 */
+/* clear search button enhanced */
 .clear-search-btn {
   background-color: #f8f9fa;
   color: #4d2f20;
@@ -1112,7 +1107,7 @@ const clearAllFilters = () => {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* 信息卡片样式 */
+/* info card style */
 .info-card {
   background-color: #f8f7f0;
   border-radius: 15px;
@@ -1187,10 +1182,10 @@ const clearAllFilters = () => {
   font-style: italic;
 }
 
-/* 响应式调整 */
+/* responsive adjustment */
 @media (max-width: 991.98px) {
   .info-card-img-container {
-    padding-top: 66.67%; /* 2:3比例 */
+    padding-top: 66.67%;
   }
 }
 
@@ -1211,7 +1206,7 @@ const clearAllFilters = () => {
   }
 }
 
-/* FAQ 部分样式 */
+/* FAQ section style */
 .faq-section {
   padding-top: 3rem;
   background-color: transparent;

@@ -25,12 +25,10 @@
     </div>
     <!-- ===== End Intro Section ===== -->
 
-
-    <!-- ===== 改为左右布局的场景选择部分 ===== -->
     <div class="scene-selection-section">
       <div class="container">
         <div class="row">
-          <!-- 左侧文字说明 -->
+          <!-- left description -->
           <div class="col-md-5" data-aos="fade-right" data-aos-duration="800">
             <div class="intro-text-container">
               <h2 class="intro-title">Prepare for a Successful Outing</h2>
@@ -40,7 +38,7 @@
             </div>
           </div>
           
-          <!-- 右侧场景卡片 -->
+          <!-- right scene cards -->
           <div class="col-md-7" data-aos="fade-left" data-aos-duration="800">
             <h3 class="scene-selection-heading">Choose a Scene:</h3>
             <div class="scene-cards-grid">
@@ -358,7 +356,7 @@
 <script setup>
 // Script content remains IDENTICAL
 import { ref, onMounted, watch, computed } from 'vue';
-  import axios from 'axios';
+import axios from 'axios';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import MyNavBar from '../components/test/MyNavBar.vue';
@@ -937,7 +935,7 @@ select option:checked {
   margin-bottom: 0.5rem;
 }
 
-/* 感官卡片容器样式 */
+/* sensory card container style */
 .expectations-container {
   background-color: #f8f9fa;
   border-radius: 10px;
@@ -947,7 +945,7 @@ select option:checked {
   border: 1px solid #e0e0e0;
 }
 
-/* 场景背景样式 */
+/* scene background style */
 .scene-bg-1 {
   background-image: url('/scenes/medical-bg.png');
 }
@@ -964,13 +962,12 @@ select option:checked {
   background-image: url('/scenes/school-bg.png');
 }
 
-/* ===== 新添加的场景选择部分样式 ===== */
 .scene-selection-section {
   padding: 4rem 0;
   background-color: #F8EFED;
 }
 
-/* 左侧文字容器 */
+/* left text container */
 .intro-text-container {
   padding: 1.5rem;
   height: 100%;
@@ -1017,7 +1014,7 @@ select option:checked {
   color: #4d2f20;
 }
 
-/* 右侧场景卡片 */
+/* right scene cards */
 .scene-selection-heading {
   color: #4d2f20;
   font-size: 1.3rem;
@@ -1089,7 +1086,7 @@ select option:checked {
   line-height: 1.5;
 }
 
-/* 感官期望部分样式 */
+/* sensory expectations section style */
 .sensory-expectations-section {
   padding: 3rem 0 5rem;
   background-color: #f8f9fa;
@@ -1118,7 +1115,7 @@ select option:checked {
   min-height: 450px;
 }
 
-/* 左侧图片容器 */
+/* left image container */
 .sensory-image-container {
   flex: 1;
   border-radius: 16px;
@@ -1129,7 +1126,7 @@ select option:checked {
   position: relative;
 }
 
-/* 右侧卡片容器 */
+/* right card container */
 .sensory-cards-container {
   flex: 1;
   display: flex;
@@ -1180,7 +1177,7 @@ select option:checked {
   line-height: 1.5;
 }
 
-/* 响应式设计 */
+/* responsive design */
 @media (max-width: 991px) {
   .sensory-content-container {
     flex-direction: column;
@@ -1219,7 +1216,7 @@ select option:checked {
   }
 }
 
-/* 音频播放器样式 */
+/* audio player style */
 .audio-controls {
   display: flex;
   flex-direction: column;
@@ -1262,17 +1259,17 @@ select option:checked {
   transform: scale(1.05);
 }
 
-/* 播放图标 - 三角形 */
+/* play icon - triangle */
 .play-icon {
   width: 0;
   height: 0;
   border-style: solid;
   border-width: 8px 0 8px 12px;
   border-color: transparent transparent transparent #ffffff;
-  margin-left: 2px; /* 微调使三角形在视觉上居中 */
+  margin-left: 2px;
 }
 
-/* 暂停图标 - 两个竖条 */
+/* pause icon - two vertical bars */
 .pause-icon {
   width: 12px;
   height: 14px;
