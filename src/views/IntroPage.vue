@@ -56,13 +56,13 @@
   }
   
   .intro-content {
-    max-width: 2000px; /* 增加容器宽度 */
+    max-width: 2000px;
     width: 80%;
     margin: 0 auto;
-    padding: 3rem; /* 增加内边距 */
+    padding: 3rem;
     background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 20px; /* 增加圆角 */
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); /* 增强阴影效果 */
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
     animation: fadeIn 1s ease-in-out;
   }
   
@@ -73,18 +73,18 @@
   
   .main-title {
     color: #4d2f20;
-    font-size: 2.5rem; /* 增大标题 */
+    font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 1rem;
   }
   
   .main-subtitle {
     color: #4d2f20;
-    font-size: 1.2rem; /* 增大副标题 */
+    font-size: 1.2rem; 
     margin-bottom: 2.5rem;
   }
   
-  /* 横向布局容器 */
+  /* horizontal layout container */
   .flex-container {
     display: flex;
     flex-direction: row;
@@ -130,15 +130,15 @@
   
   .journey-title {
     color: #3E5C2B;
-    font-size: 2rem; /* 增大标题 */
+    font-size: 2rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
   }
   
   .journey-description {
     color: #4d2f20;
-    font-size: 1.1rem; /* 增大字体 */
-    line-height: 1.7; /* 增加行高 */
+    font-size: 1.1rem;
+    line-height: 1.7;
     margin-bottom: 1.5rem;
   }
   
@@ -146,26 +146,26 @@
     display: inline-block;
     background-color: #3E5C2B;
     color: white;
-    font-size: 1.4rem; /* 增大按钮字体 */
-    border-radius: 12px; /* 增加圆角 */
-    padding: 14px 40px; /* 增加内边距 */
+    font-size: 1.4rem;
+    border-radius: 12px;
+    padding: 14px 40px;
     border: none;
     transition: all 0.3s ease;
     margin-top: 1.8rem;
-    box-shadow: 0 4px 15px rgba(62, 92, 43, 0.3); /* 增强阴影 */
+    box-shadow: 0 4px 15px rgba(62, 92, 43, 0.3);
     text-decoration: none;
-    letter-spacing: 0.5px; /* 添加字间距 */
+    letter-spacing: 0.5px;
     width: 230px;
   }
   
   .start-journey-button:hover {
     background-color: #4a6e34;
-    transform: translateY(-4px); /* 增加悬停效果 */
+    transform: translateY(-4px);
     box-shadow: 0 8px 25px rgba(62, 92, 43, 0.4);
     color: white;
   }
   
-  /* 响应式样式 */
+  /* responsive style */
   @media (max-width: 768px) {
     .main-title {
       font-size: 2.4rem;
@@ -193,7 +193,7 @@
       width: 95%;
     }
     
-    /* 平板设备上转为垂直排列 */
+    /* tablet device */
     .flex-container {
       flex-direction: column;
       gap: 1.5rem;
@@ -209,7 +209,7 @@
     }
   }
   
-  /* 中等屏幕：介于 769px 到 1024px 之间 */
+/* medium screen: between 769px and 1024px */
 @media (max-width: 1024px) and (min-width: 769px) {
   .intro-content {
     width: 90%;
@@ -228,7 +228,7 @@
   }
 }
 
-/* 小屏幕：手机 */
+/* small screen: mobile phone */
 @media (max-width: 768px) {
   .intro-content {
     width: 95%;

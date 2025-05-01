@@ -26,15 +26,24 @@
     <!-- Main Detection Section Container -->
     <div class="interactive-section-container container my-4">
       <div class="interactive-content mx-auto">
-        <!-- Back Button (改为靠左对齐) -->
+        <!-- Back Button -->
         <div class="text-left mb-3">
           <button class="btn btn-secondary" @click="goBack">
             <i class="fas fa-arrow-left me-2"></i> Back
           </button>
         </div>
         <!-- Step Title -->
-        <h3 class="step-title mb-4">3. Upload the item to check whether it is suitable</h3>
+        <h3 class="step-title mb-3">3. Is this item suitable to bring?</h3>
+        <p class="step-subtitle mb-4">Let's check if what you plan to bring fits the needs of your child in this environment.</p>
 
+        <!-- add image -->
+        <div class="check-item-image-container mb-4">
+          <img 
+            src="/check-item.png" 
+            alt="Check if item is suitable" 
+            class="check-item-image" 
+          />
+        </div>
 
         <!-- File Upload Card -->
         <div class="upload-card mb-4">
@@ -68,19 +77,19 @@
               
               <div class="mt-3 d-flex justify-content-center">
                 <button 
+                  class="btn btn-reset me-3" 
+                  @click="resetDetection"
+                  v-if="selectedFile"
+                >
+                  <i class="fas fa-undo me-2"></i> Reset
+                </button>
+                <button 
                   class="btn btn-action" 
                   @click="analyzeImage" 
                   :disabled="!selectedFile || isLoading"
                 >
                   <i class="fas fa-search me-2"></i>
-                  {{ isLoading ? 'Analyzing...' : 'Analyze Item' }}
-                </button>
-                <button 
-                  class="btn btn-reset ms-3" 
-                  @click="resetDetection"
-                  v-if="selectedFile"
-                >
-                  <i class="fas fa-undo me-2"></i> Reset
+                  {{ isLoading ? 'Analysing...' : 'Analyse Item' }}
                 </button>
               </div>
             </div>
@@ -92,7 +101,7 @@
           <div class="spinner-border text-primary-custom" role="status">
             <span class="visually-hidden">Loading...</span>
       </div>
-          <p class="loading-text mt-2">Analyzing your item...</p>
+          <p class="loading-text mt-2">Analysing your item...</p>
         </div>
 
         <!-- Results Section -->
@@ -105,93 +114,101 @@
                 Detection Results
               </h4>
 
-              <!-- Item description from image analysis -->
-              <div class="item-description mb-4" v-if="results.description && results.description.captions.length">
-                <h5 class="section-subtitle">We detected:</h5>
-                <p class="description-text">
-                  {{ results.description.captions[0].text }}
-                </p>
+          <!-- Item description from image analysis -->
+          <div class="item-description mb-4" v-if="results.description && results.description.captions.length">
+            <h5 class="section-subtitle">We detected:</h5>
+            <p class="description-text">
+              {{ results.description.captions[0].text }}
+            </p>
       </div>
       
-              <!-- Detection Status -->
-              <div v-if="isSuitableItem" class="detection-status success">
-                <div class="status-icon">
-                  <i class="fas fa-check-circle"></i>
+          <!-- Detection Status -->
+          <div v-if="isSuitableItem" class="detection-status success">
+            <div class="status-icon">
+              <i class="fas fa-check-circle"></i>
           </div>
-                <div class="status-message">
-                  <h5>This item is suitable!</h5>
-                  <p>This matches our recommended items list for this activity.</p>
+          <div class="status-message">
+            <h5>This item is suitable!</h5>
+            <p>This matches our recommended items list for this activity.</p>
           </div>
         </div>
         
-              <div v-else class="detection-status warning">
-                <div class="status-icon">
-                  <i class="fas fa-exclamation-circle"></i>
+          <div v-else class="detection-status warning">
+            <div class="status-icon">
+              <i class="fas fa-exclamation-circle"></i>
         </div>
-                <div class="status-message">
-                  <h5>This item might not be suitable</h5>
-                  <p>We couldn't find this item in our recommended list.</p>
+            <div class="status-message">
+              <h5>This item might not be essential for this outing.</h5>
+              <p>It’s not included in our top recommended list for this scenario, but feel free to bring it if it helps your child.</p>
         </div>
         </div>
         
-              <!-- Detected Labels -->
-              <div class="detected-labels mt-4">
-                <h5 class="section-subtitle">Detected Labels:</h5>
-                <div class="labels-container">
-                  <span 
-                    v-for="(tag, index) in results.tags" 
-                    :key="'tag-'+index" 
-                    class="label-tag"
-                    :class="{ 'label-matched': matchedTerms.includes(tag.name.toLowerCase()) }"
-                  >
-                    {{ tag.name }}
-                    <i v-if="matchedTerms.includes(tag.name.toLowerCase())" class="fas fa-check ms-1"></i>
-                  </span>
+        <!--
+        <div class="detected-labels mt-4">
+          <h5 class="section-subtitle">Detected Labels:</h5>
+          <div class="labels-container">
+            <span 
+              v-for="(tag, index) in results.tags" 
+              :key="'tag-'+index" 
+              class="label-tag"
+              :class="{ 'label-matched': matchedTerms.includes(tag.name.toLowerCase()) }"
+            >
+              {{ tag.name }}
+              <i v-if="matchedTerms.includes(tag.name.toLowerCase())" class="fas fa-check ms-1"></i>
+            </span>
+          </div>
+        </div>
+        -->
+
+        
+        <!-- Recommended Items -->
+        <div class="recommended-items mt-4">
+          <h5 class="section-subtitle">Consider bringing these recommended items:</h5>
+          <ul class="checklist">
+            <li v-for="item in checklistItems" :key="item.id" class="checklist-item">
+              <div class="checklist-item-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+
+              <div class="checklist-item-content">
+                <div class="item-row">
+                  <div class="item-text">
+                    <strong>{{ item.title }}</strong>
+                    <p class="item-description">{{ item.description }}</p>
+                  </div>
+                  <div class="item-image-container" v-if="item.image_url">
+                    <img 
+                      :src="getImageUrl(item)" 
+                      :alt="item.title"
+                      class="item-image"
+                      @error="handleImageError($event, item)"
+                      @load="onImageLoaded(item)"
+                    >
+                  </div>
                 </div>
-        </div>
-        
-              <!-- Recommended Items -->
-              <div class="recommended-items mt-4">
-                <h5 class="section-subtitle">Consider bringing these recommended items:</h5>
-                <ul class="checklist">
-                  <li v-for="item in checklistItems" :key="item.id" class="checklist-item">
-                    <div class="checklist-item-icon">
-                      <i class="fas fa-check-circle"></i>
-                    </div>
-                    <div class="checklist-item-content">
-                      <strong>{{ item.title }}</strong>
-                      <p class="item-description">{{ item.description }}</p>
-                      <div class="item-image-container" v-if="item.image_url">
-                        <img 
-                          :src="getImageUrl(item)" 
-                          :alt="item.title"
-                          class="item-image"
-                          @error="handleImageError($event, item)"
-                          @load="onImageLoaded(item)"
-                        >
-                      </div>
-                    </div>
+              </div>
             </li>
+
           </ul>
         </div>
         
-              <!-- Navigation Buttons -->
-              <div class="text-center mt-4">
-                <button class="btn btn-secondary me-3" @click="goBack">
-                  <i class="fas fa-arrow-left me-2"></i> Back
-                </button>
-                <button class="btn btn-action" @click="goToNext">
-                  Next Step <i class="fas fa-arrow-right ms-2"></i>
+        <!-- Navigation Buttons -->
+        <div class="text-center mt-4">
+          <button class="btn btn-secondary me-3" @click="goBack">
+            <i class="fas fa-arrow-left me-2"></i> Back
+          </button>
+          <button class="btn btn-action" @click="goToNext">
+            View My Summary <i class="fas fa-arrow-right ms-2"></i>
               </button>
-              </div>
-            </div>
-          </div>
         </div>
-
+      </div>
+        </div>
+      </div>
+      
         <!-- Error Message -->
         <div v-if="error" class="alert alert-danger error-box mx-auto" style="max-width: 700px;">
           <strong>Error:</strong> {{ error }}
-          <p class="mb-0 mt-1"><small>Unable to analyze the image. Please try again with a clearer photo.</small></p>
+          <p class="mb-0 mt-1"><small>Unable to analyse the image. Please try again with a clearer photo.</small></p>
         </div>
       </div>
     </div>
@@ -253,7 +270,7 @@ import { useRouter, useRoute } from 'vue-router';
       return matchedTerms.value.length > 0;
     });
 
-    // 根据场景ID获取场景标题
+    // get scene title based on sceneId
     const getSceneTitleText = computed(() => {
       switch(sceneId.value) {
         case 1:
@@ -387,7 +404,7 @@ import { useRouter, useRoute } from 'vue-router';
           checklistItems.value = checklistResponse.data.data;
           console.log("加载了物品列表:", checklistItems.value);
           
-          // 检查接收到的数据是否包含image_url
+          // check if the received data contains image_url
           const hasImages = checklistItems.value.some(item => item.image_url);
           console.log("是否有图片URL:", hasImages);
           if (!hasImages) {
@@ -425,20 +442,20 @@ import { useRouter, useRoute } from 'vue-router';
 
     const handleImageError = (event, item) => {
       console.log(`图片加载失败: ${item.title}`, event);
-      // 使用通用的占位图
+      // use a generic placeholder image
       event.target.src = `${IMAGE_BASE_URL}/Sunglasses.png`;
     };
 
     const getImageUrl = (item) => {
       if (!item.image_url) return null;
       
-      // 检查特殊情况
+      // check special cases
       if (item.title === "Fun-pattern bandage or sticker" && 
           item.image_url === "Fun-pattern bandage.png") {
         return `${IMAGE_BASE_URL}/Fun-pattern bandage.png`;
       }
 
-      // 常规情况
+      // normal cases
       return `${IMAGE_BASE_URL}/${item.image_url}`;
     };
 
@@ -573,10 +590,19 @@ import { useRouter, useRoute } from 'vue-router';
 
 .step-title {
   color: #4d2f20;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  font-size: 1.6rem;
   text-align: center;
+}
+
+.step-subtitle {
+  color: #666;
+  font-size: 1.1rem;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 1.5rem;
+  line-height: 1.5;
 }
 
 /* File Upload Section */
@@ -591,12 +617,17 @@ import { useRouter, useRoute } from 'vue-router';
 .file-drop-area {
   border: 2px dashed #ccc;
     border-radius: 8px;
-  padding: 2rem;
+  padding: 3.5rem;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
   background-color: #f8f9fa;
   position: relative;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .file-drop-area.dragging {
@@ -649,6 +680,15 @@ import { useRouter, useRoute } from 'vue-router';
   margin-bottom: 1rem;
 }
 
+.upload-prompt {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
 .upload-prompt p {
   font-size: 1.15rem;
   color: #666;
@@ -656,14 +696,18 @@ import { useRouter, useRoute } from 'vue-router';
 }
 
 .image-preview-container {
-  max-height: 300px;
+  max-height: 400px;
   overflow: hidden;
   border-radius: 6px;
-}
-
+  display: flex;
+  justify-content: center;
+  align-items: center;
+    width: 100%;
+  }
+  
 .image-preview {
   max-width: 100%;
-  max-height: 300px;
+  max-height: 400px;
   object-fit: contain;
 }
 
@@ -762,24 +806,25 @@ import { useRouter, useRoute } from 'vue-router';
 .detection-status {
   display: flex;
   align-items: flex-start;
-  padding: 1.25rem;
-  border-radius: 8px;
+  padding: 2rem;
+  border-radius: 12px;
   margin: 1.5rem 0;
 }
 
 .detection-status.success {
   background-color: #f0f7ed;
-  border-left: 4px solid #3E5C2B;
+  border-left: 6px solid #3E5C2B;
 }
 
 .detection-status.warning {
   background-color: #fff8e6;
-  border-left: 4px solid #e59700;
+  border-left: 6px solid #e59700;
 }
 
 .status-icon {
-  font-size: 2rem;
-  margin-right: 1rem;
+  font-size: 3.5rem;
+  margin-right: 1.5rem;
+  flex-shrink: 0;
 }
 
 .detection-status.success .status-icon {
@@ -792,13 +837,16 @@ import { useRouter, useRoute } from 'vue-router';
 
 .status-message h5 {
   color: #4d2f20;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
 }
 
 .status-message p {
     color: #666;
   margin-bottom: 0;
+  font-size: 1.15rem;
+  line-height: 1.5;
   }
   
 /* Detected Labels */
@@ -880,7 +928,7 @@ import { useRouter, useRoute } from 'vue-router';
   width: 100%;
   height: auto;
   object-fit: cover;
-  display: block;
+    display: block;
   transition: transform 0.3s ease;
 }
 
@@ -917,6 +965,20 @@ import { useRouter, useRoute } from 'vue-router';
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
+/* 新增的图片容器样式 */
+.check-item-image-container {
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto 2rem;
+}
+
+.check-item-image {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
 @media (max-width: 768px) {
   .hero-banner {
     height: 300px;
@@ -944,4 +1006,33 @@ import { useRouter, useRoute } from 'vue-router';
 .text-left {
   text-align: left;
   }
+/* 横向排列文字和图片 */
+.item-row {
+    display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.item-text {
+  flex: 1 1 60%;
+}
+
+.item-image-container {
+  flex: 0 0 150px;
+  max-width: 150px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.item-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
   </style>
+
+

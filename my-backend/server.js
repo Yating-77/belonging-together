@@ -430,7 +430,7 @@ app.get('/api/scenes/:sceneId/checklist', async (req, res) => {
       [sceneIdInt]
     );
 
-    // 为每个物品添加完整的图片URL
+    // add the full image URL for each item
     const itemsWithImagePath = result.rows.map(item => ({
       ...item,
       image_url: item.image_url || null
@@ -485,8 +485,134 @@ app.get('/api/scenes/:sceneId/terms', async (req, res) => { // Renamed from /key
   }
 });
 
+/*
+  Get data for Autism Prevalence Trend Chart
+ */
+  app.get('/api/charts/prevalence-trends', async (req, res) => {
+    console.log('Request received for /api/charts/prevalence-trends');
+    try {
+      const result = await pool.query(`
+        SELECT age_group, prevalence_2015, prevalence_2018, prevalence_2022
+        FROM autism_prevalence_by_age
+        ORDER BY
+          CASE age_group
+            WHEN '0-4' THEN 1
+            WHEN '5-9' THEN 2
+            WHEN '10-14' THEN 3
+            WHEN '15-19' THEN 4
+            ELSE 5
+          END;
+      `);
+  
+      // Transform data for ECharts line chart
+      const xAxisData = result.rows.map(row => row.age_group);
+      const seriesData = [
+        { name: '2015', type: 'line', data: result.rows.map(row => row.prevalence_2015) },
+        { name: '2018', type: 'line', data: result.rows.map(row => row.prevalence_2018) },
+        { name: '2022', type: 'line', data: result.rows.map(row => row.prevalence_2022) }
+      ];
+  
+      console.log('Sending data for prevalence trends chart');
+      res.json({ success: true, data: { xAxis: xAxisData, series: seriesData } });
+  
+    } catch (error) {
+      console.error('Error fetching prevalence trend data:', error);
+      res.status(500).json({ success: false, error: 'Internal server error', details: error.message });
+    }
+  });
+  
+  /*
+    Get data for Autism Gender/Age Chart
+   */
+  app.get('/api/charts/gender-age-prevalence', async (req, res) => {
+    console.log('Request received for /api/charts/gender-age-prevalence');
+    try {
+      const result = await pool.query(`
+        SELECT age_group, autistic_percent, ci_lower, ci_upper, gender
+        FROM autism_gender_age
+        ORDER BY
+          CASE age_group
+            WHEN '0-4' THEN 1
+            WHEN '5-14' THEN 2
+            ELSE 3
+          END,
+          gender;
+      `);
+  
+      // Transform data for ECharts grouped bar chart
+      const xAxisData = [...new Set(result.rows.map(row => row.age_group))].sort((a, b) => {
+          // Custom sort for age groups
+          const order = {'0-4': 1, '5-14': 2};
+          return (order[a] || 99) - (order[b] || 99);
+      });
+  
+      const seriesMap = {}; // Use a map for easier construction
+  
+      result.rows.forEach(row => {
+        const genderLower = row.gender.toLowerCase();
+        if (!seriesMap[genderLower]) {
+          seriesMap[genderLower] = {
+            name: genderLower, // Frontend expects 'male'/'female'
+            type: 'bar',
+            data: new Array(xAxisData.length).fill(null), // Initialize with nulls
+            // Prepare markLine data structure if needed by frontend directly
+            markLineData: []
+          };
+        }
+  
+        const index = xAxisData.indexOf(row.age_group);
+        if (index !== -1) {
+          seriesMap[genderLower].data[index] = row.autistic_percent;
+          // Add markLine data for this specific bar
+          seriesMap[genderLower].markLineData.push([
+             { name: `${genderLower}-${row.age_group}-lower`, coord: [index, row.ci_lower], symbol: 'none' },
+             { name: `${genderLower}-${row.age_group}-upper`, coord: [index, row.ci_upper], symbol: 'none' }
+          ]);
+        }
+      });
+  
+      // Convert map values to array
+      const seriesData = Object.values(seriesMap);
+  
+      console.log('Sending data for gender/age prevalence chart');
+      res.json({ success: true, data: { xAxis: xAxisData, series: seriesData } });
+  
+    } catch (error) {
+      console.error('Error fetching gender/age prevalence data:', error);
+      res.status(500).json({ success: false, error: 'Internal server error', details: error.message });
+    }
+  });
+  
+  /*
+    Get data for Autism Behavior Difficulty Chart
+   */
+  app.get('/api/charts/behavioral-difficulties', async (req, res) => {
+    console.log('Request received for /api/charts/behavioral-difficulties');
+    try {
+      // Order by percentage ASC to match the frontend's current Y-axis order
+      const result = await pool.query(`
+        SELECT behavior_difficulty, proportion_percent
+        FROM autism_behavior_difficulty
+        ORDER BY proportion_percent ASC;
+      `);
+  
+      // Transform data for ECharts horizontal bar chart
+      const yAxisData = result.rows.map(row => row.behavior_difficulty);
+      const seriesData = result.rows.map(row => row.proportion_percent);
+  
+      console.log('Sending data for behavioral difficulties chart');
+      res.json({ success: true, data: { yAxis: yAxisData, seriesData: seriesData } });
+  
+    } catch (error) {
+      console.error('Error fetching behavioral difficulty data:', error);
+      res.status(500).json({ success: false, error: 'Internal server error', details: error.message });
+    }
+  });
+  
+
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${port}`);
+  console.log(`Chart API available at http://localhost:${port}/api/charts/`);
   console.log(`API available at http://localhost:${port}/api/`);
 });

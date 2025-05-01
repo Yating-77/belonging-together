@@ -21,51 +21,60 @@
       <div class="search-container">
         <div class="container">
           <div class="filter-section py-4">
+            <!-- Main Search Row -->
             <div class="row g-3 justify-content-center">
-              <!-- Search Bar -->
-              <div class="col-lg-4 col-md-12">
-                <div class="input-group search-input-group">
-                  <span class="input-group-text search-icon"><i class="fas fa-search"></i></span>
-                  <input
-                    type="text"
-                    class="form-control search-input"
-                    placeholder="Search by name or keyword..."
-                    v-model.lazy="searchQuery"
-                    @keyup.enter="applyFilters"
-                  />
+              <!-- Search Bar with Button -->
+              <div class="col-lg-12 col-md-12">
+                <div class="search-box-container">
+                  <div class="input-group search-input-group">
+                    <span class="input-group-text search-icon">
+                      <i class="fas fa-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      class="form-control search-input"
+                      placeholder="Search by name or keyword..."
+                      v-model="searchQuery"
+                      @keyup.enter="applyFilters"
+                    />
+                    <button v-if="searchQuery" 
+                      class="input-group-text clear-input-btn" 
+                      @click="clearSearchQuery">
+                      <i class="fas fa-times"></i>
+                    </button>
+                    <button class="btn btn-search" @click="applyFilters">
+                      Search
+                    </button>
+                  </div>
+                  
+                  <!-- Search Tips -->
+                  
                 </div>
               </div>
-              <!-- Filters -->
-              <div class="col-lg-8 col-md-12">
-                <div class="row g-2">
-                  <div class="col-md-4 col-sm-12">
-                    <select class="form-select filter-select" v-model="selectedSensoryCategory" @change="applyFilters">
-                      <option :value="null">All Sensory Features</option>
-                      <option v-for="cat in sensoryCategories" :key="cat" :value="cat">{{ cat }}</option>
-                    </select>
+            </div>
+            
+            <!-- Sensory Features Filter -->
+            <div class="row mt-4 justify-content-center">
+              <div class="col-lg-12 col-md-12">
+                <div class="filter-card">
+                  <div class="filter-label mb-2">
+                    <i class="fas fa-filter me-2"></i> Filter by Sensory Features:
                   </div>
-                  <div class="col-md-4 col-sm-6">
-                    <select class="form-select filter-select" v-model="selectedLocation" @change="applyFilters">
-                      <option :value="null">All Locations</option>
-                      <optgroup v-if="locationsByRegion['Melbourne CBD']" label="Melbourne CBD">
-                        <option v-for="loc in locationsByRegion['Melbourne CBD']" :key="loc" :value="loc">{{ loc }}</option>
-                      </optgroup>
-                      <optgroup v-if="locationsByRegion['Inner Suburbs']" label="Inner Suburbs">
-                        <option v-for="loc in locationsByRegion['Inner Suburbs']" :key="loc" :value="loc">{{ loc }}</option>
-                      </optgroup>
-                      <optgroup v-if="locationsByRegion['Eastern Suburbs']" label="Eastern Suburbs">
-                        <option v-for="loc in locationsByRegion['Eastern Suburbs']" :key="loc" :value="loc">{{ loc }}</option>
-                      </optgroup>
-                      <optgroup v-if="locationsByRegion['Other Areas']" label="Other Areas">
-                        <option v-for="loc in locationsByRegion['Other Areas']" :key="loc" :value="loc">{{ loc }}</option>
-                      </optgroup>
-                    </select>
-                  </div>
-                  <div class="col-md-4 col-sm-6">
-                    <select class="form-select filter-select" v-model="selectedVenueType" @change="applyFilters">
-                      <option :value="null">All Venue Types</option>
-                      <option v-for="type in venueTypes" :key="type" :value="type">{{ type }}</option>
-                    </select>
+                  <div class="filter-chips-container">
+                    <button 
+                      class="filter-chip" 
+                      :class="{ 'active': selectedSensoryCategory === null }"
+                      @click="selectSensoryFeature(null)">
+                      All Features
+                    </button>
+                    <button 
+                      v-for="cat in sensoryCategories" 
+                      :key="cat" 
+                      class="filter-chip"
+                      :class="{ 'active': selectedSensoryCategory === cat }"
+                      @click="selectSensoryFeature(cat)">
+                      {{ cat }}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -76,10 +85,12 @@
   
       <!-- Results Section with consistent styling -->
       <div class="results-section container mb-5">
-        <!-- 搜索结果标题栏 -->
+        <!-- search result title bar -->
         <div v-if="isFiltered" class="search-result-header mb-4">
           <div class="d-flex justify-content-between align-items-center">
-            <h2 class="search-results-title">Search Results</h2>
+            <h2 class="search-results-title">
+              <i class="fas fa-clipboard-list me-2"></i>Search Results
+            </h2>
             <button class="clear-search-btn" @click="clearAllFilters">
               <i class="fas fa-undo me-1"></i> Clear Search
             </button>
@@ -87,8 +98,6 @@
           <p class="search-summary mb-0">
             <span v-if="searchQuery">Keyword: <strong>{{ searchQuery }}</strong></span>
             <span v-if="selectedSensoryCategory"> | Sensory Feature: <strong>{{ selectedSensoryCategory }}</strong></span>
-            <span v-if="selectedLocation"> | Location: <strong>{{ selectedLocation }}</strong></span>
-            <span v-if="selectedVenueType"> | Venue Type: <strong>{{ selectedVenueType }}</strong></span>
           </p>
         </div>
   
@@ -116,9 +125,9 @@
           </button>
         </div>
   
-        <!-- Venues Grid with Info Cards - 使用两列布局 -->
+        <!-- Venues Grid with Info Cards - uses two-column layout -->
         <div v-else class="row g-4">
-          <!-- 场馆卡片区域 - 占据左侧8列 -->
+          <!-- venue card area - occupies left 8 columns -->
           <div class="col-lg-8">
             <div class="row g-4">
               <div v-for="venue in venues" :key="venue.id" class="col-md-6">
@@ -155,9 +164,9 @@
             </div>
           </div>
           
-          <!-- 信息卡片区域 - 占据右侧4列 -->
+          <!-- information card area - occupies right 4 columns -->
           <div class="col-lg-4">
-            <!-- 第一个信息卡片 -->
+            <!-- first information card -->
             <div class="info-card mb-4" data-aos="fade-left">
               <div class="info-card-img-container">
                 <img src="@/assets/sensory-hours.png" alt="Sensory-Friendly Hours" class="info-card-img">
@@ -174,7 +183,7 @@
               </div>
             </div>
             
-            <!-- 第二个信息卡片 -->
+            <!-- second information card -->
             <div class="info-card" data-aos="fade-left" data-aos-delay="200">
               <div class="info-card-img-container">
                 <img src="@/assets/staff-trained.png" alt="Staff Trained in Autism Support" class="info-card-img">
@@ -230,6 +239,92 @@
         </div>
       </div>
   
+      <!-- FAQ Section -->
+      <div class="faq-section container mb-5">
+        <h2 class="faq-title">FAQs</h2>
+        
+        <div class="accordion" id="faqAccordion">
+          <!-- FAQ Item 1 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingOne">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                <div class="faq-question">What is a Sensory Map?</div>
+              </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                <p>A sensory map highlights spaces in a venue that support sensory needs. It helps families find calm zones, quiet areas, and sensory-friendly features.</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- FAQ Item 2 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingTwo">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                <div class="faq-question">Why is the Sensory Map useful for my child?</div>
+              </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                <p>It helps reduce uncertainty. By knowing where calming spaces are in advance, you and your child can plan breaks, avoid stressful spots, and feel more confident.</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- FAQ Item 3 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingThree">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                <div class="faq-question">What should I look for when I open the Sensory Map?</div>
+              </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                <p>Look for labels such as:</p>
+                <ul class="faq-list">
+                  <li><span class="faq-icon">🕰️</span> Sensory-Friendly Hours</li>
+                  <li><span class="faq-icon">🛋️</span> Quiet Rooms</li>
+                  <li><span class="faq-icon">🎧</span> Sensory Tools</li>
+                  <li><span class="faq-icon">🤝</span> Staff Trained in Autism Support</li>
+                  <li><span class="faq-icon">🟡</span> Low Sensory Zones</li>
+                  <li><span class="faq-icon">🟣</span> Sensory Opportunities</li>
+                </ul>
+                <p>These help you find supportive spaces during your visit.</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- FAQ Item 4 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFour">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                <div class="faq-question">Are the sensory features always available?</div>
+              </button>
+            </h2>
+            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                <p>Some features, like Quiet Rooms or Low Sensory Hours, may be available only during specific times. It's best to check with the venue directly before your visit.</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- FAQ Item 5 -->
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingFive">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                <div class="faq-question">Can I use the Sensory Map to plan with my child?</div>
+              </button>
+            </h2>
+            <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
+              <div class="accordion-body">
+                <p>Yes! You can explore the map together before your visit and talk through where they might feel safe or need a break. It builds predictability and reduces anxiety.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
       <MyFooter />
     </div>
   </template>
@@ -239,8 +334,8 @@
   import axios from 'axios';
   import AOS from 'aos';
   import 'aos/dist/aos.css';
-  import MyNavBar from '../components/test/MyNavBar.vue'; // Adjust path
-  import MyFooter from '../components/test/MyFooter.vue'; // Adjust path
+  import MyNavBar from '../components/test/MyNavBar.vue';
+  import MyFooter from '../components/test/MyFooter.vue';
   import { debounce } from 'lodash-es'; // Import debounce
   import { Modal } from 'bootstrap';
   
@@ -261,11 +356,11 @@
   
   const API_BASE_URL = 'http://localhost:3000/api';
   
-  // 添加 selectedVenue 状态
+  // add selectedVenue state
   const selectedVenue = ref(null);
   let descriptionModal = null;
   
-  // 判断是否有过滤条件
+  // check if there are any filters
   const isFiltered = computed(() => {
     return searchQuery.value || selectedSensoryCategory.value || selectedLocation.value || selectedVenueType.value;
   });
@@ -357,19 +452,19 @@
   
   const handleImageError = (event) => {
     console.warn(`Image failed to load: ${event.target.src}. Using placeholder.`);
-    // 修改为正确的后端图片路径
+    // modify to the correct backend image path
     event.target.src = 'http://localhost:3000/image/ngv.png';
   };
   
   const getImageUrl = (venue) => {
-    // 首选完整URL (如果有)
+    // first choose the full URL (if exists)
     if (venue.image_full_url && venue.image_full_url.startsWith('http')) {
       return venue.image_full_url;
     }
     
-    // 如果image_full_url存在但不是完整URL (可能只是路径)
+    // if image_full_url exists but is not a full URL
     if (venue.image_full_url) {
-      // 检查是否已经包含/image/前缀
+      // check if it already has /image/ prefix
       if (venue.image_full_url.startsWith('/image/')) {
         return `http://localhost:3000${venue.image_full_url}`;
       } else {
@@ -377,12 +472,12 @@
       }
     }
     
-    // 如果只有image_url (无前缀)
+    // if only image_url (no prefix)
     if (venue.image_url) {
       return `http://localhost:3000/image/${venue.image_url}`;
     }
     
-    // 兜底使用默认图片
+    // fallback to default image
     return 'http://localhost:3000/image/ngv.png';
   };
   
@@ -419,7 +514,7 @@
       return rangeWithDots;
   });
   
-  // 地区分组数据
+  // location data grouped by region
   const locationsByRegion = computed(() => {
     const grouped = {
       'Melbourne CBD': [],
@@ -428,7 +523,7 @@
       'Other Areas': []
     };
     
-    // 根据地址分配到不同区域
+    // assign to different regions based on address
     locations.value.forEach(loc => {
       if (loc.includes('Melbourne') && (loc.includes('3000') || loc.includes('3006'))) {
         grouped['Melbourne CBD'].push(loc);
@@ -442,7 +537,7 @@
       }
     });
     
-    // 过滤掉空数组
+    // filter out empty arrays
     Object.keys(grouped).forEach(key => {
       if (grouped[key].length === 0) {
         delete grouped[key];
@@ -471,10 +566,10 @@
   // });
   // Note: The @change="applyFilters" on the selects handles this directly now.
   
-  // 显示描述弹窗
+  // show description modal
   const showDescriptionModal = (venue) => {
     selectedVenue.value = venue;
-    // 确保DOM已加载
+    // ensure DOM is loaded
     nextTick(() => {
       if (!descriptionModal) {
         descriptionModal = new Modal(document.getElementById('descriptionModal'));
@@ -483,14 +578,27 @@
     });
   };
   
-  // 清除所有筛选条件
+  // add method: clear search query
+  const clearSearchQuery = () => {
+    searchQuery.value = '';
+    applyFilters();
+  };
+  
+  // add method: select sensory feature
+  const selectSensoryFeature = (category) => {
+    selectedSensoryCategory.value = category;
+    applyFilters();
+  };
+  
+  // modify the method: clear all filters
   const clearAllFilters = () => {
     searchQuery.value = '';
     selectedSensoryCategory.value = null;
-    selectedLocation.value = null;
-    selectedVenueType.value = null;
+    // remove the filters that are no longer needed
+    // selectedLocation.value = null;
+    // selectedVenueType.value = null;
     
-    // 重新获取数据
+    // get data again
     fetchVenues(1);
   };
   
@@ -514,13 +622,12 @@
     font-family: 'Inter', sans-serif;
   }
   
-  /* 新的Hero Banner样式 */
   .hero-banner {
     position: relative;
     width: 100%;
-    height: 500px; /* 从400px增加到500px */
+    height: 500px;
     overflow: hidden;
-    margin-bottom: 0; /* 移除底部边距 */
+    margin-bottom: 0;
   }
   
   .hero-image-container {
@@ -532,7 +639,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center 50%; /* 图片中心偏上 */
+    object-position: center 50%;
   }
   
   .hero-text-overlay {
@@ -543,8 +650,8 @@
     height: 100%;
     display: flex;
     align-items: center;
-    justify-content: center; /* 水平居中 */
-    background: rgba(255, 255, 255, 0.5); /* 半透明白色背景 */
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.5);
   }
   
   .text-center {
@@ -552,7 +659,7 @@
   }
   
   .main-title { 
-    color: #4d2f20 !important; /* 确保使用棕色 */
+    color: #4d2f20 !important;
     font-size: 2.7rem; 
     font-weight: 700; 
     margin-bottom: 1rem; 
@@ -560,7 +667,7 @@
   }
   
   .main-subtitle { 
-    color: #4d2f20 !important; /* 确保使用棕色 */
+    color: #4d2f20 !important;
     font-size: 1.3rem; 
     margin-bottom: 0; 
     line-height: 1.6;
@@ -570,14 +677,20 @@
     text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
   }
   
-  /* 搜索容器样式 */
+  /* search container style */
   .search-container {
     background-color: #f8f9fa;
     padding-top: 0;
     padding-bottom: 3rem;
   }
   
-  /* Filter Section */
+  .search-container .container,
+  .results-section.container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  /* filter section */
   .filter-section {
     background-color: white;
     border-radius: 12px;
@@ -585,7 +698,7 @@
     position: relative;
     z-index: 10;
     padding: 1.5rem;
-    margin-top: -20px; /* 向上偏移以减少空白 */
+    margin-top: -20px;
   }
   .filter-select, .form-control {
       border-radius: 8px;
@@ -754,7 +867,7 @@
     -webkit-box-orient: vertical;
   }
   
-  /* 自定义分页样式 */
+  /* custom pagination style */
   .pagination-custom {
     display: flex;
     padding-left: 0;
@@ -808,26 +921,31 @@
     border-color: #dee2e6;
   }
   
-  /* 搜索栏样式 */
+  /* search bar enhanced style */
+  .search-box-container {
+    margin-bottom: 0.5rem;
+  }
+  
+  .search-tips {
+    margin-top: 8px;
+    color: #6c757d;
+    text-align: left;
+    padding-left: 8px;
+  }
+  
   .search-input-group {
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid #3E5C2B;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  }
-  
-  .search-input-group .search-icon {
-    background-color: #3E5C2B;
-    border: none;
-    color: #ffffff;
-    padding: 0.6rem 1rem;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
   }
   
   .search-input {
     border: none;
     color: #4d2f20;
-    font-size: 0.95rem;
+    font-size: 1rem;
     padding: 0.6rem 1rem;
+    height: 50px;
   }
   
   .search-input::placeholder {
@@ -841,29 +959,186 @@
     color: #4d2f20;
   }
   
-  /* 下拉菜单样式调整 */
-  .filter-select {
-    border: 1px solid #3E5C2B;
-    color: #4d2f20;
+  .btn-search {
+    background-color: #3E5C2B;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    min-width: 110px;
+    transition: all 0.3s ease;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+  
+  .btn-search:hover {
+    background-color: #4d7234;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .search-icon {
+    background-color: white;
+    border: none;
+    color: #3E5C2B;
     padding: 0.6rem 1rem;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%233E5C2B' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    font-size: 1.1rem;
   }
   
-  .filter-select:focus {
-    border-color: #3E5C2B;
-    box-shadow: 0 0 0 0.25rem rgba(62, 92, 43, 0.25);
-  }
-  
-  /* 信息卡片样式 */
-  .info-card {
+  /* filter card */
+  .filter-card {
     background-color: white;
     border-radius: 10px;
+    padding: 15px 20px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    border-left: 4px solid #3E5C2B;
+    margin-bottom: 1rem;
+  }
+  
+  .filter-content {
+    display: flex;
+    align-items: center;
+  }
+  
+  .filter-label {
+    color: var(--text-brown);
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  
+  .filter-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: flex-start;
+  }
+  
+  .filter-chip {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #4d2f20;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+  
+  .filter-chip:hover {
+    background-color: #e9ecef;
+    border-color: #3E5C2B;
+    transform: translateY(-2px);
+  }
+  
+  .filter-chip.active {
+    background-color: #3E5C2B;
+    color: white;
+    border-color: #3E5C2B;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .clear-input-btn {
+    background-color: white;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .clear-input-btn:hover {
+    color: #dc3545;
+  }
+  
+  /* search result header enhanced */
+  .search-result-header {
+    background-color: #f8f7f6;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    border-left: 4px solid #3E5C2B;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .search-results-title {
+    color: #4d2f20;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  .search-results-title i {
+    color: #3E5C2B;
+  }
+  
+  .search-summary {
+    margin-top: 10px;
+    color: #666;
+    font-size: 0.95rem;
+  }
+  
+  .search-summary strong {
+    color: #3E5C2B;
+    font-weight: 600;
+  }
+  
+  /* clear search button enhanced */
+  .clear-search-btn {
+    background-color: #f8f9fa;
+    color: #4d2f20;
+    border: 1px solid #3E5C2B;
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+  
+  .clear-search-btn:hover {
+    background-color: #3E5C2B;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  /* info card style */
+  .info-card {
+    background-color: #f8f7f0;
+    border-radius: 15px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: flex;
     flex-direction: column;
     height: auto;
+    border-left: 5px solid #3E5C2B;
+    position: relative;
+    padding-top: 40px;
+  }
+  
+  .info-card::before {
+    content: "SENSORY FEATURES";
+    position: absolute;
+    top: 12px;
+    left: 18px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #3E5C2B;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background-color: rgba(62, 92, 43, 0.1);
+    padding: 3px 8px;
+    border-radius: 4px;
   }
   
   .info-card:hover {
@@ -875,8 +1150,9 @@
     position: relative;
     width: 100%;
     padding-top: 60%; /* 长宽比3:5 */
-    background-color: #f8f9fa;
+    background-color: #ffffff;
     overflow: hidden;
+    border-bottom: 2px dashed rgba(62, 92, 43, 0.2);
   }
   
   .info-card-img {
@@ -886,6 +1162,7 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    padding: 10px;
   }
   
   .info-card-body {
@@ -897,6 +1174,8 @@
     font-size: 1.4rem;
     font-weight: 600;
     margin-bottom: 1rem;
+    border-bottom: 2px solid rgba(62, 92, 43, 0.2);
+    padding-bottom: 0.5rem;
   }
   
   .info-card-text {
@@ -904,60 +1183,164 @@
     font-size: 0.95rem;
     line-height: 1.6;
     margin-bottom: 0.75rem;
+    font-style: italic;
   }
   
-  /* 响应式调整 */
+  /* responsive adjustment */
   @media (max-width: 991.98px) {
     .info-card-img-container {
-      padding-top: 66.67%; /* 2:3比例 */
+      padding-top: 66.67%;
     }
   }
   
   @media (max-width: 767.98px) {
     .info-card-img-container {
-      padding-top: 75%; /* 3:4比例 */
+      padding-top: 75%;
     }
   }
   
-  /* 搜索结果区域样式 */
-  .search-result-header {
-    background-color: #f8f7f6;
-    border-radius: 8px;
-    padding: 15px 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    border-left: 4px solid var(--primary-green);
+  @media (max-width: 768px) {
+    .filter-content {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .filter-label {
+      margin-bottom: 10px;
+    }
   }
-  
-  .search-results-title {
-    font-size: 1.4rem;
-    color: var(--text-brown);
-    margin-bottom: 0;
-  }
-  
-  .search-summary {
-    font-size: 0.9rem;
-    color: #666;
-    margin-top: 8px;
-  }
-  
-  .search-summary strong {
-    color: var(--primary-green);
-    font-weight: 600;
-  }
-  
-  .clear-search-btn {
+
+  /* FAQ section style */
+  .faq-section {
+    padding-top: 3rem;
     background-color: transparent;
-    color: var(--primary-green);
-    border: 1px solid var(--primary-green);
-    border-radius: 20px;
-    padding: 5px 15px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  }
+
+  .faq-title {
+    color: var(--text-brown);
+    font-size: 2.2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    padding-bottom: 1rem;
+  }
+
+  .faq-title::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background-color: var(--primary-green);
+    border-radius: 2px;
+  }
+
+  .accordion {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  .accordion-item {
+    border: none;
+    border-bottom: 1px solid #eee;
+    background-color: white;
   }
   
-  .clear-search-btn:hover {
+  .accordion-item:last-child {
+    border-bottom: none;
+  }
+
+  .accordion-button {
+    padding: 1.2rem 1.5rem;
+    color: var(--text-brown);
+    font-weight: 600;
+    font-size: 1.1rem;
+    background-color: white;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(0,0,0,.125);
+  }
+
+  .accordion-button:not(.collapsed) {
+    color: var(--primary-green);
+    background-color: rgba(62, 92, 43, 0.05);
+    box-shadow: none;
+  }
+
+  .accordion-button:not(.collapsed)::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%233E5C2B'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    transform: rotate(-180deg);
+  }
+
+  .accordion-body {
+    padding: 1rem 1.5rem 1.5rem;
+    background-color: rgba(248, 247, 240, 0.3);
+    color: #555;
+    line-height: 1.6;
+    font-size: 1rem;
+  }
+
+  .faq-question {
+    position: relative;
+    padding-left: 15px;
+  }
+
+  .faq-question::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
     background-color: var(--primary-green);
-    color: #3E5C2B;
+  }
+
+  .faq-list {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .faq-list li {
+    margin-bottom: 0.7rem;
+    position: relative;
+    padding-left: 2.5rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .faq-icon {
+    position: absolute;
+    left: 0;
+    font-size: 1.3rem;
+    margin-right: 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .faq-title {
+      font-size: 1.8rem;
+    }
+    
+    .accordion-button {
+      font-size: 1rem;
+      padding: 1rem 1.2rem;
+    }
+    
+    .accordion-body {
+      padding: 1rem;
+      font-size: 0.95rem;
+    }
   }
   </style>

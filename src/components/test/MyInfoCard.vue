@@ -5,6 +5,7 @@
     </div>
     <h3 class="info-card-title">{{ title }}</h3>
     <p class="info-card-description">{{ description }}</p>
+    <div v-if="stat" class="info-card-stat" v-html="stat"></div>
   </div>
 </template>
 
@@ -15,7 +16,8 @@ const props = defineProps({
   title: { type: String, required: true },
   description: { type: String, required: true },
   imagePath: { type: String, required: true },
-  colorAccent: { type: String, default: 'primary' }
+  colorAccent: { type: String, default: 'primary' },
+  stat: { type: String, default: '' }
 });
 
 const colorClass = computed(() => `accent-${props.colorAccent}`);
@@ -104,8 +106,36 @@ const colorClass = computed(() => `accent-${props.colorAccent}`);
 .info-card-description {
   font-size: 0.95rem;
   color: #6c757d;
-  margin-bottom: 0;
+  margin-bottom: 1rem;
   flex-grow: 1;
   line-height: 1.6; 
+}
+
+.info-card-stat {
+  font-size: 0.9rem;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 12px 15px;
+  margin-top: auto;
+  text-align: left;
+  color: #4d2f20;
+  border-left: 3px solid;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.my-info-card.accent-primary .info-card-stat {
+  border-left-color: #88bf10;
+  background-color: rgba(136, 191, 16, 0.1);
+}
+
+.my-info-card.accent-secondary .info-card-stat {
+  border-left-color: #c76d0c;
+  background-color: rgba(199, 109, 12, 0.1);
+}
+
+.my-info-card.accent-tertiary .info-card-stat {
+  border-left-color: #ff4000;
+  background-color: rgba(255, 64, 0, 0.1);
 }
 </style>

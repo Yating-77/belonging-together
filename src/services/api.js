@@ -1,29 +1,40 @@
-import axios from 'axios'
+import axios from 'axios';
 
 const apiClient = axios.create({
   baseURL: 'http://localhost:3000/api',
   headers: {
     'Content-Type': 'application/json'
   }
-})
+});
 
-export default {
+const api = {
+  // Articles
   getArticles() {
-    return apiClient.get('/articles')
+    return apiClient.get('/articles');
   },
-  
   getArticle(id) {
-    return apiClient.get(`/articles/${id}`)
+    return apiClient.get(`/articles/${id}`);
   },
-  
   searchArticles(keyword) {
-    return apiClient.get(`/test-search?keyword=${encodeURIComponent(keyword)}`);
+    return apiClient.get(`/articles/search?keyword=${encodeURIComponent(keyword)}`);
   },
-  getPopularArticles(limit = 5) {
+  getPopularArticles(limit = 4) {
     return apiClient.get(`/articles/popular?limit=${limit}`);
   },
-  
   incrementArticleViewCount(id) {
     return apiClient.post(`/articles/${id}/view`);
+  },
+
+  // Charts
+  getPrevalenceTrends() {
+    return apiClient.get('/charts/prevalence-trends');
+  },
+  getGenderAgePrevalence() {
+    return apiClient.get('/charts/gender-age-prevalence');
+  },
+  getBehavioralDifficulties() {
+    return apiClient.get('/charts/behavioral-difficulties');
   }
-}
+};
+
+export default api;

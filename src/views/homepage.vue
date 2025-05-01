@@ -13,12 +13,18 @@
             :description="card.description"
             :imagePath="`/${card.imageName}.jpg`"  
             :colorAccent="card.colorAccent"
+            :stat="card.stat"
             data-aos="fade-up"
             :data-aos-delay="index * 100"
             data-aos-duration="1300"
             data-aos-easing="ease-out-cubic"
             data-aos-once="true"
           />
+        </div>
+        <div class="insights-link-container" data-aos="fade-up" data-aos-delay="300">
+          <router-link to="/insights" class="insights-link-button">
+            Explore our insights <i class="fas fa-arrow-right"></i>
+          </router-link>
         </div>
       </div>
     </section>
@@ -89,18 +95,21 @@ const autismIntroCards = ref([
   {
     title: "Unique Individual Differences",
     description: "Autism is a broad spectrum, with each child having unique strengths, interests, and support needs. No two individuals are exactly the same.",
+    stat: "Did you know? Autism was identified in <strong>3.7%</strong> of Australian children aged 5–9 in 2022 — a steady rise over recent years.",
     imageName: "333",
     colorAccent: "primary"
   },
   {
     title: "Different Ways of Perceiving",
     description: "They may experience sensory information such as sounds, lights, and touch differently. Understanding and respecting these sensory needs is important.",
+    stat: "Over <strong>60%</strong> of autistic children experience sensory or social challenges that affect how they perceive the world.",
     imageName: "555",
     colorAccent: "secondary"
   },
   {
     title: "Diverse Communication Methods",
     description: "Communication methods may include language, gestures, pictures, or behaviors. Patient observation and learning their unique expressions is key to building connection.",
+    stat: "About <strong>1 in 3</strong> autistic children in Australia have significant speech or language difficulties.",
     imageName: "666",
     colorAccent: "tertiary"
   }
@@ -557,6 +566,51 @@ p {
   
   .navigate-description {
     font-size: 0.95rem;
+  }
+}
+
+.insights-link-container {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.insights-link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #3E5C2B;
+  color: white;
+  padding: 14px 32px;
+  border-radius: 50px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  gap: 10px;
+}
+
+.insights-link-button i {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.insights-link-button:hover {
+  background-color: #4d7234;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.insights-link-button:hover i {
+  transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+  .insights-link-container {
+    margin-top: 2rem;
+  }
+  
+  .insights-link-button {
+    padding: 12px 28px;
   }
 }
 </style>
