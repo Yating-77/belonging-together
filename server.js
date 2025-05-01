@@ -430,7 +430,7 @@ app.get('/api/scenes/:sceneId/checklist', async (req, res) => {
       [sceneIdInt]
     );
 
-    // 为每个物品添加完整的图片URL
+    // add image path prefix
     const itemsWithImagePath = result.rows.map(item => ({
       ...item,
       image_url: item.image_url || null
@@ -472,7 +472,6 @@ app.get('/api/scenes/:sceneId/terms', async (req, res) => { // Renamed from /key
     const result = await pool.query(query, [sceneIdInt]);
 
     // Extract just the terms into an array of lowercase strings
-    // The 'term' alias makes this easy
     const terms = result.rows.map(row => row.term.toLowerCase()); 
 
     console.log(`Found ${terms.length} distinct terms (keywords & labels) for scene ID: ${sceneIdInt}`);
