@@ -85,7 +85,7 @@
 
     <!-- Results Section with consistent styling -->
     <div class="results-section container mb-5">
-      <!-- search result header -->
+      <!-- search result title bar -->
       <div v-if="isFiltered" class="search-result-header mb-4">
         <div class="d-flex justify-content-between align-items-center">
           <h2 class="search-results-title">
@@ -125,7 +125,7 @@
         </button>
       </div>
 
-      <!-- Venues Grid with Info Cards - use two-column layout -->
+      <!-- Venues Grid with Info Cards - uses two-column layout -->
       <div v-else class="row g-4">
         <!-- venue card area - occupies left 8 columns -->
         <div class="col-lg-8">
@@ -141,7 +141,9 @@
                 <div class="card-body d-flex flex-column">
                   <h5 class="card-title venue-title">{{ venue.venue_title }}</h5>
                   <p class="card-text venue-address mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ venue.venue_location }}</p>
-                  <p class="card-text venue-type mb-2"><small class="text-muted">{{ venue.venue_type }}</small></p>
+                  <p class="card-text venue-type mb-2">
+                    <span class="venue-category-tag">{{ venue.venue_type }}</span>
+                  </p>
                   
                   <div class="venue-description-container flex-grow-1">
                     <p class="card-text venue-description">{{ truncate(venue.venue_description, 100) }}</p>
@@ -154,9 +156,12 @@
                   </div>
                 </div>
                 <div class="card-footer bg-transparent border-top-0 pb-3">
-                  <a v-if="venue.venue_sensory_info_link" :href="venue.venue_sensory_info_link" target="_blank" rel="noopener noreferrer" class="cta-button venue-btn w-100">
+                  <button 
+                    v-if="venue.venue_sensory_info_link" 
+                    @click="confirmExternalNavigation(venue.venue_sensory_info_link)" 
+                    class="cta-button venue-btn w-100">
                     View Sensory Map/Info <i class="fas fa-external-link-alt ms-1"></i>
-                  </a>
+                  </button>
                   <p v-else class="text-muted text-center small mb-0">No sensory map link available</p>
                 </div>
               </div>
@@ -164,9 +169,9 @@
           </div>
         </div>
         
-        <!-- info card area - occupies right 4 columns -->
+        <!-- information card area - occupies right 4 columns -->
         <div class="col-lg-4">
-          <!-- first info card -->
+          <!-- first information card -->
           <div class="info-card mb-4" data-aos="fade-left">
             <div class="info-card-img-container">
               <img src="@/assets/sensory-hours.png" alt="Sensory-Friendly Hours" class="info-card-img">
@@ -183,7 +188,7 @@
             </div>
           </div>
           
-          <!-- second info card -->
+          <!-- second information card -->
           <div class="info-card" data-aos="fade-left" data-aos-delay="200">
             <div class="info-card-img-container">
               <img src="@/assets/staff-trained.png" alt="Staff Trained in Autism Support" class="info-card-img">
@@ -234,6 +239,40 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="cta-button venue-btn" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- External Link Confirmation Modal -->
+    <div class="modal fade" id="externalLinkModal" tabindex="-1" aria-labelledby="externalLinkModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="externalLinkModalLabel">
+              <i class="fas fa-external-link-alt me-2"></i> External Link Notice
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="external-link-warning">
+              <div class="warning-icon">
+                <i class="fas fa-exclamation-circle"></i>
+              </div>
+              <div class="warning-content">
+                <p class="mb-2">You are about to navigate to an external website that is not part of Belonging Together.</p>
+                <p class="mb-3">This link will take you to the sensory map or information page for this venue.</p>
+                <p class="small text-muted mb-0">External URL: <span class="external-url">{{ externalUrl }}</span></p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="fas fa-times me-1"></i> Cancel
+            </button>
+            <button type="button" class="cta-button venue-btn" @click="openExternalLink">
+              <i class="fas fa-external-link-alt me-1"></i> Continue to External Site
+            </button>
           </div>
         </div>
       </div>
@@ -334,9 +373,9 @@ import { ref, onMounted, watch, computed, nextTick } from 'vue';
 import axios from 'axios';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import MyNavBar from '../components/test/MyNavBar.vue'; // Adjust path
-import MyFooter from '../components/test/MyFooter.vue'; // Adjust path
-import { debounce } from 'lodash-es'; // Import debounce
+import MyNavBar from '../components/test/MyNavBar.vue';
+import MyFooter from '../components/test/MyFooter.vue';
+import { debounce } from 'lodash-es';
 import { Modal } from 'bootstrap';
 
 // --- State ---
@@ -352,13 +391,17 @@ const locations = ref([]);
 const sensoryCategories = ref([]);
 const currentPage = ref(1);
 const totalPages = ref(1);
-const limit = ref(4); // Items per page
+const limit = ref(4);
 
 const API_BASE_URL = '/api';
 
 // add selectedVenue state
 const selectedVenue = ref(null);
 let descriptionModal = null;
+
+// add state for external link modal
+const externalUrl = ref('');
+let externalLinkModal = null;
 
 // check if there are any filters
 const isFiltered = computed(() => {
@@ -370,17 +413,16 @@ const isFiltered = computed(() => {
 const fetchVenues = async (page = currentPage.value) => {
   isLoading.value = true;
   error.value = null;
-  currentPage.value = page; // Update current page state
+  currentPage.value = page;
 
   const params = {
-    search: searchQuery.value || undefined, // Send only if not empty
+    search: searchQuery.value || undefined,
     sensoryCategory: selectedSensoryCategory.value || undefined,
     location: selectedLocation.value || undefined,
     venueType: selectedVenueType.value || undefined,
     page: currentPage.value,
     limit: limit.value
   };
-  // Remove undefined params
   Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
 
   console.log("Fetching venues with params:", params);
@@ -392,7 +434,6 @@ const fetchVenues = async (page = currentPage.value) => {
       // Ensure currentPage isn't greater than totalPages after filtering
       if (currentPage.value > totalPages.value) {
           currentPage.value = totalPages.value > 0 ? totalPages.value : 1;
-          // Optionally re-fetch if page changed, though often backend handles offset correctly
       }
       console.log(`Venues loaded. Total Pages: ${totalPages.value}, Current Page: ${currentPage.value}`);
     } else {
@@ -410,8 +451,8 @@ const fetchVenues = async (page = currentPage.value) => {
 
 // Debounced version of fetchVenues, specifically for search input
 const debouncedFetchVenues = debounce(() => {
-    fetchVenues(1); // Reset to page 1 when search query changes
-}, 500); // 500ms delay
+    fetchVenues(1);
+}, 500);
 
 
 const fetchFilterOptions = async () => {
@@ -427,19 +468,23 @@ const fetchFilterOptions = async () => {
         console.log("Filter options loaded:", { types: venueTypes.value.length, locs: locations.value.length, cats: sensoryCategories.value.length });
     } catch (err) {
         console.error("Error fetching filter options:", err);
-        // Handle error - maybe show a message?
         error.value = "Could not load filter options.";
     }
 };
 
 // Called when filters (dropdowns) change or search is entered explicitly
 const applyFilters = () => {
-    fetchVenues(1); // Reset to page 1 and fetch
+    fetchVenues(1);
 };
 
 const changePage = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages.value && newPage !== currentPage.value) {
         fetchVenues(newPage);
+        // add logic to scroll to the result top
+        window.scrollTo({
+          top: document.querySelector('.search-result-header')?.offsetTop - 100 || 0,
+          behavior: 'smooth'
+        });
     }
 };
 
@@ -452,19 +497,19 @@ const truncate = (text, length) => {
 
 const handleImageError = (event) => {
   console.warn(`Image failed to load: ${event.target.src}. Using placeholder.`);
-  // use the correct backend image path
+  // modify to the correct backend image path
   event.target.src = '/image/ngv.png';
 };
 
 const getImageUrl = (venue) => {
-  // 首选完整URL (如果有)
+  // first choose the full URL (if exists)
   if (venue.image_full_url && venue.image_full_url.startsWith('http')) {
     return venue.image_full_url;
   }
   
-  // 如果image_full_url存在但不是完整URL (可能只是路径)
+  // if image_full_url exists but is not a full URL
   if (venue.image_full_url) {
-    // 检查是否已经包含/image/前缀
+    // check if it already has /image/ prefix
     if (venue.image_full_url.startsWith('/image/')) {
       return `${venue.image_full_url}`;
     } else {
@@ -472,12 +517,12 @@ const getImageUrl = (venue) => {
     }
   }
   
-  // 如果只有image_url (无前缀)
+  // if only image_url (no prefix)
   if (venue.image_url) {
     return `/image/${venue.image_url}`;
   }
   
-  // 兜底使用默认图片
+  // fallback to default image
   return '/image/ngv.png';
 };
 
@@ -486,7 +531,7 @@ const getImageUrl = (venue) => {
 const paginationRange = computed(() => {
     const current = currentPage.value;
     const last = totalPages.value;
-    const delta = 1; // How many pages around current page
+    const delta = 1;
     const left = current - delta;
     const right = current + delta + 1;
     const range = [];
@@ -560,12 +605,6 @@ watch(searchQuery, () => {
     debouncedFetchVenues();
 });
 
-// Watch filters (no debounce needed for selects typically)
-// watch([selectedSensoryCategory, selectedLocation, selectedVenueType], () => {
-//     applyFilters(); // applyFilters already resets to page 1
-// });
-// Note: The @change="applyFilters" on the selects handles this directly now.
-
 // show description modal
 const showDescriptionModal = (venue) => {
   selectedVenue.value = venue;
@@ -578,23 +617,47 @@ const showDescriptionModal = (venue) => {
   });
 };
 
-// clear search query
+// add method: clear search query
 const clearSearchQuery = () => {
   searchQuery.value = '';
   applyFilters();
 };
 
-// select sensory feature
+// add method: select sensory feature
 const selectSensoryFeature = (category) => {
   selectedSensoryCategory.value = category;
   applyFilters();
 };
 
-// clean all filters
+// modify the method: clear all filters
 const clearAllFilters = () => {
   searchQuery.value = '';
   selectedSensoryCategory.value = null;
+  
+  // get data again
   fetchVenues(1);
+};
+
+// add method: confirm external navigation
+const confirmExternalNavigation = (url) => {
+  externalUrl.value = url;
+  // Initialize and show modal
+  nextTick(() => {
+    if (!externalLinkModal) {
+      externalLinkModal = new Modal(document.getElementById('externalLinkModal'));
+    }
+    externalLinkModal.show();
+  });
+};
+
+// Method to open external link
+const openExternalLink = () => {
+  if (externalUrl.value) {
+    window.open(externalUrl.value, '_blank', 'noopener,noreferrer');
+    if (externalLinkModal) {
+      externalLinkModal.hide();
+    }
+  }
 };
 
 </script>
@@ -617,7 +680,6 @@ const clearAllFilters = () => {
   font-family: 'Inter', sans-serif;
 }
 
-/* new hero banner style */
 .hero-banner {
   position: relative;
   width: 100%;
@@ -686,7 +748,7 @@ const clearAllFilters = () => {
   margin: 0 auto;
 }
 
-/* Filter Section */
+/* filter section */
 .filter-section {
   background-color: white;
   border-radius: 12px;
@@ -929,6 +991,20 @@ const clearAllFilters = () => {
   padding-left: 8px;
 }
 
+/* Venue category tag styles */
+.venue-category-tag {
+  display: inline-block;
+  background-color: #4d2f20;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 .search-input-group {
   border-radius: 8px;
   overflow: hidden;
@@ -1145,7 +1221,7 @@ const clearAllFilters = () => {
 .info-card-img-container {
   position: relative;
   width: 100%;
-  padding-top: 60%; /* 长宽比3:5 */
+  padding-top: 60%;
   background-color: #ffffff;
   overflow: hidden;
   border-bottom: 2px dashed rgba(62, 92, 43, 0.2);
@@ -1191,7 +1267,7 @@ const clearAllFilters = () => {
 
 @media (max-width: 767.98px) {
   .info-card-img-container {
-    padding-top: 75%; /* 3:4比例 */
+    padding-top: 75%;
   }
 }
 
@@ -1213,7 +1289,7 @@ const clearAllFilters = () => {
 }
 
 .faq-title {
-  color: var(--text-brown);
+  color: #4d2f20;
   font-size: 2.2rem;
   font-weight: 700;
   text-align: center;
@@ -1230,7 +1306,7 @@ const clearAllFilters = () => {
   transform: translateX(-50%);
   width: 80px;
   height: 4px;
-  background-color: var(--primary-green);
+  background-color: #4d2f20;
   border-radius: 2px;
 }
 
@@ -1252,7 +1328,7 @@ const clearAllFilters = () => {
 
 .accordion-button {
   padding: 1.2rem 1.5rem;
-  color: var(--text-brown);
+  color: #4d2f20;
   font-weight: 600;
   font-size: 1.1rem;
   background-color: white;
@@ -1266,22 +1342,30 @@ const clearAllFilters = () => {
 }
 
 .accordion-button:not(.collapsed) {
-  color: var(--primary-green);
-  background-color: rgba(62, 92, 43, 0.05);
+  color: #4d2f20;
+  background-color: rgba(77, 47, 32, 0.05);
   box-shadow: none;
 }
 
 .accordion-button:not(.collapsed)::after {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%233E5C2B'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%234d2f20'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
   transform: rotate(-180deg);
 }
 
 .accordion-body {
   padding: 1rem 1.5rem 1.5rem;
-  background-color: rgba(248, 247, 240, 0.3);
+  background-color: rgba(248, 239, 237, 0.3);
   color: #555;
   line-height: 1.6;
   font-size: 1rem;
+  text-align: left;
+}
+
+.accordion-body p,
+.accordion-body ul {
+  text-align: left;
+  margin-left: 0;
+  padding-left: 0;
 }
 
 .faq-question {
@@ -1298,15 +1382,17 @@ const clearAllFilters = () => {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background-color: var(--primary-green);
+  background-color: #4d2f20;
 }
 
+/* FAQ list styling for left alignment */
 .faq-list {
   list-style: none;
   padding-left: 0;
-  margin-left: 1rem;
+  margin-left: 0;
   margin-top: 1rem;
   margin-bottom: 1rem;
+  text-align: left;
 }
 
 .faq-list li {
@@ -1315,6 +1401,7 @@ const clearAllFilters = () => {
   padding-left: 2.5rem;
   display: flex;
   align-items: center;
+  color: #4d2f20;
 }
 
 .faq-icon {
@@ -1322,6 +1409,7 @@ const clearAllFilters = () => {
   left: 0;
   font-size: 1.3rem;
   margin-right: 0.5rem;
+  color: #4d2f20;
 }
 
 @media (max-width: 768px) {
@@ -1338,5 +1426,37 @@ const clearAllFilters = () => {
     padding: 1rem;
     font-size: 0.95rem;
   }
+}
+
+/* external link popup style */
+.external-link-warning {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  background-color: #fff8e6;
+  border-radius: 8px;
+  border-left: 4px solid #e59700;
+}
+
+.warning-icon {
+  font-size: 2.5rem;
+  color: #e59700;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.warning-content {
+  flex: 1;
+}
+
+.warning-content p {
+  color: #4d2f20;
+  margin-bottom: 0.5rem;
+}
+
+.external-url {
+  color: #3E5C2B;
+  word-break: break-all;
+  font-style: italic;
 }
 </style>

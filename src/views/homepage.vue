@@ -11,7 +11,7 @@
             :key="card.title"
             :title="card.title"
             :description="card.description"
-            :imagePath="`/iteration2/${card.imageName}.jpg`"  
+            :imagePath="`/${card.imageName}.jpg`"  
             :colorAccent="card.colorAccent"
             :stat="card.stat"
             data-aos="fade-up"
@@ -36,16 +36,13 @@
           <h2 id="navigate-heading" class="navigate-title">Navigate the World, Feel You Belong</h2>
           <p class="navigate-subtitle">Every child deserves to feel included in the world around them.</p>
           <p class="navigate-description">
-            From a first school tour to a family supermarket trip, these everyday outings can either open doors, or present barriers.
-          </p>
-          <p class="navigate-description">
-            Our Outing Guide and Sensory-Friendly Venues are designed to support inclusion at every step:
+            Our Outing Guide and Sensory-Friendly Venues support inclusion by:
             <br>🧭 offering practical tools for preparation,
             <br>🧒 reducing anxiety through environmental previews,
             <br>🎒 and helping your child participate in shared community spaces with confidence.
           </p>
           <p class="navigate-description">
-            Together, we create not just smoother outings, but moments of true belonging.
+            Together, we create not just smoother outings, but true moments of belonging.
           </p>
           <div class="navigate-buttons">
             <router-link to="/sensoryVenue" class="navigate-button">Find Sensory Venues</router-link>

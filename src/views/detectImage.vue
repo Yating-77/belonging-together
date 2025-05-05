@@ -26,7 +26,7 @@
     <!-- Main Detection Section Container -->
     <div class="interactive-section-container container my-4">
       <div class="interactive-content mx-auto">
-        <!-- Back Button (Align to the left) -->
+        <!-- Back Button -->
         <div class="text-left mb-3">
           <button class="btn btn-secondary" @click="goBack">
             <i class="fas fa-arrow-left me-2"></i> Back
@@ -36,7 +36,7 @@
         <h3 class="step-title mb-3">3. Is this item suitable to bring?</h3>
         <p class="step-subtitle mb-4">Let's check if what you plan to bring fits the needs of your child in this environment.</p>
 
-        <!-- Add image -->
+        <!-- add image -->
         <div class="check-item-image-container mb-4">
           <img 
             src="/check-item.png" 
@@ -44,55 +44,63 @@
             class="check-item-image" 
           />
         </div>
-
-        <!-- File Upload Card -->
-        <div class="upload-card mb-4">
-          <div class="card-body">
-            <div class="file-upload-container text-center">
-              <div 
-                class="file-drop-area"
-                @dragover.prevent="onDragOver"
-                @dragleave.prevent="onDragLeave"
-                @dragenter.prevent="onDragEnter"
-                @drop.prevent="onFileDrop"
-                @click="triggerFileInput"
-                :class="{ 'dragging': isDragging }"
-              >
-                <input 
-                  type="file" 
-                  ref="fileInput" 
-                  class="file-input-hidden" 
-                  @change="onFileSelected" 
-                  accept="image/*"
+        <!-- outer container -->
+        <div class="position-relative">
+          <div class="upload-card mb-4">
+            <div class="card-body">
+              <div class="file-upload-container text-center">
+                <div 
+                  class="file-drop-area"
+                  @dragover.prevent="onDragOver"
+                  @dragleave.prevent="onDragLeave"
+                  @dragenter.prevent="onDragEnter"
+                  @drop.prevent="onFileDrop"
+                  @click="triggerFileInput"
+                  :class="{ 'dragging': isDragging }"
                 >
-                <div v-if="!selectedFile" class="upload-prompt">
-                  <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                  <p>Drag and drop an image here or click to browse</p>
-                  <span class="small text-muted">Supported formats: JPG, PNG, GIF</span>
+                  <input 
+                    type="file" 
+                    ref="fileInput" 
+                    class="file-input-hidden" 
+                    @change="onFileSelected" 
+                    accept="image/*"
+                  >
+                  <div v-if="!selectedFile" class="upload-prompt">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <p>Drag and drop an image here or click to browse</p>
+                    <span class="small text-muted">Supported formats: JPG, PNG, GIF</span>
+                  </div>
+                  <div v-else class="image-preview-container">
+                    <img :src="imagePreview" alt="Selected image preview" class="image-preview">
+                  </div>
                 </div>
-                <div v-else class="image-preview-container">
-                  <img :src="imagePreview" alt="Selected image preview" class="image-preview">
+                
+                <div class="mt-3 d-flex justify-content-center">
+                  <button 
+                    class="btn btn-reset me-3" 
+                    @click="resetDetection"
+                    v-if="selectedFile"
+                  >
+                    <i class="fas fa-undo me-2"></i> Reset
+                  </button>
+                  <button 
+                    class="btn btn-action" 
+                    @click="analyzeImage" 
+                    :disabled="!selectedFile || isLoading"
+                  >
+                    <i class="fas fa-search me-2"></i>
+                    {{ isLoading ? 'Analysing...' : 'Analyse Item' }}
+                  </button>
                 </div>
-              </div>
-              
-              <div class="mt-3 d-flex justify-content-center">
-                <button 
-                  class="btn btn-reset me-3" 
-                  @click="resetDetection"
-                  v-if="selectedFile"
-                >
-                  <i class="fas fa-undo me-2"></i> Reset
-                </button>
-                <button 
-                  class="btn btn-action" 
-                  @click="analyzeImage" 
-                  :disabled="!selectedFile || isLoading"
-                >
-                  <i class="fas fa-search me-2"></i>
-                  {{ isLoading ? 'Analysing...' : 'Analyse Item' }}
-                </button>
               </div>
             </div>
+          </div>
+          
+          <!-- Skip -->
+          <div class="skip-button-container">
+            <button class="skip-button" @click="goToNext">
+              <i class="fas fa-forward me-2"></i> Skip to checklist
+            </button>
           </div>
         </div>
         
@@ -270,7 +278,7 @@ import { useRouter, useRoute } from 'vue-router';
       return matchedTerms.value.length > 0;
     });
 
-    // Get scene title based on scene ID
+    // get scene title based on sceneId
     const getSceneTitleText = computed(() => {
       switch(sceneId.value) {
         case 1:
@@ -357,10 +365,10 @@ import { useRouter, useRoute } from 'vue-router';
         // Call Azure Computer Vision API
           const response = await axios({
             method: 'post',
-          url: 'https://5120.cognitiveservices.azure.com/vision/v3.2/analyze?visualFeatures=Objects,Tags,Description',
+          url: process.env.VUE_APP_AZURE_VISION_ENDPOINT || 'https://5120.cognitiveservices.azure.com/vision/v3.2/analyze?visualFeatures=Objects,Tags,Description',
             headers: {
               'Content-Type': 'application/octet-stream',
-            'Ocp-Apim-Subscription-Key': 'EdLSbueKzPgxgxulSFPvVJkH4dOFmJp3IwC9Y1SQBZq56LqCoWEaJQQJ99BDACL93NaXJ3w3AAAFACOGI0sm'
+            'Ocp-Apim-Subscription-Key': process.env.VUE_APP_AZURE_VISION_KEY || 'EdLSbueKzPgxgxulSFPvVJkH4dOFmJp3IwC9Y1SQBZq56LqCoWEaJQQJ99BDACL93NaXJ3w3AAAFACOGI0sm'
             },
             data: fileData,
             transformRequest: [(data) => data]
@@ -398,17 +406,17 @@ import { useRouter, useRoute } from 'vue-router';
       try {
         // Fetch checklist items for the current scene
         const checklistResponse = await axios.get(`${API_BASE_URL}/scenes/${sceneId.value}/checklist`);
-        console.log("API:", checklistResponse.data);
+        console.log("API response:", checklistResponse.data);
         
         if (checklistResponse.data.success) {
           checklistItems.value = checklistResponse.data.data;
-          console.log("Loading:", checklistItems.value);
+          console.log("loaded item list:", checklistItems.value);
           
-          // image_url
+          // check if the received data contains image_url
           const hasImages = checklistItems.value.some(item => item.image_url);
-          console.log("URL:", hasImages);
+          console.log("has image URLs:", hasImages);
           if (!hasImages) {
-            console.warn("API return the URL");
+            console.warn("API returned data without image URLs");
           }
         }
 
@@ -437,25 +445,25 @@ import { useRouter, useRoute } from 'vue-router';
     };
 
     const onImageLoaded = (item) => {
-      console.log(`Image loaded successfully: ${item.title}`);
+      console.log(`loading successfully: ${item.title}`);
     };
 
     const handleImageError = (event, item) => {
-      console.log(`Image failed to load: ${item.title}`, event);
-      // Use generic placeholder image
+      console.log(`loading failed: ${item.title}`, event);
+      // use a generic placeholder image
       event.target.src = `${IMAGE_BASE_URL}/Sunglasses.png`;
     };
 
     const getImageUrl = (item) => {
       if (!item.image_url) return null;
       
-      // Check special case
+      // check special cases
       if (item.title === "Fun-pattern bandage or sticker" && 
           item.image_url === "Fun-pattern bandage.png") {
         return `${IMAGE_BASE_URL}/Fun-pattern bandage.png`;
       }
 
-      // Regular case
+      // normal cases
       return `${IMAGE_BASE_URL}/${item.image_url}`;
     };
 
@@ -958,14 +966,12 @@ import { useRouter, useRoute } from 'vue-router';
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Add hover effect */
 .file-drop-area:hover {
   border-color: #3E5C2B;
   background-color: #f0f7ed;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* New image container style */
 .check-item-image-container {
   text-align: center;
   max-width: 500px;
@@ -977,6 +983,31 @@ import { useRouter, useRoute } from 'vue-router';
   height: auto;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.skip-button-container {
+  position: absolute;
+  bottom: -80px;
+  right: 20px;
+  z-index: 5;
+}
+
+.skip-button {
+  background-color: rgba(248, 247, 246, 0.9);
+  color: #4d2f20;
+  border: 1px solid #e0e0e0;
+  padding: 0.6rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.skip-button:hover {
+  background-color: #e9ecef;
+  color: #4d2f20;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {
@@ -1002,7 +1033,6 @@ import { useRouter, useRoute } from 'vue-router';
   }
 }
 
-/* Alignment style */
 .text-left {
   text-align: left;
   }
