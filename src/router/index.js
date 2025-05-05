@@ -69,7 +69,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory('/iteration2'),
+  history: createWebHistory('/'),
   routes,
   scrollBehavior(to, from, savedPosition) {
     return { top: 0 }

@@ -287,7 +287,6 @@ export default {
     }
   },
   async created() {
-    // 确定当前的基础路径
     const currentPath = window.location.pathname;
     if (currentPath.includes('/iteration1/')) {
       this.basePublicPath = '/iteration1';

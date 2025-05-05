@@ -861,7 +861,6 @@ export default {
     }
   },
   created() {
-    // 确定当前的基础路径
     const currentPath = window.location.pathname;
     if (currentPath.includes('/iteration1/')) {
       this.basePublicPath = '/iteration1';
@@ -872,7 +871,6 @@ export default {
     }
     console.log('Base public path:', this.basePublicPath);
     
-    // 获取数据
     this.fetchCategories();
   }
 };
