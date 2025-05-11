@@ -56,7 +56,7 @@
           </p>
           <div class="hero-actions">
             
-            <router-link to="/detectpage" class="cta-button button-secondary">Get Outing Guides</router-link>
+            <router-link to="/venuePage" class="cta-button button-secondary">Explore Autism Support Near Me</router-link>
           </div>
         </div>
 
@@ -106,7 +106,7 @@ const slides = [
     title: "Together, we promote social inclusion.",
     subtitle: "We help every child feel seen, heard, and included at home, in school, and in the community.",
     image: "/slideshow-2.jpg",
-    cta: "Explore Our Resources",
+    cta: "Explore Autism Support Near Me",
     link: "/resource"
   }
 ];
@@ -195,7 +195,7 @@ const goToSlide = (index) => {
   flex: 1 1 45%; 
   position: relative; 
   min-height: 350px;
-  clip-path: polygon(12% 0, 100% 0, 100% 100%, 0 100%);/**Creates the angled corner visual effect */
+  clip-path: polygon(12% 0, 100% 0, 100% 100%, 0 100%);
   display: flex; 
   align-items: center; 
   justify-content: center; 
@@ -310,4 +310,20 @@ const goToSlide = (index) => {
 .cta-button.secondary { background-color: transparent; border: 2px solid; }
 .button-secondary-outline { border-color: #3E5C2B; color: #3E5C2B; } 
 .button-secondary-outline:hover { background-color: #3E5C2B; color: #ffffff; border-color: #3E5C2B;} 
+
+.navbar-links > li:nth-child(4) .dropdown-menu {
+  right: 0 !important;
+  left: auto !important;
+  transform: translateY(10px) !important;
+  width: 280px !important;
+  max-width: 280px !important;
+}
+
+.navbar-container {
+  overflow: visible !important;
+}
+
+.dropdown-item {
+  overflow: visible;
+}
 </style>

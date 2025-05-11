@@ -10,6 +10,9 @@ import sensoryVenue from '../views/sensoryVenue.vue'
 import detectImage from '../views/detectImage.vue'
 import detectSummary from '../views/detectSummary.vue'
 import insights from '../views/insights.vue'
+import skillsGame from '../views/skillsGame.vue'
+import venuePage from '../views/venuePage.vue'
+
 const routes = [
   {
     path: '/',
@@ -65,11 +68,22 @@ const routes = [
     path: '/insights',
     name: 'insights',
     component: insights
+  },
+  {
+    path: '/skillsGame',
+    name: 'skillsGame',
+    component: skillsGame
+  },
+  {
+    path: '/venuePage',
+    name: 'venuePage',
+    component: venuePage
   }
+
 ]
 
 const router = createRouter({
-  history: createWebHistory('/iteration2'),
+  history: createWebHistory('/iteration3'),
   routes,
   scrollBehavior(to, from, savedPosition) {
     return { top: 0 }
