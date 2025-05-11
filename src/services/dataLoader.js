@@ -22,7 +22,8 @@ const loadCSVData = async (url, transformFn, errorMessage) => {
     
     const transformedData = parsedData.data
       .map(transformFn)
-      .filter(item => item.lat && item.lng && !isNaN(item.lat) && !isNaN(item.lng));
+      .filter(item => typeof item.lat === 'number' && typeof item.lng === 'number' && !isNaN(item.lat) && !isNaN(item.lng))
+;
     
     
     
