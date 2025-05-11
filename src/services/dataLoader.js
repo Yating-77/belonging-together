@@ -46,8 +46,8 @@ const transformSchoolData = (item) => {
   const district = item.LGA_Name ? item.LGA_Name.replace(/\s*\([^)]*\)/g, '') : item.Address_Town;
   
   return {
-    lat: item.Y,
-    lng: item.X,
+    lat: parseFloat(item.Y),
+    lng: parseFloat(item.X),
     district: district,
     name: item.School_Name,
     address: `${item.Address_Line}, ${item.Address_Town}, ${item.Address_State} ${item.Address_Postcode}`,
@@ -59,8 +59,8 @@ const transformSchoolData = (item) => {
 // Hospital data transformation function
 const transformHospitalData = (item) => {
   return {
-    lat: item.Y,
-    lng: item.X,
+    lat: parseFloat(item.Y),
+    lng: parseFloat(item.X),
     district: item.Address_Town || '',
     name: item["Hospital name"] || item.Hospital_name,
     address: `${item.Address_Line || ''}, ${item.Address_Town || ''}, ${item.Address_State || ''} ${item.Address_Postcode || ''}`,
@@ -75,8 +75,8 @@ const transformNdisProviderData = (item) => {
   const district = addressParts.length > 2 ? addressParts[2].trim() : '';
   
   return {
-    lat: item.Y,
-    lng: item.X,
+    lat: parseFloat(item.Y),
+    lng: parseFloat(item.X),
     district: district,
     name: item['Registered Provider Name'] || '', 
     outletName: item['Outlet Name'] || '',
@@ -95,8 +95,8 @@ const transformNdisDailyLivingData = (item) => {
   const district = addressParts.length > 2 ? addressParts[2].trim() : '';
   
   return {
-    lat: item.Y,
-    lng: item.X,
+    lat: parseFloat(item.Y),
+    lng: parseFloat(item.X),
     district: district,
     name: item['Registered Provider Name'] || '', 
     outletName: item['Outlet Name'] || '',
@@ -118,8 +118,8 @@ const transformNdisTherapyData = (item) => {
   const primaryName = item['Outlet Name'] || item['Registered Provider Name'] || ''; 
 
   return {
-    lat: item.Y,
-    lng: item.X,
+    lat: parseFloat(item.Y),
+    lng: parseFloat(item.X),
     district: district,
     name: primaryName, 
    
