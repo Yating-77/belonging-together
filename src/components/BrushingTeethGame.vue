@@ -675,7 +675,7 @@
     cup_water: new URL('@/assets/brushing/cup_water.png', import.meta.url).href,
     towel: new URL('@/assets/brushing/towel.png', import.meta.url).href,
     hand: new URL('@/assets/brushing/hand_tap.png', import.meta.url).href,
-    head: new URL('@/assets/brushing/head.png', import.meta.url).href,
+    head: new URL('@/assets/brushing/mouth.png', import.meta.url).href,
     mouth_water: new URL('@/assets/brushing/mouth_water.png', import.meta.url).href,
     mouth: new URL('@/assets/brushing/mouth.png', import.meta.url).href,
     lip: new URL('@/assets/brushing/lip.png', import.meta.url).href,
