@@ -319,9 +319,6 @@
     clean_dry: new URL('@/assets/washing/hands_clean.png', import.meta.url).href,
   };
   
-  // add water stream image
-  const waterStreamImage = new URL('@/assets/washing/water_stream.png', import.meta.url).href;
-  
   const itemImages = {
     soap: new URL('@/assets/washing/soap.png', import.meta.url).href,
     towel: new URL('@/assets/washing/towel.png', import.meta.url).href,
@@ -1596,7 +1593,6 @@
     transform: translateX(-50%);
     width: 80px;
     height: 80px;
-    background-image: url('@/assets/washing/water_stream.png');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
