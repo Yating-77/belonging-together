@@ -40,11 +40,11 @@ export const RESOURCE_TYPES = {
 // Create reactive filter state
 export const createFilterState = () => {
   return {
-    schools: true,
-    hospitals: true,
-    ndisProviders: true,
-    ndisDailyLiving: true,
-    ndisTherapy: true
+    schools: false,
+    hospitals: false,
+    ndisProviders: false,
+    ndisDailyLiving: false,
+    ndisTherapy: false
   };
 };
 
