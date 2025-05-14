@@ -595,7 +595,6 @@ app.get('/api/scenes/:sceneId/terms', async (req, res) => { // Renamed from /key
         ORDER BY proportion_percent ASC;
       `);
   
-      // Transform data for ECharts horizontal bar chart
       const yAxisData = result.rows.map(row => row.behavior_difficulty);
       const seriesData = result.rows.map(row => row.proportion_percent);
   
