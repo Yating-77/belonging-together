@@ -339,6 +339,8 @@ export default {
   height: calc(100% - 3rem);
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1060;
 }
 .title {
   font-size: 1.8rem;

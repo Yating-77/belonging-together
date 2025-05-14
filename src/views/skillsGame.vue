@@ -22,6 +22,7 @@
                 <div class="intro-text">
                   <p>Our interactive life skills games help children learn everyday routines through fun, engaging activities:</p>
                   <ul>
+                    <li>Click to pick up items in the first step</li>
                     <li>Drag and drop items in the correct sequence</li>
                     <li>Learn step-by-step processes through play</li>
                     <li>Receive positive reinforcement and celebration</li>
@@ -137,7 +138,7 @@ main {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  margin-top: 80px;
+  margin-top: 0;
   position: relative;
   z-index: 1;
 }

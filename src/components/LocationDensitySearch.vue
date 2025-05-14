@@ -1,6 +1,6 @@
 <template>
   <div class="location-search">
-    <div class="search-title">Nearby Autism Support Density Search</div>
+    <div class="search-title">Want to see resources near you?</div>
     <div v-if="searchOutOfVicError" class="search-warning out-of-vic-error">
       {{ searchOutOfVicError }}
     </div>
@@ -12,9 +12,9 @@
         <input
           type="text"
           v-model="searchLocation"
-          placeholder="Enter address or coordinates (VIC)"
+          placeholder="Enter your address or suburb name to zoom in on your local area"
           @input="handleInput"
-          @keyup.enter="validateAndSearch"
+          @keyup.enter="handleEnterKey"
           @blur="hideSuggestions"
         >
         <ul v-if="showSuggestions && suggestions.length > 0" class="suggestions-list">
@@ -40,10 +40,23 @@
         class="search-button"
         @click="validateAndSearch"
       >
-        <span class="search-icon">🔍</span>
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
       </button>
     </div>
 
+    <!-- add clear search results button -->
+    <div v-if="densityResult" class="clear-results-container">
+      <button class="clear-results-button" @click="clearResults">
+        <svg class="clear-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+        Clear search results
+      </button>
+    </div>
     
     <div v-if="densityResult" class="density-gauge-container">
  
@@ -63,31 +76,62 @@
       </div>
       
       
-      <div class="echart-gauge-wrapper">
+      <div class="density-gauge-wrapper">
         <v-chart class="chart" :option="echartsOption" autoresize />
       </div>
       
-     
-      <div class="gauge-legend">
-        <div class="legend-item">
-          <div class="legend-color very-low"></div>
-          <span>Very Low</span>
+      <!-- resource density indicator reference -->
+      <div class="density-levels-reference">
+        <div class="reference-header">
+          <h4>Resource Density Level Reference</h4>
+          <div class="reference-desc">Density levels are based on the number of accessible support resources within 3km</div>
         </div>
-        <div class="legend-item">
-          <div class="legend-color low"></div>
-          <span>Low</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-color medium"></div>
-          <span>Medium</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-color high"></div>
-          <span>High</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-color very-high"></div>
-          <span>Very High</span>
+        
+        <div class="density-level-cards">
+          <div class="density-level-card" :class="{'active': densityResultClass === 'very-low'}">
+            <div class="level-color very-low"></div>
+            <div class="level-content">
+              <div class="level-title">Very Low</div>
+              <div class="level-range">0-5 resources</div>
+              <div class="level-description">Very limited resources, consider online support</div>
+            </div>
+          </div>
+          
+          <div class="density-level-card" :class="{'active': densityResultClass === 'low'}">
+            <div class="level-color low"></div>
+            <div class="level-content">
+              <div class="level-title">Low</div>
+              <div class="level-range">6-10 resources</div>
+              <div class="level-description">Limited resources, advance planning recommended</div>
+            </div>
+          </div>
+          
+          <div class="density-level-card" :class="{'active': densityResultClass === 'medium'}">
+            <div class="level-color medium"></div>
+            <div class="level-content">
+              <div class="level-title">Medium</div>
+              <div class="level-range">11-15 resources</div>
+              <div class="level-description">Adequate resources for basic needs</div>
+            </div>
+          </div>
+          
+          <div class="density-level-card" :class="{'active': densityResultClass === 'high'}">
+            <div class="level-color high"></div>
+            <div class="level-content">
+              <div class="level-title">High</div>
+              <div class="level-range">16-20 resources</div>
+              <div class="level-description">Abundant resource options available</div>
+            </div>
+          </div>
+          
+          <div class="density-level-card" :class="{'active': densityResultClass === 'very-high'}">
+            <div class="level-color very-high"></div>
+            <div class="level-content">
+              <div class="level-title">Very High</div>
+              <div class="level-range">20+ resources</div>
+              <div class="level-description">Diverse professional support services</div>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -726,23 +770,43 @@ export default {
       searchLocationDensity();
     };
     
+    const handleEnterKey = () => {
+      // when the user presses the enter key, do not perform any action
+      // just keep the input box focused, allowing the user to continue typing
+    };
+    
+    const clearResults = () => {
+      searchLocation.value = '';
+      clearMarker();
+      
+      // reset the map view to Melbourne center
+      if (props.map) {
+        props.map.setView([-37.815, 144.963], 8);
+      }
+      
+      // clear the search related states
+      searchedAddress.value = '';
+      searchOutOfVicError.value = '';
+      inputValidationError.value = '';
+    };
+    
     return {
       searchLocation, handleInput, selectSuggestion, hideSuggestions, suggestions, showSuggestions, isLoadingSuggestions,
       searchLocationDensity, searchedAddress, 
       densityResult, 
-      clearMarker, nearbyResourcesList, groupedNearbyResources, formatTypeName, searchOutOfVicError,
+      clearMarker, clearResults, nearbyResourcesList, groupedNearbyResources, formatTypeName, searchOutOfVicError,
       echartsOption,
       densityLevelText,
       densityResultClass,
       densityData,
       validateAndSearch,
+      handleEnterKey,
       inputValidationError
     };
   }
 };
 </script>
 <style scoped>
-/* Location search component styles */
 .location-search { 
   margin-top: 15px; 
   padding-top: 10px; 
@@ -798,28 +862,29 @@ export default {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.search-input-group { 
-  display: flex; 
-  margin-bottom: 10px; 
+.search-input-group {
+  display: flex;
+  margin-bottom: 10px;
+  width: 100%;
 }
 
 .search-input-group.disabled { 
   opacity: 0.6; 
 }
 
-.autocomplete-wrapper { 
-  position: relative; 
-  flex: 1; 
+.autocomplete-wrapper {
+  position: relative;
+  flex: 1;
+  width: 100%;
 }
 
 .autocomplete-wrapper input {
   width: 100%;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border: 1px solid #ddd;
-  border-radius: 4px 0 0 4px;
-  font-size: 13px;
+  border-radius: 6px 0 0 6px;
+  font-size: 15px;
   box-sizing: border-box;
-  transition: border-color 0.3s ease;
 }
 
 .autocomplete-wrapper input:focus {
@@ -829,26 +894,27 @@ export default {
 }
 
 .search-button { 
-  width: 36px; 
+  width: 45px; 
   background-color: #3E5C2B; 
   color: white; 
   border: none; 
-  border-radius: 0 4px 4px 0; 
+  border-radius: 0 6px 6px 0; 
   cursor: pointer; 
   display: flex; 
   align-items: center; 
   justify-content: center; 
   flex-shrink: 0; 
-  transition: background-color 0.3s ease;
+  transition: all 0.2s ease;
 }
 
-.search-button:hover:not(:disabled) { 
+.search-button:hover { 
   background-color: #517A39; 
 }
 
-.search-button:disabled { 
-  background-color: #adbba3; 
-  cursor: not-allowed; 
+.search-icon {
+  stroke: white;
+  width: 20px;
+  height: 20px;
 }
 
 .suggestions-list {
@@ -977,390 +1043,115 @@ export default {
 }
 
 
-.echart-gauge-wrapper {
+.density-gauge-wrapper {
   width: 100%;
   max-width: 100%;
-  height: 380px;    
+  height: 300px;
   margin: 0 auto 10px auto;
 }
 
-.echart-gauge-wrapper .chart {
+.density-gauge-wrapper .chart {
   width: 100%;
   height: 100%;
 }
 
 
-.gauge-legend {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 5px;
-  padding: 0 10px;
-  flex-wrap: wrap; 
-  gap: 10px; 
+.density-levels-reference {
+  margin-top: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
 }
 
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.reference-header {
+  margin-bottom: 15px;
+  text-align: center;
 }
 
-.legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
+.reference-header h4 {
+  margin: 0 0 5px 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
 }
 
-.legend-color.very-low { background-color: #FF4444; }
-.legend-color.low { background-color: #FFAA00; }
-.legend-color.medium { background-color: #FFFF00; }
-.legend-color.high { background-color: #00C851; }
-.legend-color.very-high { background-color: #0099CC; }
-
-.legend-item span {
-  font-size: 12px;
+.reference-desc {
+  font-size: 14px;
   color: #666;
 }
 
-
-.resources-list-container {
-  margin-top: 25px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.resources-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #dee2e6;
-  padding-bottom: 10px;
-}
-
-.resources-header h3 {
-  margin: 0;
-  color: #333;
-  font-size: 18px;
-}
-
-.total-resources {
-  color: #6c757d;
-  font-size: 14px;
-}
-
-.resources-grid {
+.density-level-cards {
   display: grid;
-  gap: 20px;
-}
-
-.resource-category {
-  margin-bottom: 15px;
-}
-
-.category-header {
-  display: flex;
-  align-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 10px;
-  margin-bottom: 12px;
+  justify-content: center;
 }
 
-.category-title {
+.density-level-card {
+  width: 100%;
+  background: #f9f9f9;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #eaeaea;
+}
+
+.density-level-card.active {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: #3E5C2B;
+}
+
+.level-color {
+  height: 8px;
+  width: 100%;
+}
+
+.level-color.very-low { background-color: #FF4444; }
+.level-color.low { background-color: #FFAA00; }
+.level-color.medium { background-color: #FFFF00; }
+.level-color.high { background-color: #00C851; }
+.level-color.very-high { background-color: #0099CC; }
+
+.level-content {
+  padding: 12px;
+}
+
+.level-title {
   font-weight: bold;
   font-size: 16px;
-  color: white; 
-  padding: 6px 12px;
-  border-radius: 6px;
-  flex-grow: 1;
-}
-
-
-.resource-category[data-type="schools"] .category-title {
-  background: #2196F3; 
-}
-
-.resource-category[data-type="hospitals"] .category-title {
-  background: #F44336;
-}
-
-.resource-category[data-type="ndisProviders"] .category-title {
-  background: #4CAF50; 
-}
-
-.resource-category[data-type="ndisDailyLiving"] .category-title {
-  background: #9C27B0; 
-}
-
-.resource-category[data-type="ndisTherapy"] .category-title {
-  background: #FF9800; 
-}
-
-.category-count {
-  background: white; 
-  color: #333; 
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: bold;
-  min-width: 30px;
-  text-align: center;
-  border: 1px solid #dee2e6; 
-}
-
-.resource-items-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
-  margin-left: 10px;
-}
-
-.resource-card {
-  background: white;
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  padding: 12px 15px;
-  transition: all 0.2s ease;
-  border-left: 4px solid transparent;
-}
-
-.resource-category[data-type="schools"] .resource-card {
-  border-left-color: #2196F3;
-}
-
-.resource-category[data-type="hospitals"] .resource-card {
-  border-left-color: #F44336;
-}
-
-.resource-category[data-type="ndisProviders"] .resource-card {
-  border-left-color: #4CAF50;
-}
-
-.resource-category[data-type="ndisDailyLiving"] .resource-card {
-  border-left-color: #9C27B0;
-}
-
-.resource-category[data-type="ndisTherapy"] .resource-card {
-  border-left-color: #FF9800;
-}
-
-.resource-category[data-type="schools"] .resource-card:hover {
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
-  border-color: #4CAF50;
-}
-
-.resource-category[data-type="hospitals"] .resource-card:hover {
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
-  border-color: #2196F3;
-}
-
-.resource-category[data-type="ndisProviders"] .resource-card:hover {
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
-  border-color: #FF9800;
-}
-
-.resource-category[data-type="ndisDailyLiving"] .resource-card:hover {
-  box-shadow: 0 2px 8px rgba(156, 39, 176, 0.2);
-  border-color: #9C27B0;
-}
-
-.resource-category[data-type="ndisTherapy"] .resource-card:hover {
-  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
-  border-color: #F44336;
-}
-
-.resource-card:hover {
-  transform: translateY(-1px);
-}
-
-.resource-name {
-  font-weight: 500;
-  color: #212529;
   margin-bottom: 4px;
+  color: #333;
 }
 
-.resource-address {
-  font-size: 12px;
-  color: #6c757d;
-  line-height: 1.4;
+.level-range {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 5px;
 }
 
-
-.search-location-pin { 
-  position: relative; 
-  width: 40px; 
-  height: 40px; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
+.level-description {
+  font-size: 13px;
+  color: #777;
+  line-height: 1.3;
 }
 
-.location-icon { 
-  font-size: 20px;
+.density-level-card.active .level-title {
+  color: #3E5C2B;
 }
 
-.search-location-pin .location-icon { 
-  font-size: 40px !important; 
-  color: #ff0033; 
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3); 
-  filter: drop-shadow(0 4px 12px rgba(255,0,51,0.5)); 
-  animation: pulse 2s infinite; 
+.density-level-card.active .level-range {
+  color: #3E5C2B;
 }
 
-@keyframes pulse { 
-  0% { transform: scale(1); opacity: 1; } 
-  50% { transform: scale(1.05); opacity: 0.9; } 
-  100% { transform: scale(1); opacity: 1; } 
-}
-
-
-:deep(.custom-tooltip .tooltip-content) { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 8px; 
-}
-
-:deep(.custom-tooltip .tooltip-title) { 
-  font-weight: bold; 
-  font-size: 16px; 
-  color: #333; 
-  margin-bottom: 5px; 
-  border-bottom: 1px solid #eee; 
-  padding-bottom: 5px; 
-}
-
-:deep(.custom-tooltip .tooltip-details) { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 4px; 
-}
-
-:deep(.custom-tooltip .tooltip-row) { 
-  display: flex; 
-  flex-direction: row; 
-  gap: 8px; 
-  align-items: baseline; 
-}
-
-:deep(.custom-tooltip .tooltip-label) { 
-  font-weight: bold; 
-  color: #555; 
-  width: 85px; 
-  flex-shrink: 0; 
-}
-
-:deep(.custom-tooltip .tooltip-value) { 
-  color: #333; 
-  flex: 1; 
-  word-break: break-all; 
-}
-
-:deep(.horizontal-tooltip) { 
-  background-color: white !important; 
-  border: 1px solid #ccc !important; 
-  border-radius: 6px !important; 
-  padding: 12px !important; 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important; 
-  min-width: 320px !important; 
-  max-width: 500px !important; 
-  z-index: 1001 !important; 
-}
-
-:deep(.custom-search-marker) { 
-  z-index: 1000 !important; 
-  overflow: visible !important; 
-}
-
-:deep(.custom-search-marker div) { 
-  overflow: visible !important; 
-}
-
-
-@media (max-width: 768px) {
-  .echart-gauge-wrapper {
-    height: 300px;
-    max-width: 100%;
-  }
-  
-  .gauge-legend {
-    justify-content: center;
-  }
-  
-  .legend-item span {
-    font-size: 11px;
-  }
-  
-  .density-gauge-container {
-    padding: 12px;
-  }
-  
-  .resource-items-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 10px;
-  }
-  
-  .resources-list-container {
-    padding: 15px;
-  }
-  
-  .density-level {
-    font-size: 20px;
-  }
-  
-  .density-detail {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .echart-gauge-wrapper {
-    height: 260px;
-    max-width: 100%;
-  }
-  
-  .gauge-legend {
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .legend-item {
-    width: auto;
-  }
-  
-  .density-gauge-container {
-    padding: 10px;
-  }
-  
-  .resource-items-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .category-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .category-title {
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  .resources-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .density-level {
-    font-size: 18px;
-  }
-  
-  .density-detail {
-    font-size: 13px;
-  }
+.density-level-card.active .level-description {
+  color: #4c6d35;
 }
 
 .online-resources {
@@ -1468,5 +1259,288 @@ export default {
   .online-resources .resource-card li {
     font-size: 13px;
   }
+  
+  .density-level-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .density-level-card {
+    width: 100%;
+    max-width: 100%;
+    flex-direction: row;
+  }
+  
+  .level-color {
+    width: 8px;
+    height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .density-levels-reference {
+    padding: 15px;
+  }
+  
+  .reference-header h4 {
+    font-size: 16px;
+  }
+  
+  .density-level-card {
+    flex-direction: row;
+  }
+}
+
+/* nearby resources list styles */
+.resources-list-container {
+  margin-top: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  padding: 15px 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.resources-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.resources-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+}
+
+.total-resources {
+  background-color: #3E5C2B;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.resources-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.resource-category {
+  width: 100%;
+  overflow: hidden;
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border-radius: 8px 8px 0 0;
+  font-weight: 600;
+}
+
+.resource-category[data-type="schools"] .category-header {
+  background-color: #2196F3;
+  color: white;
+}
+
+.resource-category[data-type="hospitals"] .category-header {
+  background-color: #F44336;
+  color: white;
+}
+
+.resource-category[data-type="ndisProviders"] .category-header {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.resource-category[data-type="ndisDailyLiving"] .category-header {
+  background-color: #9C27B0;
+  color: white;
+}
+
+.resource-category[data-type="ndisTherapy"] .category-header {
+  background-color: #FF9800;
+  color: white;
+}
+
+.category-title {
+  color: white;
+  font-size: 16px;
+}
+
+.category-count {
+  background-color: rgba(255, 255, 255, 0.3);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.resource-items-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 10px;
+}
+
+.resource-items-grid .resource-card {
+  width: 100%;
+  padding: 15px;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid transparent;
+  display: flex;
+  flex-direction: column;
+}
+
+.resource-category[data-type="schools"] .resource-card {
+  border-left-color: #2196F3;
+}
+
+.resource-category[data-type="hospitals"] .resource-card {
+  border-left-color: #F44336;
+}
+
+.resource-category[data-type="ndisProviders"] .resource-card {
+  border-left-color: #4CAF50;
+}
+
+.resource-category[data-type="ndisDailyLiving"] .resource-card {
+  border-left-color: #9C27B0;
+}
+
+.resource-category[data-type="ndisTherapy"] .resource-card {
+  border-left-color: #FF9800;
+}
+
+.resource-name {
+  font-weight: 600;
+  margin-bottom: 5px;
+  font-size: 15px;
+  color: #333;
+}
+
+.resource-address {
+  color: #666;
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  .resource-items-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .density-gauge-wrapper {
+    height: 380px;
+  }
+}
+
+@media (max-width: 767px) {
+  .resource-items-grid {
+    grid-template-columns: 1fr;
+    padding: 8px;
+  }
+  
+  .resources-list-container {
+    padding: 10px;
+  }
+  
+  .resources-header h3 {
+    font-size: 16px;
+  }
+  
+  .category-header {
+    padding: 8px 12px;
+  }
+  
+  .category-title {
+    font-size: 15px;
+  }
+  
+  .resource-items-grid .resource-card {
+    padding: 12px;
+  }
+  
+  .density-level-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .density-gauge-wrapper {
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-input-group {
+    flex-direction: column;
+  }
+  
+  .autocomplete-wrapper input {
+    border-radius: 6px;
+    margin-bottom: 8px;
+  }
+  
+  .search-button {
+    width: 100%;
+    border-radius: 6px;
+    height: 40px;
+  }
+  
+  .resources-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .total-resources {
+    align-self: flex-start;
+  }
+  
+  .density-gauge-wrapper {
+    height: 200px;
+  }
+}
+
+/* clear search results button styles */
+.clear-results-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.clear-results-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clear-results-button:hover {
+  background-color: #e5e5e5;
+  color: #333;
+}
+
+.clear-icon {
+  flex-shrink: 0;
 }
 </style>

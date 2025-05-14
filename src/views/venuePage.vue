@@ -10,14 +10,9 @@
     </div>
 
     <div class="main-content">  
-      <!-- Step Indicators -->
-      <div class="step-indicators">
-        <div :class="['step', currentStep === 'filter' ? 'active' : '']">1. Filter Resources</div>
-        <div :class="['step', currentStep === 'heatmap' ? 'active' : '']">2. View Heatmap</div>
-      </div>
-      
-      <!-- External Resource Selector - Only shown in filter step -->
-      <div v-if="currentStep === 'filter'" class="external-filter-container">
+      <!-- unified page container -->
+      <div class="unified-page-container">
+        <!-- resource type selection part -->
         <div class="resource-filter">
           <div class="resource-type">
             <div class="type-title">What kind of autism support are you looking for nearby?</div>
@@ -35,37 +30,17 @@
               <button @click="selectAll">Select All</button>
               <button @click="selectNone">Clear All</button>
             </div>
-            
-            <!-- Confirm Filter Button -->
-            <div class="confirm-section">
-              <button 
-                class="confirm-button" 
-                @click="goToHeatmap"
-                :disabled="!hasSelectedAnyType"
-              >
-              Explore Autism Resource Heatmap Analysis
-              </button>
-            </div>
           </div>
         </div>
-      </div>
-      
-      <!-- Heatmap Control Panel - Only shown in heatmap step -->
-      <div v-if="currentStep === 'heatmap'" class="external-filter-container">
-        <div class="resource-type">
-          <div class="back-navigation-inline">
-            <a href="#" @click.prevent="backToFiltering" class="back-link">
-              <span class="arrow">←</span> Back to Filter
-            </a>
-          </div>
-          
-          <!-- Location Density Search Component -->
+        
+        <!-- location search part -->
+        <div class="location-search-section">
           <LocationDensitySearch
             :map="map"
             :all-types-selected="isAllTypesSelected"
             :resource-data="resourceData"
             v-model:loading="isLoading"
-            :selected-types="confirmedTypes"
+            :selected-types="selectedTypes"
             ref="densitySearchRef"
           />
         </div>
@@ -73,11 +48,8 @@
       
       <!-- Resource Map Title and Description -->
       <div class="resource-map-header">
-        <h2>Victoria Autism Support Resource</h2>
-        <p v-if="currentStep === 'filter'">
-          Current view shows resource distribution as points. Click "Explore Autism Resource Heatmap Analysis" to explore density analysis and location search.
-        </p>
-        <p v-else>
+        <h2>Victoria Autism Support Resourc Map</h2>
+        <p>
           {{ showHeatmap ? 'Currently viewing the heatmap density analysis. Use controls to adjust visualization.' : 'Currently viewing selected resource points. Toggle heatmap to see density patterns.' }}
         </p>
       </div>
@@ -92,8 +64,8 @@
           <div class="loading-text">Loading Resources...</div>
         </div>
         
-       
-        <div v-if="currentStep === 'heatmap'" class="heatmap-controls-overlay">
+        <!-- Heatmap Controls Overlay -->
+        <div class="heatmap-controls-overlay">
           <div class="heatmap-controls-header">
             <h3>Heatmap Controls</h3>
             <button class="minimize-btn" @click="toggleControlsMinimized">
@@ -111,14 +83,12 @@
             </div>
             
             <div v-if="showHeatmap" class="heatmap-settings">
-             
               <div class="setting-item">
                 <label>Hotspot Radius:</label>
                 <input type="range" min="15" max="40" v-model.number="heatmapParams.radius" @change="updateHeatmapParams">
                 <span class="setting-value">{{ heatmapParams.radius }}</span>
               </div>
               
-        
               <div class="setting-item">
                 <label>Blur Level:</label>
                 <input type="range" min="20" max="35" v-model.number="heatmapParams.blur" @change="updateHeatmapParams">
@@ -129,10 +99,9 @@
             </div>
           </div>
         </div>
-        
 
         <HeatmapLayer
-          v-if="map && currentStep === 'heatmap'"
+          v-if="map"
           :map="map"
           :data="heatmapData"
           :show-heatmap="showHeatmap"
@@ -143,46 +112,41 @@
       </div>
       
       <div class="stats-panel">
-        <div class="stat-card">
+        <div class="stat-card" :class="{ 'disabled': !selectedTypes.schools }">
           <h3>Total Special Schools</h3>
-          <div class="stat-number">{{ schoolsData.length }}</div>
+          <div class="stat-number">{{ selectedTypes.schools ? schoolsData.length : 0 }}</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" :class="{ 'disabled': !selectedTypes.hospitals }">
           <h3>Total Public Hospitals</h3>
-          <div class="stat-number">{{ hospitalsData.length }}</div>
+          <div class="stat-number">{{ selectedTypes.hospitals ? hospitalsData.length : 0 }}</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" :class="{ 'disabled': !selectedTypes.ndisProviders }">
           <h3>NDIS Early Intervention</h3>
-          <div class="stat-number">{{ ndisProvidersData.length }}</div>
+          <div class="stat-number">{{ selectedTypes.ndisProviders ? ndisProvidersData.length : 0 }}</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" :class="{ 'disabled': !selectedTypes.ndisDailyLiving }">
           <h3>NDIS Daily Living</h3>
-          <div class="stat-number">{{ ndisDailyLivingData.length }}</div>
+          <div class="stat-number">{{ selectedTypes.ndisDailyLiving ? ndisDailyLivingData.length : 0 }}</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-card" :class="{ 'disabled': !selectedTypes.ndisTherapy }">
           <h3>NDIS Therapy Services</h3>
-          <div class="stat-number">{{ ndisTherapyData.length }}</div>
+          <div class="stat-number">{{ selectedTypes.ndisTherapy ? ndisTherapyData.length : 0 }}</div>
         </div>
         <div class="stat-card">
           <h3>Total Resources</h3>
-          <div class="stat-number">{{ schoolsData.length + hospitalsData.length + ndisProvidersData.length + ndisDailyLivingData.length + ndisTherapyData.length }}</div>
+          <div class="stat-number">{{ currentTotalResources }}</div>
         </div>
       </div>
       
       <div class="instructions">
         <h3>Usage Instructions:</h3>
         <ul>
-          <li>Blue dots represent special schools, red dots represent hospitals, green dots represent NDIS early intervention, purple dots represent NDIS daily living support, and orange dots represent NDIS therapy services</li>
+          <li>On the map, different types of autism support are marked with coloured dots: <span style="color: #3388ff; font-weight: bold;">Special schools</span> (Blue Dots) <span style="color: #ff3333; font-weight: bold;">hospitals</span> (Red Dots) <span style="color: #33cc33; font-weight: bold;">NDIS early intervention</span> (Green Dots) <span style="color: #9933cc; font-weight: bold;">NDIS daily living support</span> (Purple Dots) and <span style="color: #ff9900; font-weight: bold;">NDIS therapy services</span> (Orange Dots)</li>
           <li>Check the boxes above to display multiple types of resources simultaneously</li>
+          <li>Enter an address or suburb in the search box to find nearby resources</li>
           <li>Hover over a point to view detailed information</li>
-          <li v-if="showHeatmap">The heatmap shows resource density: red indicates high density, blue indicates low density</li>
-          <li v-if="currentStep === 'filter'">After completing resource selection, click "Explore Autism Resource Heatmap Analysis" to enter heatmap view mode</li>
-          <li v-if="currentStep === 'heatmap'">In heatmap mode, you can use the heatmap toggle to show or hide the heatmap</li>
-          <li v-if="currentStep === 'heatmap'">In heatmap mode, the currently displayed resource types are locked and cannot be changed</li>
-          <li v-if="currentStep === 'heatmap'">Use the location density search feature to search for specific addresses or coordinates and view resource distribution in the area</li>
-          <li v-if="currentStep === 'heatmap'">Location density search requires all resource types to be selected to function</li>
-          <li v-if="currentStep === 'heatmap'">Click "Back to Filter" to return to the filter interface and reselect resource types</li>
-          <li v-if="currentStep === 'heatmap'">Use the heatmap controls on the map to adjust heatmap parameters: Adjusting Hotspot Radius controls the size of influence area for each resource point, adjusting Blur Level makes the heatmap appear smoother or clearer</li>
+          <li>Toggle the heatmap to visualize resource density (red indicates high density, blue indicates low density)</li>
+          <li>Use the heatmap controls to adjust parameters: Hotspot Radius controls the size of influence area for each resource point, Blur Level makes the heatmap appear smoother or clearer</li>
         </ul>
       </div>
       
@@ -229,7 +193,7 @@ export default {
     MyFooter
   },
   setup() {
-    // Create reactive references
+    // create reactive references
     const mapContainer = ref(null);
     const map = ref(null);
     const dataLoadError = ref('');
@@ -237,15 +201,12 @@ export default {
     const isLoading = ref(false);
     const densitySearchRef = ref(null);
     
-    // Step control
-    const currentStep = ref('filter'); // 'filter' or 'heatmap'
-    
     // heatmap controller state
     const controlsMinimized = ref(false);
     
     // heatmap parameters state
     const heatmapParams = reactive({
-      radius: 25,
+      radius: 37,
       blur: 35,
       intensity: 1.5,
       maxThreshold: 10
@@ -259,23 +220,20 @@ export default {
       maxThreshold: 10
     };
     
-    // Multi-select types - current filter selection (using new filtering logic)
-    const selectedTypes = reactive(loadFilterState()); // Load from local storage
+    // multi-select types - current filter selection (using new filter logic)
+    const selectedTypes = reactive(loadFilterState()); // load from local storage
     
-    // Confirmed filter conditions - used for heatmap
-    const confirmedTypes = reactive(createFilterState());
-    
-    // Computed property: whether any type is selected
+    // computed property: whether any type has been selected
     const hasSelectedAnyTypeComputed = computed(() => {
       return hasSelectedAnyType(selectedTypes);
     });
     
-    // Computed property: whether all types are selected
+    // computed property: whether all types have been selected
     const isAllTypesSelectedComputed = computed(() => {
-      return isAllTypesSelected(confirmedTypes);
+      return isAllTypesSelected(selectedTypes);
     });
     
-    // Computed property: resource data object (for passing to location density query component)
+    // computed property: resource data object (for passing to location density query component)
     const resourceData = computed(() => {
       return {
         schools: schoolsData.value,
@@ -286,7 +244,7 @@ export default {
       };
     });
     
-    // Computed property: heatmap data (based on confirmed filter types)
+    // computed property: heatmap data (based on confirmed filter types)
     const heatmapData = computed(() => {
       const allData = {
         schoolsData: schoolsData.value,
@@ -296,10 +254,10 @@ export default {
         ndisTherapyData: ndisTherapyData.value
       };
       
-      // Return only the data of currently confirmed selected types
-      const selectedData = getDataByFilters(confirmedTypes, allData);
+      // return the data of the current selected types
+      const selectedData = getDataByFilters(selectedTypes, allData);
       
-      // Combine all selected type data into a single array
+      // merge all selected types data into a single array
       let combinedData = [];
       Object.values(selectedData).forEach(data => {
         if (Array.isArray(data)) {
@@ -310,10 +268,21 @@ export default {
       return combinedData;
     });
     
+    // computed property: current total resources
+    const currentTotalResources = computed(() => {
+      let total = 0;
+      if (selectedTypes.schools) total += schoolsData.value.length;
+      if (selectedTypes.hospitals) total += hospitalsData.value.length;
+      if (selectedTypes.ndisProviders) total += ndisProvidersData.value.length;
+      if (selectedTypes.ndisDailyLiving) total += ndisDailyLivingData.value.length;
+      if (selectedTypes.ndisTherapy) total += ndisTherapyData.value.length;
+      return total;
+    });
+    
     // toggle controls minimized/expanded state
     const toggleControlsMinimized = () => {
       controlsMinimized.value = !controlsMinimized.value;
-      // save state to local storage
+      // save the state to local storage
       try {
         localStorage.setItem('heatmapControlsMinimized', JSON.stringify(controlsMinimized.value));
       } catch (error) {
@@ -323,7 +292,7 @@ export default {
     
     // update heatmap parameters
     const updateHeatmapParams = () => {
-      // save parameters to local storage
+      // save the parameters to local storage
       try {
         localStorage.setItem('heatmapParams', JSON.stringify(heatmapParams));
       } catch (error) {
@@ -363,124 +332,7 @@ export default {
       }
     };
     
-    // Confirm filter, enter heatmap page
-    const goToHeatmap = () => {
-      if (!hasSelectedAnyTypeComputed.value) {
-        return; // If no type is selected, do not execute operation
-      }
-      
-      isLoading.value = true;
-      
-      // Copy current selection to confirmed selection (using new filtering logic)
-      const newConfirmedTypes = copyFilterState(selectedTypes, confirmedTypes);
-      Object.keys(newConfirmedTypes).forEach(key => {
-        confirmedTypes[key] = newConfirmedTypes[key];
-      });
-      
-      // Save filter state to local storage
-      saveFilterState(selectedTypes);
-      
-      // Delayed switch, show loading animation
-      setTimeout(() => {
-        try {
-          // Set heatmap to default on
-          showHeatmap.value = true;
-          
-          // Switch to heatmap step
-          currentStep.value = 'heatmap';
-          
-          // Create markers using confirmed filter
-          createMarkersForConfirmedTypes();
-          
-          // if no markers are selected, or an error occurs, ensure the default view is displayed
-          if (!currentMarkerLayer.value || (currentMarkerLayer.value.getLayers && currentMarkerLayer.value.getLayers().length === 0)) {
-            console.log('No markers in heatmap view, using default view');
-            if (map.value) {
-              map.value.setView([-37.815, 144.963], 8);
-            }
-          }
-        } catch (error) {
-          console.error('Error in goToHeatmap:', error);
-          // ensure the error does not affect page switching
-          if (map.value) {
-            map.value.setView([-37.815, 144.963], 8);
-          }
-        } finally {
-          // end loading state
-          isLoading.value = false;
-        }
-      }, 500);
-    };
-    
-    // Return to filter page
-    const backToFiltering = () => {
-      isLoading.value = true;
-      
-      // Close heatmap - explicitly set to false
-      showHeatmap.value = false;
-      
-      // more powerful clear location marker logic
-      // first use forceRemoveMarker method (if available)
-      if (densitySearchRef.value) {
-        if (typeof densitySearchRef.value.forceRemoveMarker === 'function') {
-          console.log('Explicitly force removing marker before going back to filter');
-          densitySearchRef.value.forceRemoveMarker();
-        } else if (typeof densitySearchRef.value.clearMarker === 'function') {
-          // fallback option
-          console.log('Using clearMarker as fallback');
-          densitySearchRef.value.clearMarker();
-        }
-      }
-      
-      // ensure there are no search markers on the map
-      if (map.value) {
-        map.value.eachLayer(layer => {
-          if (layer instanceof L.Marker) {
-            const icon = layer.options.icon;
-            if (icon && icon.options && icon.options.className === 'custom-search-marker') {
-              console.log('Found and removing orphaned search marker during back to filter');
-              map.value.removeLayer(layer);
-            }
-          }
-        });
-      }
-      
-      // Delayed switch, show loading animation
-      setTimeout(() => {
-        try {
-          // Switch back to filter step
-          currentStep.value = 'filter';
-          
-          // Create markers using current selection
-          createMarkersForSelectedTypes();
-          
-          // also ensure that when switching back to the filter page, if there are no markers, display the default view
-          if (!currentMarkerLayer.value || (currentMarkerLayer.value.getLayers && currentMarkerLayer.value.getLayers().length === 0)) {
-            console.log('No markers in filter view, using default view');
-            if (map.value) {
-              map.value.setView([-37.815, 144.963], 8);
-            }
-          }
-        } catch (error) {
-          console.error('Error in backToFiltering:', error);
-          if (map.value) {
-            map.value.setView([-37.815, 144.963], 8);
-          }
-        } finally {
-          // end loading state
-          isLoading.value = false;
-        }
-      }, 500);
-    };
-    
-    // Toggle heatmap display state
-    const toggleHeatmap = () => {
-      // just ensure the legend is updated
-      console.log('Heatmap state after toggle:', showHeatmap.value);
-      updateLegend();
-    };
-    
-    // Quick select all types (using new filtering logic)
+    // quick select all types (using new filter logic)
     const selectAll = () => {
       const newState = selectAllTypes(selectedTypes);
       Object.keys(newState).forEach(key => {
@@ -489,7 +341,7 @@ export default {
       createMarkersForSelectedTypes();
     };
     
-    // Clear all selections (using new filtering logic)
+    // clear all selections (using new filter logic)
     const selectNone = () => {
       const newState = selectNoneTypes(selectedTypes);
       Object.keys(newState).forEach(key => {
@@ -498,30 +350,30 @@ export default {
       createMarkersForSelectedTypes();
     };
     
-    // Toggle individual resource type (using new filtering logic)
+    // toggle single resource type (using new filter logic)
     const toggleResourceTypeHandler = (type) => {
       selectedTypes[type] = !selectedTypes[type];
       createMarkersForSelectedTypes();
     };
     
-    // Zoom level constants - only restrict zoom out
+    // zoom level constants - only limit zoom out
     const zoomLevels = {
       max: 20,
       min: 6,
       minFit: 8
     };
 
-    // Create reactive data using ref
+    // create reactive data using ref
     const schoolsData = ref([]);
     const hospitalsData = ref([]);
     const ndisProvidersData = ref([]);
     const ndisDailyLivingData = ref([]);
     const ndisTherapyData = ref([]);
     
-    // Currently displayed marker layer group - using single layer group
+    // current displayed marker layer group - using single layer group
     const currentMarkerLayer = ref(null);
     
-    // Coordinate validation function
+    // coordinate validation function
     const isValidCoordinate = (point) => {
       if (!point) return false;
       
@@ -538,7 +390,7 @@ export default {
              Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
     };
     
-    // Data preprocessing
+    // data preprocessing
     const preprocessAllData = () => {
       console.log('Preprocessing data...');
       
@@ -569,7 +421,7 @@ export default {
         return processed;
       };
       
-      // Process each type of data
+      // process data for each type
       schoolsData.value = processPointData(schoolsData.value, 'Schools');
       hospitalsData.value = processPointData(hospitalsData.value, 'Hospitals');
       ndisProvidersData.value = processPointData(ndisProvidersData.value, 'NDIS Early Intervention');
@@ -577,13 +429,13 @@ export default {
       ndisTherapyData.value = processPointData(ndisTherapyData.value, 'NDIS Therapy Services');
     };
     
-    // Initialize map
+    // initialize map
     const initMap = async () => {
       console.log('Initializing map...');
       isLoading.value = true;
       
       try {
-        // Load data
+        // load data
         const result = await loadAllData();
         
         if (!result.success) {
@@ -592,17 +444,17 @@ export default {
           return;
         }
         
-        // Update reactive data
+        // update reactive data
         schoolsData.value = result.schoolsData || [];
         hospitalsData.value = result.hospitalsData || [];
         ndisProvidersData.value = result.ndisProvidersData || [];
         ndisDailyLivingData.value = result.ndisDailyLivingData || [];
         ndisTherapyData.value = result.ndisTherapyData || [];
         
-        // Data preprocessing
+        // data preprocessing
         preprocessAllData();
         
-        // Ensure DOM has been rendered
+        // ensure DOM has rendered
         setTimeout(() => {
           try {
             createMap();
@@ -620,7 +472,7 @@ export default {
       }
     };
     
-    // Create map
+    // create map
     const createMap = () => {
       const mapElement = document.getElementById('resource-map');
       if (!mapElement) {
@@ -629,7 +481,7 @@ export default {
         return;
       }
       
-      // prevent map container size issues
+      // prevent map container size problem
       if (mapElement.clientWidth === 0 || mapElement.clientHeight === 0) {
         console.warn('Map container has zero dimensions, waiting for container to be properly sized...');
         setTimeout(createMap, 300);
@@ -638,13 +490,13 @@ export default {
       
       console.log('Creating map...', mapElement.clientWidth, mapElement.clientHeight);
       
-      // If map already exists, destroy it first
+      // if map exists, destroy it first
       if (map.value) {
         map.value.remove();
         map.value = null;
       }
       
-      // Initialize map
+      // initialize map
       map.value = L.map('resource-map', {
         center: [-37.815, 144.963], // Melbourne center
         zoom: 8,
@@ -655,7 +507,7 @@ export default {
         zoomAnimation: true
       });
 
-      // Add base map
+      // add base map
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; OpenStreetMap',
         subdomains: 'abcd',
@@ -663,14 +515,14 @@ export default {
         tileSize: 256
       }).addTo(map.value);
       
-      // Create initial layer - show all selected resource types
+      // create initial layer - display all selected resource types
       createMarkersForSelectedTypes();
       
-      // Add legend
+      // add legend
       addLegend();
     };
     
-    // Helper function - format URL
+    // helper function - format URL
     const formatUrl = (url) => {
       if (!url) return '';
       let displayUrl = url.replace(/^https?:\/\//, '');
@@ -680,7 +532,50 @@ export default {
       return displayUrl;
     };
     
-    // Create markers - create markers based on selected types (for filter page)
+    // create tooltip content
+    const createTooltipContent = (item, type) => {
+      const config = RESOURCE_TYPES[type];
+      let content = `
+        <div class="tooltip-content">
+          <div class="tooltip-header">
+            <h3>${item.name || `Unnamed ${config.label}`}</h3>
+            <button class="close-tooltip">×</button>
+          </div>
+          <div class="tooltip-details">
+      `;
+      
+      if (type !== 'schools' && item.outletName) {
+        content += `<p><strong>Branch:</strong> ${item.outletName}</p>`;
+      }
+      
+      content += `
+            <p><strong>Address:</strong> ${item.address || 'Unknown Address'}</p>
+            <p><strong>Phone:</strong> ${item.phone || 'No phone information'}</p>
+            <p><strong>Type:</strong> ${item.type || config.label}</p>
+      `;
+      
+      if (type !== 'schools' && item.openHours) {
+        content += `<p><strong>Opening Hours:</strong> ${item.openHours}</p>`;
+      }
+      
+      if (item.website) {
+        // ensure website link uses full URL format
+        let fullUrl = item.website;
+        if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
+          fullUrl = 'https://' + fullUrl;
+        }
+        content += `<p><strong>Website:</strong> <a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="tooltip-link">${formatUrl(item.website)}</a></p>`;
+      }
+      
+      content += `
+          </div>
+        </div>
+      `;
+      
+      return content;
+    };
+    
+    // create markers - based on selected types
     const createMarkersForSelectedTypes = () => {
       if (!map.value) return;
       
@@ -701,48 +596,27 @@ export default {
       }, 50);
     };
     
-    // Create markers - create markers based on confirmed types (for heatmap page)
-    const createMarkersForConfirmedTypes = () => {
-      if (!map.value) return;
-      
-      console.log(`Creating markers for confirmed types...`, confirmedTypes);
-      
-      isLoading.value = true;
-      
-      setTimeout(() => {
-        try {
-          createMarkers(confirmedTypes);
-        } catch (error) {
-          console.error('Error creating markers:', error);
-        } finally {
-          setTimeout(() => {
-            isLoading.value = false;
-          }, 300);
-        }
-      }, 50);
-    };
-    
-    // Generic marker creation function
+    // create markers
     const createMarkers = (typeFilter) => {
-      // If there's a current marker layer, remove it first
+      // if current marker layer exists, remove it first
       if (currentMarkerLayer.value && map.value.hasLayer(currentMarkerLayer.value)) {
         map.value.removeLayer(currentMarkerLayer.value);
       }
       
-      // ensure the map is initialized
+      // ensure map is initialized
       if (!map.value) {
         console.warn('Map not initialized, cannot create markers');
         return;
       }
       
       try {
-        // Create new layer group
+        // create new layer group
         currentMarkerLayer.value = L.layerGroup();
         
-        // Add markers based on selection state
+        // add markers based on selected state
         let pointCount = 0;
         
-        // Get all current data
+        // get all current data
         const allData = {
           schoolsData: schoolsData.value,
           hospitalsData: hospitalsData.value,
@@ -751,7 +625,7 @@ export default {
           ndisTherapyData: ndisTherapyData.value
         };
         
-        // Get selected data and create markers
+        // get selected data and create markers
         const selectedData = getDataByFilters(typeFilter, allData);
         
         Object.entries(selectedData).forEach(([type, data]) => {
@@ -771,19 +645,57 @@ export default {
                 })
               });
               
-              // Create tooltip content
+              // create tooltip content
               const tooltipContent = createTooltipContent(item, type);
               
-              marker.bindTooltip(tooltipContent, {
-                direction: 'auto',
-                permanent: false,
-                className: 'custom-tooltip horizontal-tooltip',
-                offset: [10, 0],
-                sticky: true,
-                opacity: 0.9
+              // use popup instead of tooltip, allow fixed display
+              const popup = L.popup({
+                className: 'custom-popup',
+                offset: [0, -5],
+                closeButton: false,
+                autoClose: false,
+                closeOnEscapeKey: true,
+                maxWidth: 350
+              }).setContent(tooltipContent);
+              
+              marker.bindPopup(popup);
+              
+              // add click event handler
+              marker.on('click', function(e) {
+                // close all other open popups
+                map.value.eachLayer(function(layer) {
+                  if (layer !== marker && layer.closePopup) {
+                    layer.closePopup();
+                  }
+                });
+                
+                // open current popup
+                marker.openPopup();
+                
+                // add event listener to ensure correct external link opening
+                setTimeout(() => {
+                  const popupLinks = document.querySelectorAll('.tooltip-link');
+                  popupLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                      e.stopPropagation();
+                      window.open(this.href, '_blank');
+                      return false;
+                    });
+                  });
+                  
+                  // add event listener to ensure correct close button opening
+                  const closeButtons = document.querySelectorAll('.close-tooltip');
+                  closeButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      marker.closePopup();
+                    });
+                  });
+                }, 100);
               });
               
-              // Add to current layer group
+              // add to current layer group
               marker.addTo(currentMarkerLayer.value);
               pointCount++;
             } catch (error) {
@@ -792,13 +704,13 @@ export default {
           });
         });
         
-        // Add layer group to map
+        // add to current layer group
         currentMarkerLayer.value.addTo(map.value);
         console.log(`Created ${pointCount} markers`);
         
-        // only adjust view when markers are added
+        // adjust view only when adding markers
         if (pointCount > 0) {
-          // Adjust view to show all markers
+          // adjust view to show all markers
           fitToCurrentMarkers();
         } else {
           console.log('No markers added, using default view');
@@ -806,61 +718,26 @@ export default {
         }
       } catch (error) {
         console.error('Error in createMarkers:', error);
-        // use default view when error occurs
+        // when error occurs, use default view
         if (map.value) {
           map.value.setView([-37.815, 144.963], 8);
         }
       }
     };
     
-    // Create tooltip content
-    const createTooltipContent = (item, type) => {
-      const config = RESOURCE_TYPES[type];
-      let content = `
-        <div class="tooltip-content">
-          <h3>${item.name || `Unnamed ${config.label}`}</h3>
-          <div class="tooltip-details">
-      `;
-      
-      if (type !== 'schools' && item.outletName) {
-        content += `<p><strong>Branch:</strong> ${item.outletName}</p>`;
-      }
-      
-      content += `
-            <p><strong>Address:</strong> ${item.address || 'Unknown Address'}</p>
-            <p><strong>Phone:</strong> ${item.phone || 'No phone information'}</p>
-            <p><strong>Type:</strong> ${item.type || config.label}</p>
-      `;
-      
-      if (type !== 'schools' && item.openHours) {
-        content += `<p><strong>Opening Hours:</strong> ${item.openHours}</p>`;
-      }
-      
-      if (item.website) {
-        content += `<p><strong>Website:</strong> <a href="${item.website}" target="_blank">${formatUrl(item.website)}</a></p>`;
-      }
-      
-      content += `
-          </div>
-        </div>
-      `;
-      
-      return content;
-    };
-    
-    // Adjust map view to fit current markers
+    // adjust map view to fit current markers
     const fitToCurrentMarkers = () => {
       if (!map.value || !currentMarkerLayer.value) return;
       
       try {
-        // ensure the layer exists and has markers, do not attempt to call getBounds if there are no markers
+        // ensure layer exists and has markers, if no markers, do not try to call getBounds
         if (currentMarkerLayer.value.getLayers && currentMarkerLayer.value.getLayers().length === 0) {
           console.log('No markers to fit, using default view');
           map.value.setView([-37.815, 144.963], 8);
           return;
         }
         
-        // ensure the getBounds method exists
+        // ensure getBounds method exists
         if (typeof currentMarkerLayer.value.getBounds !== 'function') {
           console.warn('getBounds method not available on currentMarkerLayer, using default view');
           map.value.setView([-37.815, 144.963], 8);
@@ -882,31 +759,31 @@ export default {
         }
       } catch (error) {
         console.error('Error adjusting view:', error);
-        // use default view when error occurs
+        // when error occurs, use default view
         map.value.setView([-37.815, 144.963], 8);
       }
     };
     
-    // Add legend
+    // add legend
     const addLegend = () => {
       if (!map.value) return;
       
-      // Remove existing legend
+      // remove existing legend
       const existingLegend = document.querySelector('.info.legend');
       if (existingLegend) {
         existingLegend.remove();
       }
       
-      // Create legend control
+      // create legend control
       const legend = L.control({position: 'bottomright'});
       
       legend.onAdd = function (map) {
         const div = L.DomUtil.create('div', 'info legend');
         
-        // Add point legend
+        // add point legend
         div.innerHTML = `<h4>Point Legend</h4>`;
         
-        // Dynamically generate legend using resource type configuration
+        // use resource type config to dynamically generate legend
         Object.values(RESOURCE_TYPES).forEach(config => {
           div.innerHTML += `
             <div style="margin-bottom:5px;">
@@ -916,7 +793,7 @@ export default {
           `;
         });
         
-        // Add heatmap legend
+        // add heatmap legend
         if (showHeatmap.value) {
           div.innerHTML += `
             <h4 style="margin-top:10px;">Heatmap</h4>
@@ -933,28 +810,26 @@ export default {
       legend.addTo(map.value);
     };
     
-    // Update legend
+    // update legend
     const updateLegend = () => {
       addLegend();
     };
     
-    // Watch for changes in selected types - update only during filter step
+    // watch selected types changes
     watch(selectedTypes, (newState) => {
-      if (map.value && currentStep.value === 'filter') {
-        // Save new selection state
+      if (map.value) {
+        // save new selection state
         saveFilterState(newState);
         createMarkersForSelectedTypes();
       }
     }, { deep: true });
     
-    // Watch for heatmap toggle - update heatmap and legend
+    // watch heatmap switch - update heatmap and legend
     watch(showHeatmap, (newValue, oldValue) => {
       console.log(`Heatmap state changed from ${oldValue} to ${newValue}`);
       
-      // ensure the legend is updated
-      if (currentStep.value === 'heatmap') {
-        updateLegend();
-      }
+      // ensure legend is updated
+      updateLegend();
       
       // if needed, add other operations here
       if (newValue) {
@@ -964,22 +839,7 @@ export default {
       }
     });
     
-    // Watch for step changes - update legend display
-    watch(currentStep, (newStep) => {
-      console.log('Step changed:', newStep);
-      updateLegend();
-    });
-    
-    // Watch for confirmed type changes - update heatmap during heatmap step
-    watch(confirmedTypes, () => {
-      if (currentStep.value === 'heatmap' && showHeatmap.value) {
-        // when confirmed types change, recreate markers and update heatmap
-        createMarkersForConfirmedTypes();
-        console.log('Heatmap data updated based on types');
-      }
-    }, { deep: true });
-    
-    // Destroy map and clean up resources
+    // destroy map and clean resources
     const destroyMap = () => {
       try {
         if (map.value) {
@@ -998,19 +858,19 @@ export default {
       }
     };
 
-    // Initialize when component is mounted
+    // component mounted - initialize
     onMounted(() => {
       console.log('Component mounted, starting initialization...');
       
-      // initialize heatmap related states
+      // initialize heatmap related state
       initializeHeatmapState();
       
-      // delay initialization of map to ensure DOM is fully rendered
+      // delay map initialization to ensure DOM is fully rendered
       setTimeout(() => {
         // initialize map
         initMap();
         
-        // after map initialisation, force size refresh to solve possible display issues
+        // map initialized, force size refresh to solve possible display issues
         setTimeout(() => {
           if (map.value) {
             console.log('Forcing map size refresh...');
@@ -1019,7 +879,7 @@ export default {
         }, 500);
       }, 100);
       
-      // Add window resize listener
+      // add window size adjustment listener
       window.addEventListener('resize', () => {
         if (map.value) {
           map.value.invalidateSize();
@@ -1027,21 +887,20 @@ export default {
       });
     });
     
-    // Clean up when component is unmounted
+    // component unmounted - cleanup
     onUnmounted(() => {
       console.log('Component unmounted, starting cleanup...');
       destroyMap();
       
-      // Remove event listeners
+      // remove event listener
       window.removeEventListener('resize', null);
     });
 
-    // Return properties and methods needed in template
+    // return properties and methods needed in the template
     return {
       mapContainer,
       map,
       selectedTypes,
-      confirmedTypes,
       changeResourceType: toggleResourceTypeHandler,
       selectAll,
       selectNone,
@@ -1051,22 +910,19 @@ export default {
       ndisDailyLivingData,
       ndisTherapyData,
       showHeatmap,
-      toggleHeatmap,
       updateLegend,
       dataLoadError,
       maxZoomLevel: zoomLevels.max,
       isLoading,
-      currentStep,
-      goToHeatmap,
-      backToFiltering,
       hasSelectedAnyType: hasSelectedAnyTypeComputed,
       densitySearchRef,
       isAllTypesSelected: isAllTypesSelectedComputed,
       resourceData,
       heatmapData,
       RESOURCE_TYPES,
+      currentTotalResources,
       
-      // add location density search
+        // add location density search
       controlsMinimized,
       heatmapParams,
       toggleControlsMinimized,
@@ -1158,56 +1014,26 @@ export default {
   margin-right: auto;
 }
 
-.step-indicators {
+/* 统一页面容器 */
+.unified-page-container {
   display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-  gap: 40px;
-}
-
-.step {
-  padding: 8px 15px;
-  background-color: #f0f0f0;
-  border-radius: 6px;
-  font-size: 16px;
-  color: #4d2f20;
-  position: relative;
-}
-
-.step:after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: -25px;
-  transform: translateY(-50%);
-  width: 10px;
-  height: 10px;
-  border-top: 2px solid #ccc;
-  border-right: 2px solid #ccc;
-  transform: translateY(-50%) rotate(45deg);
-}
-
-.step:last-child:after {
-  display: none;
-}
-
-.step.active {
-  background-color: #3E5C2B;
-  color: white;
-  font-weight: bold;
-}
-
-.external-filter-container {
-  margin-bottom: 20px;
-  max-width: 100%;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 30px;
+  background: white;
+  border-radius: 8px;
+  padding: 25px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .resource-filter {
-  background: white;
-  border-radius: 6px;
-  padding: 25px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  min-height: 180px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 20px;
+}
+
+.location-search-section {
+  padding-top: 10px;
 }
 
 .resource-type {
@@ -1320,77 +1146,6 @@ export default {
 
 .quick-options button:active {
   transform: translateY(0);
-}
-
-.confirm-section {
-  margin-top: 25px;
-  display: flex;
-  justify-content: center;
-}
-
-.confirm-button {
-  padding: 12px 28px;
-  font-size: 16px;
-  font-weight: 500;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.3s;
-  min-width: 240px;
-  background: #3E5C2B;
-  color: white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.confirm-button:hover:not(:disabled) {
-  background: #517A39;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(62, 92, 43, 0.25);
-}
-
-.confirm-button:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.confirm-button:disabled {
-  background: #6c757d;
-  cursor: not-allowed;
-  opacity: 0.65;
-}
-
-.back-navigation-inline {
-  margin-bottom: 15px;
-}
-
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  text-decoration: none;
-  color: white;
-  font-size: 16px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  background-color: #5F666D;
-  padding: 12px 20px;
-  border-radius: 10px;
-}
-
-.back-link:hover {
-  color: white;
-  transform: translateX(-2px);
-  background-color: #4a5258;
-}
-
-.back-link .arrow {
-  font-size: 20px;
-  font-weight: 600;
-  transition: transform 0.2s ease;
-}
-
-.back-link:hover .arrow {
-  transform: translateX(-3px);
 }
 
 .map-container {
@@ -1670,10 +1425,21 @@ input:checked + .slider:before {
   width: calc(16.666% - 12.5px);
   text-align: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
 }
 
-.stat-card:hover {
+.stat-card.disabled {
+  opacity: 0.5;
+  background-color: #f8f8f8;
+  box-shadow: none;
+  transform: scale(0.98);
+}
+
+.stat-card.disabled .stat-number {
+  color: #999;
+}
+
+.stat-card:hover:not(.disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
@@ -1731,21 +1497,8 @@ input:checked + .slider:before {
   left: 10px;
   color: #3E5C2B;
   font-weight: bold;
-  font-size: 18px;
+  font-size: 22px;
 }
-
-.instructions li:nth-child(1):before { content: '🔵'; }
-.instructions li:nth-child(2):before { content: '🔴'; }
-.instructions li:nth-child(3):before { content: '🟢'; }
-.instructions li:nth-child(4):before { content: '🟣'; }
-.instructions li:nth-child(5):before { content: '🟠'; }
-.instructions li:nth-child(6):before { content: '✓'; }
-.instructions li:nth-child(7):before { content: '👆'; }
-.instructions li:nth-child(8):before { content: '▶️'; }
-.instructions li:nth-child(9):before { content: '🌈'; }
-.instructions li:nth-child(10):before { content: '🔍'; }
-.instructions li:nth-child(11):before { content: '↩️'; }
-.instructions li:nth-child(12):before { content: '⚙️'; }
 
 .instructions li:not([v-if]), 
 .instructions li[v-if]:not([style*="display: none"]) {
@@ -1850,9 +1603,9 @@ input:checked + .slider:before {
 }
 
 :deep(.location-search) {
-  margin-top: 35px; 
-  padding-top: 15px;
-  border-top: 1px solid #eee;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-top: none !important;
 }
 
 :deep(.search-title) {
@@ -1934,12 +1687,60 @@ input:checked + .slider:before {
   overflow: visible !important;
 }
 
-/* 确保footer样式 */
 :deep(footer) {
   margin-top: auto;
   position: relative;
   width: 100%;
   bottom: 0;
+}
+
+.resource-map-header {
+  background-color: white;
+  padding: 15px 20px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  border: 1px solid #e9ecef;
+  border-bottom: none;
+  text-align: center;
+  z-index: 2;
+  position: relative;
+}
+
+.resource-map-header h2 {
+  color: #4d2f20;
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.resource-map-header p {
+  color: #4d2f20;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.map-debug-info {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 1000;
+  max-width: 80%;
+  word-break: break-all;
+}
+
+.map-info-banner .info-content p {
+  margin: 0;
+  color: #4d2f20;
+  font-size: 13px;
+  line-height: 1.3;
 }
 
 @media (max-width: 768px) {
@@ -1959,8 +1760,8 @@ input:checked + .slider:before {
     padding: 30px 15px 15px;
   }
   
-  .external-filter-container {
-    padding: 0;
+  .unified-page-container {
+    padding: 15px;
   }
   
   .checkbox-group {
@@ -1981,21 +1782,6 @@ input:checked + .slider:before {
   
   :deep(.horizontal-tooltip) {
     max-width: 320px;
-  }
-  
-  .step-indicators {
-    gap: 20px;
-  }
-  
-  .step {
-    font-size: 12px;
-    padding: 6px 10px;
-  }
-  
-  .step:after {
-    right: -15px;
-    width: 8px;
-    height: 8px;
   }
   
   .heatmap-controls-overlay {
@@ -2049,12 +1835,8 @@ input:checked + .slider:before {
     padding: 20px 10px 10px;
   }
   
-  .external-filter-container {
-    padding: 0;
-  }
-  
-  .resource-filter {
-    padding: 15px;
+  .unified-page-container {
+    padding: 10px;
   }
   
   .checkbox-group {
@@ -2064,12 +1846,6 @@ input:checked + .slider:before {
   
   .checkbox-group label {
     justify-content: flex-start;
-  }
-  
-  .confirm-button {
-    min-width: auto;
-    width: 100%;
-    padding: 10px 16px;
   }
   
   .map-container {
@@ -2084,22 +1860,6 @@ input:checked + .slider:before {
     max-width: 280px;
   }
   
-  .step-indicators {
-    gap: 15px;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .step {
-    font-size: 11px;
-    padding: 5px 8px;
-    margin-bottom: 10px;
-  }
-  
-  .step:after {
-    display: none;
-  }
-  
   .type-title {
     font-size: 14px;
   }
@@ -2111,15 +1871,6 @@ input:checked + .slider:before {
   
   .quick-options button {
     width: 100%;
-  }
-  
-  .back-link {
-    font-size: 13px;
-    gap: 6px;
-  }
-  
-  .back-link .arrow {
-    font-size: 16px;
   }
   
   :deep(.autocomplete-wrapper input) {
@@ -2174,52 +1925,113 @@ input:checked + .slider:before {
   }
 }
 
-.resource-map-header {
+:deep(.custom-popup) {
   background-color: white;
-  padding: 15px 20px;
-  border-radius: 8px 8px 0 0;
-  margin-bottom: 0;
-  border: 1px solid #e9ecef;
-  border-bottom: none;
-  text-align: center;
-  z-index: 2;
-  position: relative;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.2);
+  border: none;
+  overflow: hidden;
+  width: 300px;
 }
 
-.resource-map-header h2 {
-  color: #4d2f20;
-  margin: 0 0 8px 0;
-  font-size: 20px;
-  font-weight: 600;
+:deep(.leaflet-popup-content-wrapper) {
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: none;
 }
 
-.resource-map-header p {
-  color: #4d2f20;
+:deep(.leaflet-popup-content) {
   margin: 0;
-  font-size: 15px;
-  line-height: 1.4;
-  max-width: 800px;
-  margin: 0 auto;
+  width: 100% !important;
 }
 
-.map-debug-info {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  z-index: 1000;
-  max-width: 80%;
+:deep(.leaflet-popup-tip-container) {
+  display: none;
+}
+
+:deep(.tooltip-content) {
+  width: 100%;
+  padding: 0;
+}
+
+:deep(.tooltip-header) {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 15px 15px 12px;
+  border-bottom: 1px solid #eee;
+  background-color: #fff;
+}
+
+:deep(.tooltip-content h3) {
+  margin: 0;
+  color: #4d2f20;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding-right: 15px;
+  flex: 1;
+}
+
+:deep(.close-tooltip) {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0;
+  margin: -5px -5px 0 0;
+  line-height: 1;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:deep(.close-tooltip:hover) {
+  color: #333;
+}
+
+:deep(.tooltip-details) {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+}
+
+:deep(.tooltip-details p) {
+  margin: 0 0 10px 0;
+  color: #4d2f20;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+:deep(.tooltip-details p:last-child) {
+  margin-bottom: 0;
+}
+
+:deep(.tooltip-details p strong) {
+  color: #3E5C2B;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 2px;
+}
+
+:deep(.tooltip-link) {
+  color: #3E5C2B;
+  text-decoration: none;
+  transition: color 0.2s ease;
   word-break: break-all;
 }
 
-.map-info-banner .info-content p {
-  margin: 0;
-  color: #4d2f20;
-  font-size: 13px;
-  line-height: 1.3;
+:deep(.tooltip-link:hover) {
+  color: #517A39;
+  text-decoration: underline;
+}
+
+:deep(.leaflet-popup-close-button) {
+  display: none;
 }
 </style>
