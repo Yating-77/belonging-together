@@ -214,7 +214,7 @@ export default {
     
     // default heatmap parameters (for resetting)
     const defaultHeatmapParams = {
-      radius: 25,
+      radius: 35,
       blur: 35,
       intensity: 1.5,
       maxThreshold: 10
