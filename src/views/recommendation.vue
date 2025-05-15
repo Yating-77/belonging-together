@@ -478,7 +478,7 @@ export default {
       loading: false,
       error: null,
       selectedCardIndex: null,
-      basePublicPath: '', // 基础公共路径
+      basePublicPath: '',
     };
   },
   computed: {
