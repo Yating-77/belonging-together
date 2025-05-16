@@ -42,16 +42,24 @@
             v-model:loading="isLoading"
             :selected-types="selectedTypes"
             ref="densitySearchRef"
+            @scroll-to-map="scrollToMap"
           />
         </div>
       </div>
       
       <!-- Resource Map Title and Description -->
       <div class="resource-map-header">
-        <h2>Victoria Autism Support Resourc Map</h2>
-        <p>
-          {{ showHeatmap ? 'Currently viewing the heatmap density analysis. Use controls to adjust visualization.' : 'Currently viewing selected resource points. Toggle heatmap to see density patterns.' }}
-        </p>
+        <h2>Victoria Autism Support Resource Map</h2>
+        <div class="map-header-actions">
+          <button v-if="densitySearchRef && densitySearchRef.densityResult" 
+                  class="back-to-list-btn" 
+                  @click="scrollToList">
+            <span class="back-icon">↑</span> Back to Results
+          </button>
+          <p>
+            {{ showHeatmap ? 'Currently viewing the heatmap density analysis. Use controls to adjust visualization.' : 'Currently viewing selected resource points. Toggle heatmap to see density patterns.' }}
+          </p>
+        </div>
       </div>
       
       <!-- Map Container with Heatmap Controls Overlay -->
@@ -150,6 +158,64 @@
         </ul>
       </div>
       
+      <!-- Data Source Disclaimer -->
+      <div class="data-disclaimer">
+        <h3>Data Sources:</h3>
+        <p>The resource data displayed on this map has been sourced from the following government websites. We strive to keep all information accurate and up-to-date. However, we recommend verifying service details directly with providers before making decisions.</p>
+        <ul class="data-sources-list">
+          <li>
+            <strong>Schools:</strong> VIC.GOV.AU - 
+            <a href="#" @click.prevent="openExternalLinkModal('https://discover.data.vic.gov.au/dataset/school-locations-2024#:~:text=Listing%20of%20all%20school%20locations,on%20the%20school%20administration%20campus')" class="external-link">
+              2024 VIC School Lists
+            </a>
+          </li>
+          <li>
+            <strong>Public Hospitals:</strong> DATA.GOV.AU - 
+            <a href="#" @click.prevent="openExternalLinkModal('https://data.gov.au/dataset/ds-dga-88a95824-c0e7-4ec0-bb78-b36223dd16a8/distribution/dist-dga-43b9e4a4-0752-44c7-b825-bc32c46cf3b7/details?q=hospital')" class="external-link">
+              2017 Australian Pubic Hospital Lists
+            </a>
+          </li>
+          <li>
+            <strong>NDIS Providers:</strong> NDIS.GOV.AU - 
+            <a href="#" @click.prevent="openExternalLinkModal('https://www.ndis.gov.au/participants/working-providers/find-registered-provider/provider-finder')" class="external-link">
+              2025 Australian NDIS Provider Lists
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- External Link Warning Modal -->
+      <div v-if="externalLinkModalVisible" class="external-link-modal-overlay" @click="cancelExternalNavigation">
+        <div class="external-link-modal" @click.stop>
+          <div class="modal-header">
+            <div class="modal-title">
+              <span class="external-icon">⬈</span> External Link Notice
+            </div>
+            <button class="modal-close" @click="cancelExternalNavigation">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="warning-content">
+              <div class="warning-icon">
+                <span class="icon-circle">!</span>
+              </div>
+              <div class="warning-text">
+                <p class="warning-main-text">You are about to navigate to an external website that is not part of Belonging Together.</p>
+                <p class="warning-sub-text">This link will take you to the information page for this resource.</p>
+                <p class="external-url-text">External URL: <span class="url">{{ pendingExternalUrl }}</span></p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="cancel-button" @click="cancelExternalNavigation">
+              <span class="cancel-icon">✕</span> Cancel
+            </button>
+            <button class="continue-button" @click="continueToExternalSite">
+              <span class="continue-icon">⬈</span> Continue to External Site
+            </button>
+          </div>
+        </div>
+      </div>
+      
       <div v-if="dataLoadError" class="error-message">
         <p>{{ dataLoadError }}</p>
       </div>
@@ -201,6 +267,36 @@ export default {
     const isLoading = ref(false);
     const densitySearchRef = ref(null);
     
+    // external link modal state
+    const externalLinkModalVisible = ref(false);
+    const pendingExternalUrl = ref('');
+    
+    // external link handling functions
+    const openExternalLinkModal = (url) => {
+      pendingExternalUrl.value = url;
+      externalLinkModalVisible.value = true;
+      // prevent scrolling when modal is open
+      document.body.style.overflow = 'hidden';
+    };
+    
+    const continueToExternalSite = () => {
+      if (pendingExternalUrl.value) {
+        window.open(pendingExternalUrl.value, '_blank');
+      }
+      closeExternalLinkModal();
+    };
+    
+    const cancelExternalNavigation = () => {
+      closeExternalLinkModal();
+    };
+    
+    const closeExternalLinkModal = () => {
+      externalLinkModalVisible.value = false;
+      pendingExternalUrl.value = '';
+      // restore scrolling
+      document.body.style.overflow = '';
+    };
+    
     // heatmap controller state
     const controlsMinimized = ref(false);
     
@@ -214,7 +310,7 @@ export default {
     
     // default heatmap parameters (for resetting)
     const defaultHeatmapParams = {
-      radius: 35,
+      radius: 25,
       blur: 35,
       intensity: 1.5,
       maxThreshold: 10
@@ -522,16 +618,6 @@ export default {
       addLegend();
     };
     
-    // helper function - format URL
-    const formatUrl = (url) => {
-      if (!url) return '';
-      let displayUrl = url.replace(/^https?:\/\//, '');
-      if (displayUrl.length > 30) {
-        displayUrl = displayUrl.substring(0, 27) + '...';
-      }
-      return displayUrl;
-    };
-    
     // create tooltip content
     const createTooltipContent = (item, type) => {
       const config = RESOURCE_TYPES[type];
@@ -564,11 +650,24 @@ export default {
         if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
           fullUrl = 'https://' + fullUrl;
         }
-        content += `<p><strong>Website:</strong> <a href="${fullUrl}" target="_blank" rel="noopener noreferrer" class="tooltip-link">${formatUrl(item.website)}</a></p>`;
+        content += `<p><strong>Website:</strong> <a href="#" data-external-url="${fullUrl}" class="tooltip-link">${formatUrl(item.website)}</a></p>`;
       }
       
       content += `
           </div>
+      `;
+      
+      // Add external link warning if website exists
+      if (item.website) {
+        content += `
+          <div class="tooltip-external-warning">
+            <span class="tooltip-warning-icon">⚠️</span> 
+            <span>External link will open in a new tab</span>
+          </div>
+        `;
+      }
+      
+      content += `
         </div>
       `;
       
@@ -677,8 +776,12 @@ export default {
                   const popupLinks = document.querySelectorAll('.tooltip-link');
                   popupLinks.forEach(link => {
                     link.addEventListener('click', function(e) {
+                      e.preventDefault();
                       e.stopPropagation();
-                      window.open(this.href, '_blank');
+                      const externalUrl = this.getAttribute('data-external-url');
+                      if (externalUrl) {
+                        openExternalLinkModal(externalUrl);
+                      }
                       return false;
                     });
                   });
@@ -815,6 +918,16 @@ export default {
       addLegend();
     };
     
+    // helper function - format URL
+    const formatUrl = (url) => {
+      if (!url) return '';
+      let displayUrl = url.replace(/^https?:\/\//, '');
+      if (displayUrl.length > 30) {
+        displayUrl = displayUrl.substring(0, 27) + '...';
+      }
+      return displayUrl;
+    };
+    
     // watch selected types changes
     watch(selectedTypes, (newState) => {
       if (map.value) {
@@ -896,6 +1009,53 @@ export default {
       window.removeEventListener('resize', null);
     });
 
+    // scroll to map
+    const scrollToMap = () => {
+      const mapElement = document.querySelector('.resource-map-header');
+      if (mapElement) {
+        // use setTimeout to ensure DOM is fully updated before scrolling
+        setTimeout(() => {
+          // calculate offset, can adjust this value to control scroll position
+          const offset = 60; // top extra offset, in pixels
+          const elementPosition = mapElement.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - offset;
+          
+          // use window.scrollTo to implement more precise scroll control
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }, 100);
+      }
+    };
+    
+    // scroll to result list
+    const scrollToList = () => {
+      if (densitySearchRef.value && densitySearchRef.value.densityResult) {
+        const densityElement = document.querySelector('.density-gauge-container');
+        if (densityElement) {
+          // use setTimeout to ensure DOM is fully updated before scrolling
+          setTimeout(() => {
+            // calculate offset, can adjust this value to control scroll position
+            const offset = 70; // top extra offset, in pixels
+            const elementPosition = densityElement.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
+            
+            // use window.scrollTo to implement more precise scroll control
+            window.scrollTo({
+              top: offsetPosition,
+              behavior: 'smooth'
+            });
+            
+            // switch back to meter, but do not trigger extra scrolling
+            if (densitySearchRef.value.activeTab !== 'meter') {
+              densitySearchRef.value.switchTab('meter', false);
+            }
+          }, 100);
+        }
+      }
+    };
+
     // return properties and methods needed in the template
     return {
       mapContainer,
@@ -922,12 +1082,23 @@ export default {
       RESOURCE_TYPES,
       currentTotalResources,
       
-        // add location density search
+      // add location density search
       controlsMinimized,
       heatmapParams,
       toggleControlsMinimized,
       updateHeatmapParams,
-      resetHeatmapParams
+      resetHeatmapParams,
+      
+      // add scroll functionality
+      scrollToMap,
+      scrollToList,
+      
+      // external link modal
+      externalLinkModalVisible,
+      pendingExternalUrl,
+      openExternalLinkModal,
+      continueToExternalSite,
+      cancelExternalNavigation
     };
   }
 };
@@ -1517,6 +1688,59 @@ input:checked + .slider:before {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 }
 
+.data-disclaimer {
+  background-color: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 25px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.data-disclaimer h3 {
+  margin-top: 0;
+  margin-bottom: 18px;
+  color: #4d2f20;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  border-bottom: 2px solid #3E5C2B;
+  padding-bottom: 8px;
+}
+
+.data-disclaimer p {
+  text-align: justify;
+  color: #4d2f20;
+  margin: 0 0 15px 0;
+  font-size: 15px;
+  max-width: 100%;
+  line-height: 1.5;
+}
+
+.data-sources-list {
+  padding-left: 20px;
+  margin-bottom: 0;
+  list-style-type: none;
+}
+
+.data-sources-list li {
+  margin-bottom: 12px;
+  color: #4d2f20;
+  line-height: 1.6;
+  padding-left: 20px;
+  font-size: 15px;
+  position: relative;
+}
+
+.data-sources-list li:before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  color: #3E5C2B;
+  font-weight: bold;
+  font-size: 22px;
+}
+
 .error-message {
   background-color: #ffeeee;
   border-left: 4px solid #ff5555;
@@ -1713,6 +1937,39 @@ input:checked + .slider:before {
   font-weight: 600;
 }
 
+.map-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.back-to-list-btn {
+  background-color: #3E5C2B;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.back-to-list-btn:hover {
+  background-color: #517A39;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.back-icon {
+  font-size: 16px;
+}
+
 .resource-map-header p {
   color: #4d2f20;
   margin: 0;
@@ -1720,27 +1977,6 @@ input:checked + .slider:before {
   line-height: 1.4;
   max-width: 800px;
   margin: 0 auto;
-}
-
-.map-debug-info {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  z-index: 1000;
-  max-width: 80%;
-  word-break: break-all;
-}
-
-.map-info-banner .info-content p {
-  margin: 0;
-  color: #4d2f20;
-  font-size: 13px;
-  line-height: 1.3;
 }
 
 @media (max-width: 768px) {
@@ -2022,8 +2258,9 @@ input:checked + .slider:before {
 :deep(.tooltip-link) {
   color: #3E5C2B;
   text-decoration: none;
+  position: relative;
+  padding-right: 16px;
   transition: color 0.2s ease;
-  word-break: break-all;
 }
 
 :deep(.tooltip-link:hover) {
@@ -2031,7 +2268,237 @@ input:checked + .slider:before {
   text-decoration: underline;
 }
 
+:deep(.tooltip-link::after) {
+  content: '↗';
+  position: absolute;
+  right: 0;
+  font-size: 12px;
+  top: 1px;
+}
+
 :deep(.leaflet-popup-close-button) {
   display: none;
+}
+
+.external-link-warning {
+  background-color: #fff8e6;
+  border-left: 3px solid #e59700;
+  padding: 8px 12px;
+  margin-top: 15px;
+  font-size: 13px;
+  color: #4d2f20;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.warning-icon {
+  font-size: 16px;
+  color: #e59700;
+}
+
+.external-link {
+  color: #3E5C2B;
+  text-decoration: none;
+  position: relative;
+  padding-right: 16px;
+  transition: color 0.2s ease;
+}
+
+.external-link:hover {
+  color: #517A39;
+  text-decoration: underline;
+}
+
+.external-link::after {
+  content: '↗';
+  position: absolute;
+  right: 0;
+  font-size: 12px;
+  top: 1px;
+}
+
+:deep(.tooltip-external-warning) {
+  background-color: #fff8e6;
+  border-top: 1px solid #e59700;
+  padding: 6px 10px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #4d2f20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 0 0 8px 8px;
+}
+
+:deep(.tooltip-warning-icon) {
+  font-size: 14px;
+  color: #e59700;
+}
+
+.external-link-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.external-link-modal {
+  width: 90%;
+  max-width: 500px;
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.external-icon {
+  font-size: 22px;
+  color: #555;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.modal-close:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+.modal-body {
+  padding: 0;
+}
+
+.warning-content {
+  display: flex;
+  padding: 20px;
+  background-color: #fff8e6;
+  border-left: 4px solid #e59700;
+}
+
+.warning-icon {
+  margin-right: 16px;
+  padding-top: 5px;
+}
+
+.icon-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: #e59700;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 50%;
+}
+
+.warning-text {
+  flex: 1;
+}
+
+.warning-main-text {
+  font-size: 18px;
+  color: #333;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.warning-sub-text {
+  font-size: 16px;
+  color: #333;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+}
+
+.external-url-text {
+  font-size: 14px;
+  color: #555;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.url {
+  color: #3E5C2B;
+  word-break: break-all;
+  font-style: italic;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px;
+  gap: 12px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.cancel-button, .continue-button {
+  padding: 12px 20px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.cancel-button {
+  background-color: #e6e6e6;
+  color: #333;
+  border: none;
+}
+
+.cancel-button:hover {
+  background-color: #d9d9d9;
+}
+
+.continue-button {
+  background-color: #3E5C2B;
+  color: white;
+  border: none;
+}
+
+.continue-button:hover {
+  background-color: #4d7234;
 }
 </style>

@@ -1,3 +1,4 @@
+<!-- Navigation.vue -->
 <template>
   <div>
     <nav class="my-navbar" data-aos="fade-down">
@@ -19,42 +20,24 @@
           <li><router-link :to="'/intro'" :class="{ 'router-link-active': isPersonalisedRoute }">Personalised Recommendations</router-link></li>
           <li><router-link to="/venuePage">Community Map</router-link></li>
           <li class="dropdown">
-            <a @click.prevent="toggleOutingDropdown" :class="{ 'router-link-active': isOutingSupportActive }" class="dropdown-link">
-              Outing Support
+            <a @click.prevent="toggleOutingDropdown" :class="{ 'router-link-active': isOutingSupportActive }">
+              Outing Support <span class="arrow">▾</span>
             </a>
+            <ul class="nav-dropdown" v-show="outingDropdownOpen">
+              <li><router-link to="/detectpage" @click="closeSubmenu">Outing Guides</router-link></li>
+              <li><router-link to="/sensoryVenue" @click="closeSubmenu">Sensory Venues</router-link></li>
+            </ul>
           </li>
           <li class="dropdown">
-            <a @click.prevent="toggleDropdown" :class="{ 'router-link-active': isSupportHubActive }" class="dropdown-link">
-              Resource Hub
+            <a @click.prevent="toggleDropdown" :class="{ 'router-link-active': isSupportHubActive }">
+              Resource Hub <span class="arrow">▾</span>
             </a>
+            <ul class="nav-dropdown" v-show="dropdownOpen">
+              <li><router-link to="/skillsGame" @click="closeSubmenu">Skills Game</router-link></li>
+              <li><router-link to="/resource" @click="closeSubmenu">Resource Center</router-link></li>
+            </ul>
           </li>
         </ul>
-      </div>
-      
-      <!-- submenu -->
-      <div class="submenu-container" v-show="outingDropdownOpen || dropdownOpen" ref="submenuContainer">
-        <div class="horizontal-submenu" v-show="outingDropdownOpen">
-          <div class="submenu-title">Outing Support</div>
-          <div class="submenu-items">
-            <router-link to="/detectpage" class="submenu-item" @click="closeSubmenu">
-              Outing Guides
-            </router-link>
-            <router-link to="/sensoryVenue" class="submenu-item" @click="closeSubmenu">
-              Sensory Venues
-            </router-link>
-          </div>
-        </div>
-        <div class="horizontal-submenu" v-show="dropdownOpen">
-          <div class="submenu-title">Resource Hub</div>
-          <div class="submenu-items">
-            <router-link to="/skillsGame" class="submenu-item" @click="closeSubmenu">
-              Skills Game
-            </router-link>
-            <router-link to="/resource" class="submenu-item" @click="closeSubmenu">
-              Resource Center
-            </router-link>
-          </div>
-        </div>
       </div>
     </nav>
     
@@ -71,10 +54,10 @@
             Outing Support
           </a>
           <div class="mobile-dropdown-menu" :class="{ 'active': mobileOutingDropdownOpen }">
-            <router-link to="/detectpage" @click="closeMobileMenu">
+            <router-link to="/detectpage" @click="closeMobileMenu" :class="{ 'active-tab': route.path === '/detectpage' }">
               Outing Guides
             </router-link>
-            <router-link to="/sensoryVenue" @click="closeMobileMenu">
+            <router-link to="/sensoryVenue" @click="closeMobileMenu" :class="{ 'active-tab': route.path === '/sensoryVenue' }">
               Sensory Venues
             </router-link>
           </div>
@@ -84,10 +67,10 @@
             Resource Hub
           </a>
           <div class="mobile-dropdown-menu" :class="{ 'active': mobileDropdownOpen }">
-            <router-link to="/skillsGame" @click="closeMobileMenu">
+            <router-link to="/skillsGame" @click="closeMobileMenu" :class="{ 'active-tab': route.path === '/skillsGame' }">
               Skills Game
             </router-link>
-            <router-link to="/resource" @click="closeMobileMenu">
+            <router-link to="/resource" @click="closeMobileMenu" :class="{ 'active-tab': route.path === '/resource' }">
               Resource Center
             </router-link>
           </div>
@@ -99,9 +82,10 @@
 
 <script setup>
 import { onMounted, onUnmounted, ref, computed, watch, nextTick } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const mobileMenuOpen = ref(false);
 const mobileDropdownOpen = ref(false);
 const dropdownOpen = ref(false);
@@ -112,7 +96,6 @@ const submenuContainer = ref(null);
 // base height
 const NAVBAR_BASE_HEIGHT = 85;
 const NAVBAR_MOBILE_HEIGHT = 75;
-const SUBMENU_HEIGHT = 60;
 
 // main spacer height
 const mainSpacerHeight = ref(NAVBAR_BASE_HEIGHT);
@@ -137,25 +120,8 @@ const updateSpacerHeight = () => {
     // fixed height on mobile, no spacer when menu is open
     mainSpacerHeight.value = mobileMenuOpen.value ? 0 : NAVBAR_MOBILE_HEIGHT;
   } else {
-    // dynamic height on desktop
-    const hasSubmenu = outingDropdownOpen.value || dropdownOpen.value;
-    
-    // check if submenu container is actually visible (DOM state)
-    const submenuVisible = submenuContainer.value && 
-                           submenuContainer.value.offsetParent !== null &&
-                           (outingDropdownOpen.value || dropdownOpen.value);
-    
-    // set height based on actual state, force ensure state consistency
-    if (!hasSubmenu || !submenuVisible) {
-      mainSpacerHeight.value = NAVBAR_BASE_HEIGHT;
-      // force close submenu (to prevent state inconsistency)
-      if (submenuVisible && !hasSubmenu) {
-        outingDropdownOpen.value = false;
-        dropdownOpen.value = false;
-      }
-    } else {
-      mainSpacerHeight.value = NAVBAR_BASE_HEIGHT + SUBMENU_HEIGHT;
-    }
+    // fixed height on desktop
+    mainSpacerHeight.value = NAVBAR_BASE_HEIGHT;
   }
 };
 
@@ -177,26 +143,32 @@ const toggleMobileOutingDropdown = () => {
   mobileOutingDropdownOpen.value = !mobileOutingDropdownOpen.value;
 };
 
-const toggleOutingDropdown = () => {
-  outingDropdownOpen.value = !outingDropdownOpen.value;
-  if (outingDropdownOpen.value) {
+const toggleOutingDropdown = (event) => {
+  // close other dropdown menus
+  if (dropdownOpen.value) {
     dropdownOpen.value = false;
   }
-  // ensure DOM update
-  nextTick(() => {
-    updateSpacerHeight();
-  });
+  
+  outingDropdownOpen.value = !outingDropdownOpen.value;
+  
+  // prevent event bubbling
+  if (event) {
+    event.stopPropagation();
+  }
 };
 
-const toggleDropdown = () => {
-  dropdownOpen.value = !dropdownOpen.value;
-  if (dropdownOpen.value) {
+const toggleDropdown = (event) => {
+  // close other dropdown menus
+  if (outingDropdownOpen.value) {
     outingDropdownOpen.value = false;
   }
-  // ensure DOM update
-  nextTick(() => {
-    updateSpacerHeight();
-  });
+  
+  dropdownOpen.value = !dropdownOpen.value;
+  
+  // prevent event bubbling
+  if (event) {
+    event.stopPropagation();
+  }
 };
 
 const closeMobileMenu = () => {
@@ -212,16 +184,6 @@ const closeSubmenu = () => {
   // immediately close
   dropdownOpen.value = false;
   outingDropdownOpen.value = false;
-  
-  // ensure DOM fully updated 
-  nextTick(() => {
-    updateSpacerHeight();
-    
-    // extra check, ensure submenu fully closed
-    setTimeout(() => {
-      mainSpacerHeight.value = NAVBAR_BASE_HEIGHT;
-    }, 50);
-  });
 };
 
 // when route changes, close all dropdown menus
@@ -234,34 +196,13 @@ watch(route, () => {
   // use nextTick to ensure DOM update
   nextTick(() => {
     updateSpacerHeight();
-    // delay check and update again, ensure fully closed
-    setTimeout(() => {
-      if (!dropdownOpen.value && !outingDropdownOpen.value) {
-        // check if current path is not submenu item
-        const isSubmenuPage = route.path === '/skillsGame' || 
-                             route.path === '/resource' ||
-                             route.path === '/detectpage' || 
-                             route.path === '/sensoryVenue';
-        
-        // if it is submenu page, ensure height calculation is correct
-        if (isSubmenuPage) {
-          mainSpacerHeight.value = NAVBAR_BASE_HEIGHT;
-        }
-      }
-    }, 100);
   });
 });
 
 const handleClickOutside = (event) => {
-  const navbar = document.querySelector('.my-navbar');
-  
-  if (navbar && !navbar.contains(event.target)) {
-    if (dropdownOpen.value || outingDropdownOpen.value) {
-      dropdownOpen.value = false;
-      outingDropdownOpen.value = false;
-      updateSpacerHeight();
-    }
-  }
+  // click anywhere on the page to close dropdown menus
+  dropdownOpen.value = false;
+  outingDropdownOpen.value = false;
 };
 
 const handleScroll = () => {
@@ -319,7 +260,6 @@ onUnmounted(() => {
   padding: 0.5rem 3%;
   z-index: 1050;
   transition: all 0.3s ease;
-  flex-direction: column;
 }
 
 .navbar-spacer {
@@ -405,86 +345,57 @@ onUnmounted(() => {
   color: #3E5C2B;
 }
 
-/* horizontal submenu */
-.submenu-container {
-  width: 100%;
-  background-color: #f1f5f9;
-  border-top: 1px solid #e9ecef;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  opacity: 1;
-  transform: translateY(0);
-  height: 60px;
-  overflow: hidden;
-  z-index: 1040;
+/* Arrow for dropdown */
+.arrow {
+  font-size: 0.8em;
+  margin-left: 4px;
 }
 
-.submenu-container:not(.active) {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.horizontal-submenu {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 12px 3%;
-  display: flex;
-  align-items: center;
-  height: 100%;
-  background-color: #f8f9fa;
-  justify-content: flex-end;
-}
-
-.submenu-title {
-  font-weight: 600;
-  color: #3E5C2B;
-  margin-right: 30px;
-  font-size: 1.05rem;
-  background-color: rgba(255, 255, 255, 0.7);
-  padding: 4px 10px;
-  border-radius: 4px;
-  order: -1;
-}
-
-.submenu-items {
-  display: flex;
-  gap: 25px;
-  margin-right: 20px;
-}
-
-.submenu-item {
-  color: #5a6268;
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  background-color: #f0f0f0;
-  margin: 0 5px;
-}
-
-.submenu-item:hover {
-  background-color: rgba(62, 92, 43, 0.2);
-  color: #3E5C2B;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* dropdown menu style */
+/* Dropdown menu style */
 .dropdown {
   position: relative;
-  display: inline-block;
-  z-index: 1050;
 }
 
 .dropdown > a {
   cursor: pointer;
 }
 
-.dropdown-link {
+/* 垂直下拉菜单样式 */
+.nav-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 220px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 1000;
+  padding: 8px 0;
+  margin-top: 8px;
+}
+
+.nav-dropdown li {
   display: block;
-  padding: 0.7rem 0.3rem;
+  width: 100%;
+}
+
+.nav-dropdown li a {
+  padding: 10px 20px;
+  color: #6c757d;
+  font-weight: 500;
+  font-size: 0.95rem;
+  display: block;
+  transition: all 0.2s ease;
+}
+
+.nav-dropdown li a:hover {
+  background-color: rgba(62, 92, 43, 0.1);
+  color: #3E5C2B;
+}
+
+.nav-dropdown li a:after {
+  display: none;
 }
 
 .mobile-dropdown {
@@ -515,8 +426,8 @@ onUnmounted(() => {
 }
 
 .mobile-dropdown-menu a {
-  padding: 18px 28px !important;
-  font-size: 1.05rem;
+  padding: 12px 25px !important;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   text-decoration: none;
@@ -529,6 +440,14 @@ onUnmounted(() => {
 
 .mobile-dropdown-menu a:hover {
   background-color: rgba(62, 92, 43, 0.05);
+}
+
+.mobile-dropdown-menu a.active-tab {
+  background-color: rgba(62, 92, 43, 0.1);
+  color: #3E5C2B;
+  font-weight: 600;
+  border-left: 4px solid #3E5C2B;
+  padding-left: 21px !important;
 }
 
 .mobile-dropdown-menu a:last-child {
@@ -642,30 +561,11 @@ onUnmounted(() => {
   .navbar-container {
     padding: 0;
   }
-  
-  .submenu-container {
-    display: none;
-  }
 }
 
 @media (max-width: 768px) {
   .logo-image {
     height: 50px;
-  }
-  
-  .horizontal-submenu {
-    justify-content: flex-end;
-    padding-right: 5%;
-  }
-  
-  .submenu-items {
-    gap: 15px;
-    margin-right: 10px;
-  }
-  
-  .submenu-item {
-    font-size: 0.9rem;
-    padding: 5px 10px;
   }
 }
 

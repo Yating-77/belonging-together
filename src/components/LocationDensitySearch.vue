@@ -48,7 +48,26 @@
     </div>
 
     <!-- add clear search results button -->
-    <div v-if="densityResult" class="clear-results-container">
+    <div v-if="densityResult" class="search-results-tabs">
+      <div class="tabs-container">
+        <div 
+          class="tab-item" 
+          :class="{ 'active': activeTab === 'meter' }"
+          @click="switchTab('meter', true)"
+        >
+          <span class="tab-icon">📊</span>
+          Resource Meter
+        </div>
+        <div 
+          class="tab-item" 
+          :class="{ 'active': activeTab === 'map' }"
+          @click="switchTab('map', true)"
+        >
+          <span class="tab-icon">🗺️</span>
+          Resource Heatmap
+        </div>
+      </div>
+      
       <button class="clear-results-button" @click="clearResults">
         <svg class="clear-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -258,7 +277,7 @@ export default {
       required: true
     }
   },
-  emits: ['update:loading'],
+  emits: ['update:loading', 'scroll-to-map'],
   setup(props, { emit }) {
     const searchLocation = ref('');
     const searchedAddress = ref('');
@@ -268,6 +287,7 @@ export default {
     const nearbyResourcesList = ref([]);
     const densityData = ref(null);
     const inputValidationError = ref('');
+    const activeTab = ref('meter');
 
     const suggestions = ref([]);
     const showSuggestions = ref(false);
@@ -790,6 +810,26 @@ export default {
       inputValidationError.value = '';
     };
     
+    // switch tab function
+    const switchTab = (tab, fromUserClick = true) => {
+      activeTab.value = tab;
+      
+      // only trigger scroll behavior when fromUserClick is true
+      if (fromUserClick) {
+        // scroll to the corresponding position based on the selected tab
+        if (tab === 'map') {
+          // trigger event, notify parent component to scroll to map position
+          emit('scroll-to-map');
+        } else {
+          // scroll to density-gauge-container element position
+          const meterElement = document.querySelector('.density-gauge-container');
+          if (meterElement) {
+            meterElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      }
+    };
+
     return {
       searchLocation, handleInput, selectSuggestion, hideSuggestions, suggestions, showSuggestions, isLoadingSuggestions,
       searchLocationDensity, searchedAddress, 
@@ -801,7 +841,9 @@ export default {
       densityData,
       validateAndSearch,
       handleEnterKey,
-      inputValidationError
+      inputValidationError,
+      activeTab,
+      switchTab
     };
   }
 };
@@ -1058,7 +1100,7 @@ export default {
 
 .density-levels-reference {
   margin-top: 20px;
-  padding: 20px;
+  padding: 15px;
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -1083,14 +1125,16 @@ export default {
 }
 
 .density-level-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .density-level-card {
-  width: 100%;
+  flex: 1;
+  min-width: 150px;
+  max-width: 190px;
   background: #f9f9f9;
   border-radius: 8px;
   overflow: hidden;
@@ -1108,7 +1152,7 @@ export default {
 }
 
 .level-color {
-  height: 8px;
+  height: 6px;
   width: 100%;
 }
 
@@ -1119,27 +1163,28 @@ export default {
 .level-color.very-high { background-color: #0099CC; }
 
 .level-content {
-  padding: 12px;
+  padding: 8px;
 }
 
 .level-title {
   font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 4px;
+  font-size: 14px;
+  margin-bottom: 2px;
   color: #333;
 }
 
 .level-range {
-  font-size: 14px;
+  font-size: 12px;
   color: #666;
   font-weight: 500;
-  margin-bottom: 5px;
+  margin-bottom: 2px;
 }
 
 .level-description {
-  font-size: 13px;
+  font-size: 11px;
   color: #777;
-  line-height: 1.3;
+  line-height: 1.2;
+  white-space: normal;
 }
 
 .density-level-card.active .level-title {
@@ -1152,6 +1197,73 @@ export default {
 
 .density-level-card.active .level-description {
   color: #4c6d35;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .density-level-cards {
+    flex-wrap: wrap;
+  }
+  
+  .density-level-card {
+    min-width: 120px;
+    max-width: 30%;
+  }
+  
+  .level-title {
+    font-size: 13px;
+  }
+  
+  .level-range {
+    font-size: 11px;
+  }
+  
+  .level-description {
+    font-size: 10px;
+  }
+  
+  .resource-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .online-resources-title {
+    font-size: 16px;
+  }
+  
+  .online-resources .resource-card h4 {
+    font-size: 16px;
+  }
+  
+  .online-resources .resource-card li {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 576px) {
+  .density-level-card {
+    min-width: 100px;
+    max-width: 48%;
+    margin-bottom: 8px;
+  }
+  
+  .density-levels-reference {
+    padding: 12px;
+  }
+  
+  .reference-header h4 {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .density-level-cards {
+    justify-content: center;
+  }
+  
+  .density-level-card {
+    min-width: 140px;
+    max-width: 45%;
+  }
 }
 
 .online-resources {
@@ -1243,55 +1355,6 @@ export default {
   text-decoration: underline;
 }
 
-@media (max-width: 768px) {
-  .resource-cards {
-    grid-template-columns: 1fr;
-  }
-  
-  .online-resources-title {
-    font-size: 16px;
-  }
-  
-  .online-resources .resource-card h4 {
-    font-size: 16px;
-  }
-  
-  .online-resources .resource-card li {
-    font-size: 13px;
-  }
-  
-  .density-level-cards {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .density-level-card {
-    width: 100%;
-    max-width: 100%;
-    flex-direction: row;
-  }
-  
-  .level-color {
-    width: 8px;
-    height: auto;
-  }
-}
-
-@media (max-width: 480px) {
-  .density-levels-reference {
-    padding: 15px;
-  }
-  
-  .reference-header h4 {
-    font-size: 16px;
-  }
-  
-  .density-level-card {
-    flex-direction: row;
-  }
-}
-
-/* nearby resources list styles */
 .resources-list-container {
   margin-top: 20px;
   background-color: #f5f5f5;
@@ -1513,19 +1576,57 @@ export default {
   }
 }
 
-/* clear search results button styles */
-.clear-results-container {
+.search-results-tabs {
   display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.tabs-container {
+  display: flex;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.tab-item {
+  flex: 1;
+  padding: 12px 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #6c757d;
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  gap: 8px;
+}
+
+.tab-item.active {
+  background-color: rgba(62, 92, 43, 0.1);
+  color: #3E5C2B;
+  font-weight: 600;
+  border-bottom-color: #3E5C2B;
+}
+
+.tab-item:hover:not(.active) {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.tab-icon {
+  font-size: 16px;
 }
 
 .clear-results-button {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 6px 12px;
+  padding: 8px 16px;
   background-color: #f5f5f5;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -1533,6 +1634,7 @@ export default {
   font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin: 0 auto;
 }
 
 .clear-results-button:hover {
@@ -1542,5 +1644,21 @@ export default {
 
 .clear-icon {
   flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .tabs-container {
+    flex-direction: column;
+  }
+  
+  .tab-item {
+    border-bottom: none;
+    border-left: 3px solid transparent;
+  }
+  
+  .tab-item.active {
+    border-bottom: none;
+    border-left-color: #3E5C2B;
+  }
 }
 </style>
