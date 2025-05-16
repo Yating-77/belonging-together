@@ -1,94 +1,73 @@
 <template>
   <!-- loading message -->
-  <div v-if="loading" class="loading-overlay">
+  <div v-if="false" class="loading-overlay">
     <div class="loading-content">
       <div class="loading-spinner"></div>
-      <p class="loading-text">Loading scenario data from database, please wait...</p>
-      <p class="loading-subtext">This may take a few seconds</p>
+      <p class="loading-text">Preparing your personalised recommendations...</p>
+      <p class="loading-subtext">Please wait a moment while we load your personalised scenarios</p>
     </div>
   </div>
 
-  <!-- error message -->
-  <div v-else-if="error" class="error-overlay">
-    <div class="error-content">
-      <div class="error-icon"></div>
-      <h3 class="error-title">Data Loading Failed</h3>
-      <p class="error-text">{{ error }}</p>
-      <div class="error-actions">
-        <button @click="fetchCategories" class="retry-button">
-          <span class="icon"></span> Retry
-        </button>
-        <button @click="setupDefaultScenarios" class="default-button">
-          <span class="icon"></span> Use Simple Mode
-        </button>
-      </div>
-      <p class="error-help">If the problem persists, please ensure:</p>
-      <ul class="error-tips">
-        <li>Backend server is running (<code>node my-backend/server.js</code>)</li>
-        <li>Database service is working and contains the necessary data</li>
-        <li>Network connection is stable</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- 主要内容 -->
   <div v-else-if="scenarios.length > 0" class="fullscreen-container">
     <MyNavBar />
-    <!-- 页面顶部中央标题 -->
     <div class="main-title-container text-center py-4">
       <h1 class="mb-3 page-title">Supporting Autism Families</h1>
       <p class="mb-4 page-subtitle">
-        Personalized recommendations based on your child's daily behaviors
+        Personalised recommendations based on your child's daily behaviors
       </p>
       
-      <div class="scenarios-cards-container">
-        <p class="intro-text page-subtitle">We provide support for six common scenarios:</p>
-        <div class="scenarios-cards-row">
-          <div class="scenario-card-item">
-            <div class="card-icon-placeholder">
-              <img src="../components/icons/sleep-icon.png" alt="Sleep Icon" class="scenario-icon">
-            </div>
-            <div class="card-title">Sleep Issues</div>
-            <div class="card-description">Trouble falling or staying asleep?</div>
-          </div>
-          <div class="scenario-card-item">
-            <div class="card-icon-placeholder">
-              <img src="../components/icons/diet-icon.png" alt="Diet Icon" class="scenario-icon">
-            </div>
-            <div class="card-title">Diet & Nutrition</div>
-            <div class="card-description">Selective eating or mealtime struggles?</div>
-          </div>
-          <div class="scenario-card-item">
-            <div class="card-icon-placeholder">
-              <img src="../components/icons/social-icon.png" alt="Social Icon" class="scenario-icon larger-icon">
-            </div>
-            <div class="card-title">Social Interaction</div>
-            <div class="card-description">Find it hard to connect with peers?</div>
-          </div>
-        </div>
-        <div class="scenarios-cards-row">
-          <div class="scenario-card-item">
-            <div class="card-icon-placeholder">
-              <img src="../components/icons/communication-icon.png" alt="Communication Icon" class="scenario-icon larger-icon">
-            </div>
-            <div class="card-title">Communication</div>
-            <div class="card-description">Limited language or unclear speech?</div>
-          </div>
-          <div class="scenario-card-item">
-            <div class="card-icon-placeholder">
-              <img src="../components/icons/emotion-icon.png" alt="Emotion Icon" class="scenario-icon larger-icon">
-            </div>
-            <div class="card-title">Emotional Management</div>
-            <div class="card-description">Frequent meltdowns or aggression?</div>
-          </div>
-          <div class="scenario-card-item">
-            <div class="card-icon-placeholder">
-              <img src="../components/icons/sensory-icon.png" alt="Sensory Icon" class="scenario-icon larger-icon">
-            </div>
-            <div class="card-title">Sensory Sensitivity</div>
-            <div class="card-description">Overreact to lights, sound or touch?</div>
-          </div>
-        </div>
+      <div v-if="!showResults" class="scenarios-cards-container">
+  <p class="intro-text page-subtitle">We provide support for six common scenarios:</p>
+  <div class="scenarios-cards-row">
+    <div class="scenario-card-item" :class="{'selected-card': selectedCardIndex === 0}" style="cursor: pointer;" @click="jumpToScenario(0)">
+      <div class="card-icon-placeholder">
+        <img src="../components/icons/sleep-icon.png" alt="Sleep Icon" class="scenario-icon">
+      </div>
+      <div class="card-title">Sleep Issues</div>
+      <div class="card-description">Trouble falling or staying asleep?</div>
+    </div>
+    <div class="scenario-card-item" :class="{'selected-card': selectedCardIndex === 1}" style="cursor: pointer;" @click="jumpToScenario(1)">
+      <div class="card-icon-placeholder">
+        <img src="../components/icons/diet-icon.png" alt="Diet Icon" class="scenario-icon">
+      </div>
+      <div class="card-title">Diet & Nutrition</div>
+      <div class="card-description">Selective eating or mealtime struggles?</div>
+    </div>
+    <div class="scenario-card-item" :class="{'selected-card': selectedCardIndex === 2}" style="cursor: pointer;" @click="jumpToScenario(2)">
+      <div class="card-icon-placeholder">
+        <img src="../components/icons/social-icon.png" alt="Social Icon" class="scenario-icon larger-icon">
+      </div>
+      <div class="card-title">Social Interaction</div>
+      <div class="card-description">Find it hard to connect with peers?</div>
+    </div>
+  </div>
+  <div class="scenarios-cards-row">
+    <div class="scenario-card-item" :class="{'selected-card': selectedCardIndex === 3}" style="cursor: pointer;" @click="jumpToScenario(3)">
+      <div class="card-icon-placeholder">
+        <img src="../components/icons/communication-icon.png" alt="Communication Icon" class="scenario-icon larger-icon">
+      </div>
+      <div class="card-title">Communication</div>
+      <div class="card-description">Limited language or unclear speech?</div>
+    </div>
+    <div class="scenario-card-item" :class="{'selected-card': selectedCardIndex === 4}" style="cursor: pointer;" @click="jumpToScenario(4)">
+      <div class="card-icon-placeholder">
+        <img src="../components/icons/emotion-icon.png" alt="Emotion Icon" class="scenario-icon larger-icon">
+      </div>
+      <div class="card-title">Emotional Management</div>
+      <div class="card-description">Frequent meltdowns or aggression?</div>
+    </div>
+    <div class="scenario-card-item" :class="{'selected-card': selectedCardIndex === 5}" style="cursor: pointer;" @click="jumpToScenario(5)">
+      <div class="card-icon-placeholder">
+        <img src="../components/icons/sensory-icon.png" alt="Sensory Icon" class="scenario-icon larger-icon">
+      </div>
+      <div class="card-title">Sensory Sensitivity</div>
+      <div class="card-description">Overreact to lights, sound or touch?</div>
+    </div>
+  </div>
+</div>
+        
+        <!-- Attribution line -->
+        <div class="attribution-line">All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank"><span class="green-text">Better Health Channel</span></a></div>
       </div>
     </div>
     
@@ -97,7 +76,10 @@
       <div class="col-md-5 d-flex align-items-center justify-content-center sidebar-container">
         <div class="position-sticky sidebar-content">
           <div class="scenario-header mb-3">
-            <h2 class="current-scenario-title">Scenario {{ currentScenario + 1}}: {{ scenarios[currentScenario].title }}</h2>
+            <h2 class="current-scenario-title" v-if="scenarios[currentScenario]">
+              Scenario {{ currentScenario + 1 }}: {{ scenarios[currentScenario].title }}
+            </h2>
+
           </div>
           <div class="main-image-container">
             <img 
@@ -120,12 +102,13 @@
               </div>
             </div>
             <div class="scenario-dots mt-3 d-flex justify-content-between">
-              <div v-for="(scenario, index) in scenarios" :key="index" 
-                   class="scenario-dot" 
-                   :class="{ 'active': index <= currentScenario, 'current': index === currentScenario }"
-                   @click="navigateToScenario(index)">
-              </div>
+            <div v-for="(scenario, index) in scenarios" :key="index" 
+                class="scenario-dot" 
+                :class="{ 'active': index <= currentScenario, 'current': index === currentScenario }"
+                @click="navigateToScenario(index)"
+                :title="scenario.title">
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -286,29 +269,39 @@
             @close-modal="resetCurrentScenario">
           </SleepScene>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
+        <div class="modal-footer d-flex justify-content-between align-items-center">
+          <button class="btn back-button" @click="resetCurrentScenario">
+            Back to Question
+          </button>
+          <div class="attribution-line text-right mb-0">
+            All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a>
+          </div>
         </div>
       </div>
-            </div>
-            
+    </div>
+    
     <!-- Diet Scene Modal -->
     <div v-if="showDietScene" class="sleep-scene-modal" @keydown.escape="resetCurrentScenario">
       <div class="sleep-scene-content">
         <div class="modal-header">
           <h3 class="modal-title">Scenario Scene - Diet Issues</h3>
           <button type="button" class="close-btn" @click="resetCurrentScenario">&times;</button>
-                  </div>
+        </div>
         <div class="modal-body">
           <DietScene 
             :option="dietSceneOption" 
             @next-scenario="navigateToNextScenario" 
             @close-modal="resetCurrentScenario">
           </DietScene>
-                </div>
-        <div class="modal-footer">
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
-              </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-between align-items-center">
+          <button class="btn back-button" @click="resetCurrentScenario">
+            Back to Question
+          </button>
+          <div class="attribution-line text-right mb-0">
+            All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a>
+          </div>
+        </div>
       </div>
     </div>
     
@@ -326,11 +319,16 @@
             @close-modal="resetCurrentScenario">
           </SocialScene>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
-            </div>
+        <div class="modal-footer d-flex justify-content-between align-items-center">
+          <button class="btn back-button" @click="resetCurrentScenario">
+            Back to Question
+          </button>
+          <div class="attribution-line text-right mb-0">
+            All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a>
           </div>
         </div>
+      </div>
+    </div>
         
     <!-- Communication Scene Modal -->
     <div v-if="showCommunicationScene" class="sleep-scene-modal" @keydown.escape="resetCurrentScenario">
@@ -345,9 +343,14 @@
             @next-scenario="navigateToNextScenario" 
             @close-modal="resetCurrentScenario">
           </CommunicationScene>
-      </div>
-        <div class="modal-footer">
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
+        </div>
+        <div class="modal-footer d-flex justify-content-between align-items-center">
+          <button class="btn back-button" @click="resetCurrentScenario">
+            Back to Question
+          </button>
+          <div class="attribution-line text-right mb-0">
+            All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a>
+          </div>
         </div>
       </div>
     </div>
@@ -366,32 +369,42 @@
             @close-modal="resetCurrentScenario">
           </EmotionScene>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
+        <div class="modal-footer d-flex justify-content-between align-items-center">
+          <button class="btn back-button" @click="resetCurrentScenario">
+            Back to Question
+          </button>
+          <div class="attribution-line text-right mb-0">
+            All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a>
+          </div>
         </div>
       </div>
     </div>
     
     <!-- Sensory Scene Modal -->
     <div v-if="showSensoryScene" class="sleep-scene-modal" @keydown.escape="resetCurrentScenario">
-      <div class="sleep-scene-content">
-        <div class="modal-header">
-          <h3 class="modal-title">Scenario Scene - Sensory Sensitivity</h3>
-          <button type="button" class="close-btn" @click="resetCurrentScenario">&times;</button>
-        </div>
-        <div class="modal-body">
-          <SensoryScene 
-            :option="sensorySceneOption" 
-            @next-scenario="navigateToNextScenario" 
-            @close-modal="resetCurrentScenario">
-          </SensoryScene>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn back-button" @click="resetCurrentScenario">Back to Options</button>
-        </div>
+  <div class="sleep-scene-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Scenario Scene - Sensory Sensitivity</h3>
+      <button type="button" class="close-btn" @click="resetCurrentScenario">&times;</button>
+    </div>
+    <div class="modal-body">
+      <SensoryScene 
+        :option="sensorySceneOption" 
+        @next-scenario="navigateToNextScenario" 
+        @close-modal="resetCurrentScenario">
+      </SensoryScene>
+    </div>
+    <div class="modal-footer d-flex justify-content-between align-items-center">
+      <button class="btn back-button" @click="resetCurrentScenario">
+        Back to Question
+      </button>
+      <div class="attribution-line text-right mb-0">
+        All recommendations are sourced from <a href="https://www.betterhealth.vic.gov.au/" target="_blank" class="green-text">Better Health Channel</a>
       </div>
     </div>
-    
+  </div>
+</div>
+
     <!-- Summary Modal -->
     <div v-if="showSummary" class="sleep-scene-modal" @keydown.escape="showSummary = false">
       <div class="sleep-scene-content" style="max-width: 1200px; width: 95%;">
@@ -407,17 +420,10 @@
         </div>
       </div>
     </div>
+    
     <MyFooter />
-  </div>
   
   <!-- no data attention -->
-  <div v-else class="loading-overlay">
-    <div class="loading-content">
-      <div class="error-icon">⚠️</div>
-      <p class="loading-text">Unable to load scenario data, please try again later</p>
-      <button @click="setupDefaultScenarios" class="retry-button">Use Default Data</button>
-    </div>
-  </div>
 </template>
 
 <script>
@@ -431,6 +437,8 @@ import SensoryScene from '../components/SensoryScene.vue';
 import Summary from '../components/Summary.vue';
 import MyFooter from '../components/test/MyFooter.vue';
 import MyNavBar from '../components/test/MyNavBar.vue';
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 export default {
   components: {
@@ -466,10 +474,32 @@ export default {
       userSelections: [],
       scenarios: [],
       loading: false,
-      error: null
+      error: null,
+      selectedCardIndex: null, 
     };
   },
   methods: {
+    jumpToScenario(index) {
+      this.currentScenario = index;
+      this.selected = null;
+      this.currentSelectedOption = null;
+      this.selectedCardIndex = index;
+      
+      // scroll to the appropriate position
+      this.$nextTick(() => {
+        // try to scroll to the scenario title position
+        const scenarioTitle = document.querySelector('.current-scenario-title');
+        if (scenarioTitle) {
+          const yOffset = -50; // adjust the offset, so the title is below the top
+          const y = scenarioTitle.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({top: y, behavior: 'smooth'});
+        } else {
+          // if the element is not found, scroll to the top
+          window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+      });
+    },
+    
     // Get category and questions and options from API
     async fetchCategories() {
       this.loading = true;
@@ -599,22 +629,6 @@ export default {
         console.error('Failed to fetch categories and options data:', err);
         this.error = `Data loading failed: ${err.message}. Please ensure that the backend server is running and the database contains valid data.`;
         this.setupDefaultScenarios();
-      } finally {
-        // count the past time
-        const elapsedTime = Date.now() - startTime;
-        // if less than 1sec close
-        const minLoadingTime = 500;
-        
-        if (elapsedTime < minLoadingTime) {
-          const remainingTime = minLoadingTime - elapsedTime;
-          console.log(`Waiting additional ${remainingTime}ms to ensure minimum loading time`);
-          
-          setTimeout(() => {
-            this.loading = false;
-          }, remainingTime);
-        } else {
-          this.loading = false;
-        }
       }
     },
     showRecommendation() {
@@ -667,22 +681,19 @@ export default {
         return;
       }
       
-      // If it's a sensory sensitivity issue scenario, directly display the SensoryScene component
       else if (this.currentScenario === 5) {
         this.showSensoryScene = true;
         this.sensorySceneOption = this.selected;
         return;
       }
       
-      // Other scenarios' original logic
-      // Store the selection with index to ensure correct order
       if (this.userSelections.length <= this.currentScenario) {
         this.userSelections.push({
           scenarioTitle: this.scenarios[this.currentScenario].title,
           scenarioQuestion: this.scenarios[this.currentScenario].question,
           optionText: this.currentSelectedOption.text,
           recommendations: this.currentSelectedOption.recommendations,
-          scenarioIndex: this.currentScenario // Add index to track original scenario
+          scenarioIndex: this.currentScenario
         });
       } else {
         this.userSelections[this.currentScenario] = {
@@ -690,14 +701,12 @@ export default {
           scenarioQuestion: this.scenarios[this.currentScenario].question,
           optionText: this.currentSelectedOption.text,
           recommendations: this.currentSelectedOption.recommendations,
-          scenarioIndex: this.currentScenario // Add index to track original scenario
+          scenarioIndex: this.currentScenario
         };
       }
-      // Smooth scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     
-    // Get recommendations from API
     async fetchRecommendations(optionId) {
       try {
         console.log(`Starting to fetch recommendations for option ID ${optionId}`);
@@ -712,7 +721,6 @@ export default {
         console.log(`Retrieved ${recommendations.length} recommendations for option ID ${optionId}:`);
         console.log(JSON.stringify(recommendations));
         
-        // Update current option's recommendation data
         if (this.currentSelectedOption && recommendations.length > 0) {
           this.currentSelectedOption.recommendations = recommendations;
           console.log('Updated recommendation data for current option');
@@ -724,19 +732,17 @@ export default {
       }
     },
     resetCurrentScenario() {
-      // Save current scroll position
       const scrollPosition = window.scrollY;
       
       this.selected = null;
       this.currentSelectedOption = null;
-      this.showSleepScene = false; // Reset SleepScene display state
-      this.showDietScene = false; // Reset DietScene display state
-      this.showSocialScene = false; // Reset SocialScene display state
-      this.showCommunicationScene = false; // Reset CommunicationScene display state
-      this.showEmotionScene = false; // Reset EmotionScene display state
-      this.showSensoryScene = false; // Reset SensoryScene display state
+      this.showSleepScene = false; 
+      this.showDietScene = false;
+      this.showSocialScene = false; 
+      this.showCommunicationScene = false; 
+      this.showEmotionScene = false; 
+      this.showSensoryScene = false; 
       
-      // Delay a bit to ensure DOM is updated, then restore scroll position
       this.$nextTick(() => {
         window.scrollTo({ top: scrollPosition });
       });
@@ -747,7 +753,6 @@ export default {
       this.currentSelectedOption = null;
     },
     navigateToNextScenario() {
-      // Save current scroll position
       const scrollPosition = window.scrollY;
       
       // Print log, for debugging
@@ -762,12 +767,10 @@ export default {
         this.showEmotionScene = false;
         this.showSensoryScene = false;
         
-        // Then switch to the next scenario
         this.currentScenario++;
         this.selected = null;
         this.currentSelectedOption = null;
         
-        // Add delay to ensure the modal window is fully closed before processing next step
         setTimeout(() => {
           // Force refresh view
           this.$forceUpdate();
@@ -856,9 +859,7 @@ export default {
 </script>
 
 <style scoped>
-/* Color variables */
 
-/* Basic styles */
 .fullscreen-container {
   background-color: #F8EFED;
   min-height: 100vh;
@@ -868,7 +869,6 @@ export default {
   flex-direction: column;
 }
 
-/* Page top center title styles */
 .main-title-container {
   width: 100%;
   background-color: #f9f7f6;
@@ -878,7 +878,6 @@ export default {
   margin-bottom: 1rem;
 }
 
-/* Scenario card styles */
 .scenarios-cards-container {
   max-width: 900px;
   margin: 1.5rem auto 0;
@@ -911,7 +910,7 @@ export default {
 
 .scenario-card-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 15px rgba(62, 92, 43, 0.15);
 }
 
 .card-title {
@@ -952,7 +951,6 @@ export default {
   line-height: 1.3;
 }
 
-/* Current scenario title styles */
 .scenario-header {
   text-align: center;
 }
@@ -963,12 +961,15 @@ export default {
   font-weight: 600;
 }
 
-/* Sidebar styles */
 .sidebar-container {
   position: relative;
+  background-color: #F8EFED;
 }
-
+.row.g-0.h-100 {
+  background-color: #F8EFED !important;
+}
 .sidebar-content {
+  background-color: #F8EFED;
   top: 0;
   padding: 2rem;
 }
@@ -992,7 +993,6 @@ export default {
   font-size: 1.2rem;
 }
 
-/* Scenario introduction styles */
 .scenario-intro {
   max-width: 90%;
   margin: 0 auto;
@@ -1023,8 +1023,8 @@ export default {
   padding-right: 10px;
 }
 
-/* Main image styles */
 .main-image-container {
+  background-color: #F8EFED;
   text-align: center;
   padding: 0 1rem;
   transition: all 0.5s ease;
@@ -1038,7 +1038,6 @@ export default {
   transition: transform 0.5s ease;
 }
 
-/* Progress bar styles */
 .progress-container {
   margin-top: 1rem;
 }
@@ -1058,7 +1057,6 @@ export default {
   transition: width 0.5s ease;
 }
 
-/* Content card styles */
 .content-card {
   background-color: #F8EFED;
   border-radius: 15px;
@@ -1077,7 +1075,6 @@ export default {
   font-weight: 600;
 }
 
-/* Option card styles */
 .option-card {
   border-left: 4px solid #3E5C2B;
   background-color: #FFFFFF;
@@ -1127,7 +1124,6 @@ export default {
   color: #4d2f20;
 }
 
-/* Button styles */
 .action-button {
   background-color: #3E5C2B;
   color: white;
@@ -1179,7 +1175,6 @@ export default {
   transform: translateY(-2px);
 }
 
-/* Scenario dot styles */
 .scenario-dot {
   width: 12px;
   height: 12px;
@@ -1198,7 +1193,6 @@ export default {
   box-shadow: 0 0 0 3px rgba(77, 47, 32, 0.2);
 }
 
-/* Recommendation styles */
 .recommendations-heading {
   color: #4d2f20;
   font-weight: 600;
@@ -1275,7 +1269,6 @@ export default {
   color: #4d2f20;
 }
 
-/* Results page styles */
 .results-container {
   max-width: 1000px;
   margin: 0 auto;
@@ -1372,7 +1365,6 @@ export default {
   transform: translateY(-2px);
 }
 
-/* Scrollbar styles */
 .recommendation-cards::-webkit-scrollbar {
   width: 8px;
 }
@@ -1391,7 +1383,6 @@ export default {
   background: #5a873f;
 }
 
-/* Animation */
 .recommendation-container {
   animation: fadeIn 0.5s;
 }
@@ -1401,7 +1392,6 @@ export default {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .row {
     flex-direction: column;
@@ -1438,7 +1428,6 @@ export default {
   }
 }
 
-/* 平板电脑尺寸调整 */
 @media (min-width: 769px) and (max-width: 1024px) {
   .scenarios-cards-row {
     justify-content: center;
@@ -1450,7 +1439,6 @@ export default {
   }
 }
 
-/* Print styles */
 @media print {
   .back-button {
     display: none;
@@ -1483,7 +1471,6 @@ export default {
   }
 }
 
-/* Modal window styles */
 .sleep-scene-modal {
   position: fixed;
   top: 0;
@@ -1552,7 +1539,6 @@ export default {
   background-color: #F7F0ED;
 }
 
-/* Thank you page styles */
 .thank-you-section {
   background-color: #f9f7f6;
   border-radius: 15px;
@@ -1580,7 +1566,6 @@ export default {
   color: #3E5C2B;
 }
 
-/* Loading overlay styles */
 .loading-overlay {
   position: fixed;
   top: 0;
@@ -1626,7 +1611,6 @@ export default {
   transform: translateY(-2px);
 }
 
-/* Error overlay styles */
 .error-overlay {
   position: fixed;
   top: 0;
@@ -1729,9 +1713,36 @@ export default {
   margin-right: 5px;
 }
 
-/* Apply extra scaling for specific icons */
 .larger-icon {
   transform: scale(1.4);
+}
+
+.attribution-line {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0 15px;
+}
+
+.attribution-line a {
+  color: #3E5C2B;
+  text-decoration: none;
+}
+
+.attribution-line a:hover {
+  text-decoration: underline;
+}
+
+.green-text {
+  color: #3E5C2B;
+}
+.selected-card {
+  background-color: #f0f7eb;
+  border-left: 4px solid #3E5C2B;
+  transform: translateX(2px);
+  box-shadow: 0 4px 15px rgba(62, 92, 43, 0.3);
 }
 
 </style>

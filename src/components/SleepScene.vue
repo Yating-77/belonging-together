@@ -32,9 +32,11 @@
         <div class="dialogue-section">
           <div class="dialogue-bubbles">
             <div class="parent-bubble">
+              <span class="speaker-label parent-label">Parent:</span>
               <p>{{ currentScene.parentDialogue }}</p>
             </div>
             <div class="child-bubble">
+              <span class="speaker-label child-label">Child:</span>
               <p>{{ currentScene.childDialogue }}</p>
             </div>
           </div>
@@ -45,32 +47,36 @@
           
           <div class="advice-content" v-else>
             <h3>Parent Advice</h3>
-            <!-- 显示加载状态 -->
+            <!-- loading -->
             <div v-if="loading" class="loading-indicator">
               Loading recommendations...
             </div>
             
-            <!-- 显示错误信息 -->
+            <!-- error message -->
             <div v-else-if="error" class="error-message">
               {{ error }}
             </div>
             
-            <!-- 显示建议内容 -->
+            <!-- recommendation -->
             <p v-else>{{ currentAdvice }}</p>
             <div class="advice-progress">
               {{ adviceProgress }}
             </div>
             <div class="advice-navigation">
-              <button class="advice-btn" 
-                      @click="prevAdvice" 
-                      :disabled="currentAdviceIndex === 0">
+              <button 
+                class="advice-btn" 
+                @click="prevAdvice" 
+                v-if="currentAdviceIndex > 0">
                 &larr; Previous
               </button>
-              <button class="advice-btn" 
-                      @click="nextAdvice" 
-                      :disabled="currentAdviceIndex === totalAdvices - 1">
+              <div v-else class="placeholder-btn"></div>
+              <button 
+                class="advice-btn" 
+                @click="nextAdvice" 
+                v-if="currentAdviceIndex < totalAdvices - 1">
                 Next &rarr;
               </button>
+              <div v-else class="placeholder-btn"></div>
             </div>
             
             <!-- Show continue button after reading all advice -->
@@ -377,7 +383,6 @@ export default {
   cursor: not-allowed;
 }
 
-/* Scenario Scene Styles */
 .scenario-container {
   margin-top: 0;
   flex: 1;
@@ -416,14 +421,13 @@ export default {
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-/* Dialogue Bubbles Styles */
 .dialogue-bubbles {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 .parent-bubble, .child-bubble {
-  padding: 0.8rem;
+  padding: 1rem;
   border-radius: 16px;
   position: relative;
   max-width: 90%;
@@ -441,6 +445,7 @@ export default {
 .parent-bubble p, .child-bubble p {
   margin: 0;
   font-size: 0.95rem;
+  padding-left: 0.2rem;
 }
 
 /* Advice Section Styles */
@@ -502,9 +507,9 @@ export default {
   display: flex;
   justify-content: space-between;
   margin-top: 1rem;
+  width: 100%;
 }
 
-/* Button Group Styles */
 .button-group {
   display: flex;
   justify-content: space-around;
@@ -573,7 +578,7 @@ export default {
   box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
 }
 
-/* Responsive Design */
+
 @media (max-width: 768px) {
   .scenario-content {
     flex-direction: column;
@@ -583,7 +588,6 @@ export default {
   }
 }
 
-/* Continue to Next Scene Button Styles */
 .next-scenario-container {
   margin-top: 1.5rem;
   text-align: center;
@@ -608,17 +612,35 @@ export default {
   transform: translateY(-2px);
 }
 
-/* Loading Indicator Styles */
 .loading-indicator {
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
   color: #666;
 }
 
-/* Error Message Styles */
 .error-message {
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
   color: #d33;
+}
+
+.placeholder-btn {
+  width: 120px;
+  visibility: hidden;
+}
+
+.speaker-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+  display: block;
+}
+
+.parent-label {
+  color: #3E5C2B;
+}
+
+.child-label {
+  color: #CD5C5C;
 }
 </style>

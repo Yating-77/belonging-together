@@ -1,0 +1,1232 @@
+<template>
+  <div class="location-search">
+    <div class="search-title">Location Density Search</div>
+    <div v-if="!allTypesSelected" class="search-warning">
+      Please ensure all resource types are selected
+    </div>
+    <div v-if="searchOutOfVicError" class="search-warning out-of-vic-error">
+      {{ searchOutOfVicError }}
+    </div>
+    <div class="search-input-group" :class="{ 'disabled': !allTypesSelected }">
+      <div class="autocomplete-wrapper">
+        <input
+          type="text"
+          v-model="searchLocation"
+          placeholder="Enter address or coordinates (VIC)"
+          @input="handleInput"
+          @keyup.enter="searchLocationDensity"
+          @blur="hideSuggestions"
+          :disabled="!allTypesSelected"
+        >
+        <ul v-if="showSuggestions && suggestions.length > 0" class="suggestions-list">
+          <li
+            v-for="(suggestion, index) in suggestions"
+            :key="index"
+            @mousedown.prevent="selectSuggestion(suggestion)"
+            class="suggestion-item"
+            :class="{ 'non-vic-suggestion': !suggestion.isVic }"
+          >
+            {{ suggestion.displayName }}
+            <span v-if="!suggestion.isVic" class="suggestion-state-warning"> (Non-VIC)</span>
+          </li>
+        </ul>
+         <div v-if="showSuggestions && suggestions.length === 0 && searchLocation.length >= 2 && !isLoadingSuggestions" class="suggestions-list no-suggestions">
+          No suggestions found in VIC.
+        </div>
+        <div v-if="isLoadingSuggestions" class="suggestions-list loading-suggestions">
+          Loading...
+        </div>
+      </div>
+      <button
+        class="search-button"
+        @click="searchLocationDensity"
+        :disabled="!allTypesSelected"
+      >
+        <span class="search-icon">🔍</span>
+      </button>
+    </div>
+
+    
+    <div v-if="densityResult" class="density-gauge-container">
+ 
+      <div class="location-header">
+        <div class="location-icon">📍</div>
+        <div class="location-name">{{ searchedAddress }}</div>
+      </div>
+      
+      
+      <div class="density-info-display">
+        <div class="density-level" :class="densityResultClass">
+          {{ densityLevelText }}
+        </div>
+        <div class="density-detail">
+          {{ densityData?.pointsCount || 0 }} resources in 3km
+        </div>
+      </div>
+      
+      
+      <div class="echart-gauge-wrapper">
+        <v-chart class="chart" :option="echartsOption" autoresize />
+      </div>
+      
+     
+      <div class="gauge-legend">
+        <div class="legend-item">
+          <div class="legend-color very-low"></div>
+          <span>Very Low</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color low"></div>
+          <span>Low</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color medium"></div>
+          <span>Medium</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color high"></div>
+          <span>High</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color very-high"></div>
+          <span>Very High</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div v-if="nearbyResourcesList.length > 0" class="resources-list-container">
+    <div class="resources-header">
+      <h3>Nearby Resources</h3>
+      <span class="total-resources">{{ nearbyResourcesList.length }} total</span>
+    </div>
+    
+    <div class="resources-grid">
+      <div v-for="(group, typeKey) in groupedNearbyResources" :key="typeKey" 
+           class="resource-category" :data-type="typeKey">
+        <div class="category-header">
+          <div class="category-title">{{ formatTypeName(typeKey) }}</div>
+          <div class="category-count">{{ group.length }}</div>
+        </div>
+        
+        <div class="resource-items-grid">
+          <div v-for="resource in group" :key="resource.id || resource.name" class="resource-card">
+            <div class="resource-name">{{ resource.name || 'Unnamed Resource' }}</div>
+            <div v-if="resource.address" class="resource-address">{{ resource.address }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { ref, watch, onMounted, computed } from 'vue';
+import L from 'leaflet';
+
+// ECharts imports
+import { use } from 'echarts/core';
+import { CanvasRenderer } from 'echarts/renderers';
+import { GaugeChart } from 'echarts/charts';
+import { TitleComponent, TooltipComponent, LegendComponent } from 'echarts/components';
+import VChart from 'vue-echarts';
+
+
+use([
+  CanvasRenderer,
+  GaugeChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent
+]);
+
+
+function debounce(func, delay) {
+  let timeout;
+  return function(...args) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), delay);
+  };
+}
+
+export default {
+  name: 'LocationDensitySearch',
+  components: {
+    VChart
+  },
+  props: {
+    map: {
+      type: Object,
+      required: true
+    },
+    allTypesSelected: {
+      type: Boolean,
+      default: false
+    },
+    resourceData: {
+      type: Object,
+      required: true,
+    },
+    loading: {
+      type: Boolean,
+      default: false
+    },
+    selectedTypes: {
+      type: Object,
+      required: true
+    }
+  },
+  emits: ['update:loading'],
+  setup(props, { emit }) {
+    const searchLocation = ref('');
+    const searchedAddress = ref('');
+    const densityResult = ref('');
+    const densityResultClass = ref('');
+    const locationMarker = ref(null);
+    const nearbyResourcesList = ref([]);
+    const densityData = ref(null);
+
+    const suggestions = ref([]);
+    const showSuggestions = ref(false);
+    const isLoadingSuggestions = ref(false);
+    const searchOutOfVicError = ref('');
+    let debouncedFetchSuggestions;
+    
+    const GEOAPIFY_API_KEY = '7cdc3f23f1334a329855300d3ec01b74'; // 请替换为你的 API Key
+
+    const VIC_VIEWBOX_STRING = '140.9,-39.2,149.9,-33.9'; 
+    const VIC_NOMINATIM_VIEWBOX = VIC_VIEWBOX_STRING;
+    const VIC_GEOAPIFY_BIAS_PROXIMITY = '144.9631,-37.8136';
+
+    const formatTypeName = (typeKey) => {
+      switch (typeKey) {
+        case 'schools': return 'Schools';
+        case 'hospitals': return 'Hospitals';
+        case 'ndisProviders': return 'NDIS Early Childhood';
+        case 'ndisDailyLiving': return 'NDIS Daily Living';
+        case 'ndisTherapy': return 'NDIS Therapy';
+        default: return typeKey;
+      }
+    };
+
+    const groupedNearbyResources = computed(() => {
+      if (!nearbyResourcesList.value.length) return {};
+      const groups = { schools: [], hospitals: [], ndisProviders: [], ndisDailyLiving: [], ndisTherapy: [] };
+      nearbyResourcesList.value.forEach(item => {
+        if (item.type && groups[item.type]) groups[item.type].push(item);
+      });
+      return Object.fromEntries(Object.entries(groups).filter(([_, value]) => value.length > 0));
+    });
+
+    const densityLevelText = computed(() => {
+      const texts = {
+        'very-low': 'Very Low',
+        'low': 'Low',
+        'medium': 'Medium',
+        'high': 'High',
+        'very-high': 'Very High',
+        'error': 'Error'
+      };
+      return texts[densityResultClass.value] || '';
+    });
+    
+    const densityDetailsText = computed(() => {
+      if (densityResultClass.value === 'error' || !densityData.value?.typeCount) return '';
+      const total = Object.values(densityData.value.typeCount).reduce((sum, count) => sum + count, 0);
+      return `${total} resources in 3km`;
+    });
+
+    const echartsGaugeValue = computed(() => {
+      
+      const actual = densityData.value?.pointsCount || 0;
+      
+     
+      if (actual <= 5) return actual;        
+      if (actual <= 10) return actual;     
+      if (actual <= 15) return actual;       
+      if (actual <= 20) return actual;       
+      return Math.min(actual, 40);           
+    });
+
+    const echartsOption = computed(() => {
+      const levelText = densityLevelText.value;
+      const detailsText = densityDetailsText.value;
+
+      return {
+        series: [
+          {
+            type: 'gauge',
+            startAngle: 180,
+            endAngle: 0,
+            min: 0,
+            max: 40, 
+            splitNumber: 5,
+            radius: '150%',  
+            center: ['50%', '75%'],  
+            axisLine: {
+              lineStyle: {
+                width: 40,  
+                color: [
+                  [0.125, '#FF4444'],  
+                  [0.25, '#FFAA00'],    
+                  [0.375, '#FFFF00'],   
+                  [0.5, '#00C851'],   
+                  [1, '#0099CC']       
+                ]
+              }
+            },
+            pointer: {
+              itemStyle: {
+                color: 'auto'
+              },
+              length: '60%',
+              width: 10, 
+              offsetCenter: [0, '-10%']
+            },
+            axisTick: {
+              distance: -35, 
+              length: 10,    
+              lineStyle: {
+                color: '#fff',
+                width: 3      
+              }
+            },
+            splitLine: {
+              distance: -35,  
+              length: 35,     
+              lineStyle: {
+                color: '#fff',
+                width: 5      
+              }
+            },
+            axisLabel: {
+              show: false 
+            },
+            detail: {
+              show: false 
+            },
+            data: [
+              {
+                value: echartsGaugeValue.value,
+              }
+            ],
+          }
+        ]
+      };
+    });
+    
+    onMounted(() => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined';
+      const existingLink = document.querySelector(`link[href="${link.href}"]`);
+      if (!existingLink) document.head.appendChild(link);
+      debouncedFetchSuggestions = debounce(fetchAddressSuggestions, 350);
+    });
+    
+    const cleanAddressText = (text) => {
+      if (!text) return '';
+      const parts = text.split(',').map(part => part.trim());
+      const cleanParts = parts.filter(part => !/[\u4e00-\u9fa5]/.test(part));
+      const finalParts = cleanParts.map(part => {
+        part = part.replace(/\([^)]*\)/g, '').trim();
+        part = part.replace(/^\d+[-\d]*$/, '').trim();
+        return part;
+      }).filter(part => part.length > 0);
+      const relevantParts = finalParts.slice(0, 3);
+      return relevantParts.join(', ');
+    };
+
+    const isAddressInVicNominatim = (addressObject) => {
+        if (!addressObject) return false;
+        const state = addressObject.state;
+        return state && (state.toLowerCase() === 'victoria' || state.toLowerCase() === 'vic');
+    };
+
+    const isSuggestionInVicGeoapify = (properties) => {
+        if (!properties) return false;
+        const state = properties.state;
+        return state && (state.toLowerCase() === 'victoria' || state.toLowerCase() === 'vic.');
+    };
+    
+    const geocodeAddress = async (addressText) => {
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressText)}&viewbox=${VIC_NOMINATIM_VIEWBOX}&bounded=1&limit=1&countrycodes=au&accept-language=en&addressdetails=1`;
+        
+        const response = await fetch(url, {
+          headers: { 'User-Agent': 'Melbourne Resources Map Application - Geocoding', 'Accept-Language': 'en' }
+        });
+        
+        if (!response.ok) throw new Error(`Nominatim Geocoding request failed: ${response.status}`);
+        const data = await response.json();
+
+        if (!data || data.length === 0) {
+            return { error: 'NOT_FOUND_IN_VIC_VIEWBOX', isVic: false };
+        }
+        
+        const firstResult = data[0];
+        const isInVic = isAddressInVicNominatim(firstResult.address);
+
+        if (!isInVic) {
+            return { error: 'FOUND_OUTSIDE_VIC', result: firstResult, isVic: false };
+        }
+        
+        const cleanDisplayName = cleanAddressText(firstResult.display_name);
+        return {
+          lat: parseFloat(firstResult.lat),
+          lng: parseFloat(firstResult.lon),
+          displayName: cleanDisplayName || 'Victoria, Australia',
+          isVic: true
+        };
+      } catch (error) {
+        console.error('Geocoding error with Nominatim:', error);
+        return { error: 'GEOCODING_EXCEPTION', message: error.message, isVic: false };
+      }
+    };
+
+    const fetchAddressSuggestions = async (query) => {
+      if (!query || query.length < 2) {
+        suggestions.value = []; showSuggestions.value = false; isLoadingSuggestions.value = false;
+        return;
+      }
+      
+      isLoadingSuggestions.value = true;
+      suggestions.value = [];
+
+      const encodedQuery = encodeURIComponent(query);
+      const geoapifyUrl = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodedQuery}&apiKey=${GEOAPIFY_API_KEY}&limit=7&filter=countrycode:au&bias=proximity:${VIC_GEOAPIFY_BIAS_PROXIMITY}`;
+
+      try {
+        const response = await fetch(geoapifyUrl);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: response.statusText }));
+          throw new Error(`Geoapify Autocomplete request failed: ${response.status} - ${errorData.message || 'Unknown error'}`);
+        }
+        const data = await response.json();
+
+        if (data.features && data.features.length > 0) {
+          suggestions.value = data.features.map(feature => ({
+            displayName: feature.properties.formatted,
+            lat: feature.properties.lat, 
+            lng: feature.properties.lon,
+            isVic: isSuggestionInVicGeoapify(feature.properties),
+          }));
+        } else {
+          suggestions.value = [];
+        }
+      } catch (error) {
+        console.error('Error fetching Geoapify suggestions:', error);
+        suggestions.value = [];
+      } finally {
+        isLoadingSuggestions.value = false;
+        showSuggestions.value = searchLocation.value.length >= 2;
+      }
+    };
+
+    const handleInput = () => {
+      searchOutOfVicError.value = '';
+      if (searchLocation.value.trim() !== '') {
+        showSuggestions.value = true;
+        debouncedFetchSuggestions(searchLocation.value);
+      } else {
+        suggestions.value = []; showSuggestions.value = false; isLoadingSuggestions.value = false;
+      }
+    };
+
+    const selectSuggestion = (suggestion) => {
+      searchLocation.value = suggestion.displayName; 
+      suggestions.value = [];                      
+      showSuggestions.value = false;                 
+      isLoadingSuggestions.value = false;            
+      searchOutOfVicError.value = '';
+    };
+
+    const hideSuggestions = () => {
+        setTimeout(() => {
+            if (document.activeElement !== document.querySelector('.autocomplete-wrapper input')) {
+                 showSuggestions.value = false;
+                 isLoadingSuggestions.value = false;
+            }
+        }, 200);
+    };
+    
+    const searchLocationDensity = async () => {
+      nearbyResourcesList.value = []; 
+      searchOutOfVicError.value = ''; 
+
+      if (!props.allTypesSelected) {
+        densityResultClass.value = 'error';
+        densityResult.value = "trigger";
+        return;
+      }
+      if (!searchLocation.value || !props.map) return;
+      
+      emit('update:loading', true);
+      densityResult.value = '';
+      densityResultClass.value = '';
+      
+      try {
+        clearMarker(); 
+        let lat, lng;
+        let geocodedAddressName = searchLocation.value;
+        let isVicLocation = true; 
+
+        const coordsRegex = /^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/;
+        const coordsMatch = searchLocation.value.match(coordsRegex);
+        
+        if (coordsMatch) {
+          lat = parseFloat(coordsMatch[1]);
+          lng = parseFloat(coordsMatch[3]);
+          geocodedAddressName = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        } else {
+          const geocodeResult = await geocodeAddress(searchLocation.value);
+
+          if (geocodeResult.error || !geocodeResult.isVic) {
+            isVicLocation = false;
+            if (geocodeResult.error === 'NOT_FOUND_IN_VIC_VIEWBOX') {
+              searchOutOfVicError.value = `Address not found within Victoria. Please try a different address.`;
+            } else if (geocodeResult.error === 'FOUND_OUTSIDE_VIC') {
+              searchOutOfVicError.value = `The address "${cleanAddressText(geocodeResult.result.display_name)}" is outside Victoria. Please search for an address within VIC.`;
+            } else if (!geocodeResult.isVic && !geocodeResult.error) {
+                 searchOutOfVicError.value = `The address "${geocodeResult.displayName}" is outside Victoria. Please search for an address within VIC.`;
+            } else {
+                searchOutOfVicError.value = `Could not process the address. Please try again. (${geocodeResult.message || ''})`;
+            }
+          } else {
+            lat = geocodeResult.lat;
+            lng = geocodeResult.lng;
+            geocodedAddressName = geocodeResult.displayName;
+          }
+        }
+        
+        if (!isVicLocation) {
+          densityResultClass.value = 'error';
+          densityResult.value = "trigger";
+          emit('update:loading', false);
+          return; 
+        }
+
+        searchedAddress.value = geocodedAddressName;
+
+        if (!isValidCoordinate(lat, lng)) {
+          densityResultClass.value = 'error';
+          densityResult.value = "trigger";
+          emit('update:loading', false);
+          return;
+        }
+        
+        locationMarker.value = L.marker([lat, lng], {
+          icon: L.divIcon({ className: 'custom-search-marker', html: `<div class="search-location-pin"><span class="location-icon">📍</span></div>`, iconSize: [40, 40], iconAnchor: [20, 40], popupAnchor: [0, -40] })
+        });
+        
+        locationMarker.value.bindTooltip(`
+          <div class="tooltip-content">
+            <div class="tooltip-title">Search Location</div>
+            <div class="tooltip-details">
+              <div class="tooltip-row"><span class="tooltip-label">Address:</span><span class="tooltip-value">${searchedAddress.value}</span></div>
+              <div class="tooltip-row"><span class="tooltip-label">Coordinates:</span><span class="tooltip-value">[${lat.toFixed(6)}, ${lng.toFixed(6)}]</span></div>
+            </div>
+          </div>
+        `, { direction: 'auto', permanent: false, className: 'custom-tooltip search-tooltip horizontal-tooltip', offset: [0, -10], opacity: 0.9 });
+        
+        locationMarker.value.addTo(props.map);
+        
+        const density = calculateProximityDensity(lat, lng);
+        densityData.value = density; 
+        
+        const radius = density.radius || 3;
+        const zoomLevel = radius <= 1 ? 16 : radius <= 3 ? 14 : radius <= 5 ? 12 : 10;
+        
+        props.map.flyTo([lat, lng], zoomLevel, {
+          duration: 1.5,
+          easeLinearity: 0.25
+        });
+        
+        evaluateDensity(density);
+
+      } catch (error) {
+        console.error('Error during searchLocationDensity:', error);
+        densityResultClass.value = 'error';
+        densityResult.value = "trigger";
+      } finally {
+        emit('update:loading', false);
+      }
+    };
+    
+    const isValidCoordinate = (lat, lng) => {
+      return lat !== undefined && lng !== undefined && !isNaN(lat) && !isNaN(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+    };
+    
+    const calculateProximityDensity = (lat, lng, radius = 3) => {
+      const radiusKm = radius;
+      const allPoints = [];
+      try {
+        if (props.selectedTypes.schools && props.resourceData.schools) allPoints.push(...props.resourceData.schools.map(point => ({...point, type: 'schools'})));
+        if (props.selectedTypes.hospitals && props.resourceData.hospitals) allPoints.push(...props.resourceData.hospitals.map(point => ({...point, type: 'hospitals'})));
+        if (props.selectedTypes.ndisProviders && props.resourceData.ndisProviders) allPoints.push(...props.resourceData.ndisProviders.map(point => ({...point, type: 'ndisProviders'})));
+        if (props.selectedTypes.ndisDailyLiving && props.resourceData.ndisDailyLiving) allPoints.push(...props.resourceData.ndisDailyLiving.map(point => ({...point, type: 'ndisDailyLiving'})));
+        if (props.selectedTypes.ndisTherapy && props.resourceData.ndisTherapy) allPoints.push(...props.resourceData.ndisTherapy.map(point => ({...point, type: 'ndisTherapy'})));
+      } catch (e) { /* silent */ }
+      
+      const pointsInRadius = allPoints.filter(point => {
+        if (!isValidCoordinate(point.lat, point.lng)) return false;
+        return calculateDistance(lat, lng, point.lat, point.lng) <= radiusKm;
+      });
+      
+      const typeCount = { schools: 0, hospitals: 0, ndisProviders: 0, ndisDailyLiving: 0, ndisTherapy: 0 };
+      pointsInRadius.forEach(point => { if (point.type && typeCount[point.type] !== undefined) typeCount[point.type]++; });
+      
+      return { pointsCount: pointsInRadius.length, radius: radiusKm, totalPoints: allPoints.length, typeCount: typeCount, nearbyRawResources: pointsInRadius };
+    };
+    
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+      const R = 6371; 
+      const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2)**2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    };
+    
+    const evaluateDensity = (densityVal) => {
+      const { pointsCount, radius, totalPoints, nearbyRawResources } = densityVal;
+      nearbyResourcesList.value = nearbyRawResources || [];
+      densityResultClass.value = "";
+
+      
+      if (pointsCount <= 5) {
+        densityResultClass.value = 'very-low';  // 0-5
+      } else if (pointsCount <= 10) {
+        densityResultClass.value = 'low';       // 6-10
+      } else if (pointsCount <= 15) {
+        densityResultClass.value = 'medium';    // 11-15
+      } else if (pointsCount <= 20) {
+        densityResultClass.value = 'high';      // 16-20
+      } else {
+        densityResultClass.value = 'very-high'; 
+      }
+      
+      if (densityResultClass.value) {
+        densityResult.value = "evaluated";
+      } else {
+        densityResult.value = "";
+      }
+    };
+    
+    const clearMarker = () => {
+      if (locationMarker.value && props.map && props.map.hasLayer(locationMarker.value)) {
+        props.map.removeLayer(locationMarker.value);
+        locationMarker.value = null;
+      }
+      densityResult.value = '';
+      densityResultClass.value = '';
+      nearbyResourcesList.value = [];
+      densityData.value = null;
+    };
+    
+    watch(() => props.map, (newMap, oldMap) => {
+      if (!newMap && oldMap && locationMarker.value) clearMarker();
+    });
+    
+    return {
+      searchLocation, handleInput, selectSuggestion, hideSuggestions, suggestions, showSuggestions, isLoadingSuggestions,
+      searchLocationDensity, searchedAddress, 
+      densityResult, 
+      clearMarker, nearbyResourcesList, groupedNearbyResources, formatTypeName, searchOutOfVicError,
+      echartsOption,
+      densityLevelText,
+      densityResultClass,
+      densityData,
+    };
+  }
+};
+</script>
+<style scoped>
+/* Location search component styles */
+.location-search { 
+  margin-top: 15px; 
+  padding-top: 10px; 
+}
+
+.search-title { 
+  font-weight: bold; 
+  margin-bottom: 8px; 
+  font-size: 13px; 
+  color: #444; 
+}
+
+.search-warning { 
+  background-color: #fff8e1; 
+  border-left: 3px solid #ffc107; 
+  padding: 5px 8px; 
+  margin-bottom: 8px; 
+  font-size: 12px; 
+  color: #856404; 
+  border-radius: 2px; 
+}
+
+.search-warning.out-of-vic-error { 
+  background-color: #f8d7da; 
+  border-left-color: #f5c6cb; 
+  color: #721c24; 
+  margin-bottom: 10px; 
+}
+
+.search-input-group { 
+  display: flex; 
+  margin-bottom: 10px; 
+}
+
+.search-input-group.disabled { 
+  opacity: 0.6; 
+}
+
+.autocomplete-wrapper { 
+  position: relative; 
+  flex: 1; 
+}
+
+.autocomplete-wrapper input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px 0 0 4px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.search-button { 
+  width: 36px; 
+  background-color: #3388ff; 
+  color: white; 
+  border: none; 
+  border-radius: 0 4px 4px 0; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  flex-shrink: 0; 
+}
+
+.search-button:hover:not(:disabled) { 
+  background-color: #2979e2; 
+}
+
+.search-button:disabled { 
+  background-color: #a9c5f3; 
+  cursor: not-allowed; 
+}
+
+.suggestions-list {
+  position: absolute;
+  top: 100%; 
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px; 
+  overflow-y: auto;
+  z-index: 1000; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.suggestion-item { 
+  padding: 8px 12px; 
+  cursor: pointer; 
+  font-size: 13px; 
+}
+
+.suggestion-item:hover { 
+  background-color: #f0f0f0; 
+}
+
+.suggestion-item.non-vic-suggestion { 
+  color: #777; 
+}
+
+.suggestion-state-warning { 
+  font-size: 0.8em; 
+  margin-left: 5px; 
+  color: #dc3545; 
+  font-style: italic; 
+}
+
+.no-suggestions, .loading-suggestions { 
+  padding: 8px 12px; 
+  font-size: 13px; 
+  color: #777; 
+  text-align: center; 
+}
+
+
+.density-gauge-container {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.location-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.location-name {
+  font-weight: bold;
+  color: #333;
+  flex: 1;
+}
+
+
+.density-info-display {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.density-level {
+  font-size: 24px;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: inline-block;
+  transition: all 0.3s ease;
+  margin-bottom: 8px;
+}
+
+.density-detail {
+  font-size: 16px;
+  color: #666;
+  margin-top: 5px;
+}
+
+.density-level.very-low {
+  color: #FF4444;
+  background-color: rgba(255, 68, 68, 0.1);
+  border: 1px solid rgba(255, 68, 68, 0.3);
+}
+
+.density-level.low {
+  color: #FFAA00;
+  background-color: rgba(255, 170, 0, 0.1);
+  border: 1px solid rgba(255, 170, 0, 0.3);
+}
+
+.density-level.medium {
+  color: #CCAA00;
+  background-color: rgba(255, 255, 0, 0.1);
+  border: 1px solid rgba(204, 170, 0, 0.3);
+}
+
+.density-level.high {
+  color: #00C851;
+  background-color: rgba(0, 200, 81, 0.1);
+  border: 1px solid rgba(0, 200, 81, 0.3);
+}
+
+.density-level.very-high {
+  color: #0099CC;
+  background-color: rgba(0, 153, 204, 0.1);
+  border: 1px solid rgba(0, 153, 204, 0.3);
+}
+
+.density-level.error {
+  color: #dc3545;
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+
+.echart-gauge-wrapper {
+  width: 100%;
+  max-width: 100%;
+  height: 380px;    
+  margin: 0 auto 10px auto;
+}
+
+.echart-gauge-wrapper .chart {
+  width: 100%;
+  height: 100%;
+}
+
+
+.gauge-legend {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  padding: 0 10px;
+  flex-wrap: wrap; 
+  gap: 10px; 
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.legend-color.very-low { background-color: #FF4444; }
+.legend-color.low { background-color: #FFAA00; }
+.legend-color.medium { background-color: #FFFF00; }
+.legend-color.high { background-color: #00C851; }
+.legend-color.very-high { background-color: #0099CC; }
+
+.legend-item span {
+  font-size: 12px;
+  color: #666;
+}
+
+
+.resources-list-container {
+  margin-top: 25px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.resources-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #dee2e6;
+  padding-bottom: 10px;
+}
+
+.resources-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.total-resources {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.resources-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.resource-category {
+  margin-bottom: 15px;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.category-title {
+  font-weight: bold;
+  font-size: 16px;
+  color: white; 
+  padding: 6px 12px;
+  border-radius: 6px;
+  flex-grow: 1;
+}
+
+
+.resource-category[data-type="schools"] .category-title {
+  background: #2196F3; 
+}
+
+.resource-category[data-type="hospitals"] .category-title {
+  background: #F44336;
+}
+
+.resource-category[data-type="ndisProviders"] .category-title {
+  background: #4CAF50; 
+}
+
+.resource-category[data-type="ndisDailyLiving"] .category-title {
+  background: #9C27B0; 
+}
+
+.resource-category[data-type="ndisTherapy"] .category-title {
+  background: #FF9800; 
+}
+
+.category-count {
+  background: white; 
+  color: #333; 
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: bold;
+  min-width: 30px;
+  text-align: center;
+  border: 1px solid #dee2e6; 
+}
+
+.resource-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-left: 10px;
+}
+
+.resource-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 12px 15px;
+  transition: all 0.2s ease;
+  border-left: 4px solid transparent;
+}
+
+.resource-category[data-type="schools"] .resource-card {
+  border-left-color: #2196F3;
+}
+
+.resource-category[data-type="hospitals"] .resource-card {
+  border-left-color: #F44336;
+}
+
+.resource-category[data-type="ndisProviders"] .resource-card {
+  border-left-color: #4CAF50;
+}
+
+.resource-category[data-type="ndisDailyLiving"] .resource-card {
+  border-left-color: #9C27B0;
+}
+
+.resource-category[data-type="ndisTherapy"] .resource-card {
+  border-left-color: #FF9800;
+}
+
+.resource-category[data-type="schools"] .resource-card:hover {
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+  border-color: #4CAF50;
+}
+
+.resource-category[data-type="hospitals"] .resource-card:hover {
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+  border-color: #2196F3;
+}
+
+.resource-category[data-type="ndisProviders"] .resource-card:hover {
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
+  border-color: #FF9800;
+}
+
+.resource-category[data-type="ndisDailyLiving"] .resource-card:hover {
+  box-shadow: 0 2px 8px rgba(156, 39, 176, 0.2);
+  border-color: #9C27B0;
+}
+
+.resource-category[data-type="ndisTherapy"] .resource-card:hover {
+  box-shadow: 0 2px 8px rgba(244, 67, 54, 0.2);
+  border-color: #F44336;
+}
+
+.resource-card:hover {
+  transform: translateY(-1px);
+}
+
+.resource-name {
+  font-weight: 500;
+  color: #212529;
+  margin-bottom: 4px;
+}
+
+.resource-address {
+  font-size: 12px;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
+
+.search-location-pin { 
+  position: relative; 
+  width: 40px; 
+  height: 40px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
+
+.location-icon { 
+  font-size: 20px;
+}
+
+.search-location-pin .location-icon { 
+  font-size: 40px !important; 
+  color: #ff0033; 
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+  filter: drop-shadow(0 4px 12px rgba(255,0,51,0.5)); 
+  animation: pulse 2s infinite; 
+}
+
+@keyframes pulse { 
+  0% { transform: scale(1); opacity: 1; } 
+  50% { transform: scale(1.05); opacity: 0.9; } 
+  100% { transform: scale(1); opacity: 1; } 
+}
+
+
+:deep(.custom-tooltip .tooltip-content) { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 8px; 
+}
+
+:deep(.custom-tooltip .tooltip-title) { 
+  font-weight: bold; 
+  font-size: 16px; 
+  color: #333; 
+  margin-bottom: 5px; 
+  border-bottom: 1px solid #eee; 
+  padding-bottom: 5px; 
+}
+
+:deep(.custom-tooltip .tooltip-details) { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 4px; 
+}
+
+:deep(.custom-tooltip .tooltip-row) { 
+  display: flex; 
+  flex-direction: row; 
+  gap: 8px; 
+  align-items: baseline; 
+}
+
+:deep(.custom-tooltip .tooltip-label) { 
+  font-weight: bold; 
+  color: #555; 
+  width: 85px; 
+  flex-shrink: 0; 
+}
+
+:deep(.custom-tooltip .tooltip-value) { 
+  color: #333; 
+  flex: 1; 
+  word-break: break-all; 
+}
+
+:deep(.horizontal-tooltip) { 
+  background-color: white !important; 
+  border: 1px solid #ccc !important; 
+  border-radius: 6px !important; 
+  padding: 12px !important; 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important; 
+  min-width: 320px !important; 
+  max-width: 500px !important; 
+  z-index: 1001 !important; 
+}
+
+:deep(.custom-search-marker) { 
+  z-index: 1000 !important; 
+  overflow: visible !important; 
+}
+
+:deep(.custom-search-marker div) { 
+  overflow: visible !important; 
+}
+
+
+@media (max-width: 768px) {
+  .echart-gauge-wrapper {
+    height: 300px;
+    max-width: 100%;
+  }
+  
+  .gauge-legend {
+    justify-content: center;
+  }
+  
+  .legend-item span {
+    font-size: 11px;
+  }
+  
+  .density-gauge-container {
+    padding: 12px;
+  }
+  
+  .resource-items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  
+  .resources-list-container {
+    padding: 15px;
+  }
+  
+  .density-level {
+    font-size: 20px;
+  }
+  
+  .density-detail {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .echart-gauge-wrapper {
+    height: 260px;
+    max-width: 100%;
+  }
+  
+  .gauge-legend {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .legend-item {
+    width: auto;
+  }
+  
+  .density-gauge-container {
+    padding: 10px;
+  }
+  
+  .resource-items-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .category-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .category-title {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .resources-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .density-level {
+    font-size: 18px;
+  }
+  
+  .density-detail {
+    font-size: 13px;
+  }
+}
+</style>

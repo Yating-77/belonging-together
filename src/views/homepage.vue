@@ -1,10 +1,19 @@
 <template>
   <div id="app-container">
+
+    <!-- Top navigation bar -->
     <MyNavBar />
+
+    <!-- Hero section -->
     <MyHeroSection data-aos="fade-in" data-aos-duration="1200" />
+
+    <!-- Introduction section with autism information cards -->
     <section class="info-grid-section" aria-labelledby="autism-facts-heading">
       <div class="info-grid-container-wrapper">
+        
         <h2 id="autism-facts-heading" class="section-title">Understanding Autism</h2>
+        
+        <!-- Card grid-->
         <div class="info-grid-container">
           <MyInfoCard
             v-for="(card, index) in autismIntroCards"
@@ -22,8 +31,11 @@
         </div>
       </div>
     </section>
+
+    <!-- Video explanation section -->
+    <MyVideoSection />
+
     
-    <!-- Full-width content area with background image -->
     <div
       class="full-width-section background-image-section"
       data-aos="fade-left"
@@ -34,31 +46,37 @@
       data-aos-delay="150"
     >
       <div class="content-wrapper">
+      
         <h2 class="content-item">Resources & Support: Walking With You</h2>
-        <p class="content-item">Explore our curated resources, including practical tools, professional guides, family support strategies, and community connection opportunities, as we journey together.</p>
-        <router-link to="/resource" class="resource-button content-item">Explore Resource Center</router-link>
+        <p class="content-item">
+          Explore our curated resources, including practical tools, professional guides, family support strategies, and community connection opportunities, as we journey together.
+        </p>
+
+       
+        <router-link to="/resource" class="resource-button content-item">
+          Explore Resource Center
+        </router-link>
       </div>
     </div>
+
     <MyFooter />
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-// --- Import components ---
 import MyNavBar from '../components/test/MyNavBar.vue';
 import MyHeroSection from '../components/test/MyHeroSection.vue';
+import MyVideoSection from '../components/test/MyVideoSection.vue';
 import MyInfoCard from '../components/test/MyInfoCard.vue'; 
 import MyFooter from '../components/test/MyFooter.vue';
-// --- Import AOS animation library ---
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
-// Router for programmatic navigation (if needed)
 const router = useRouter();
 
-// --- Card data ---
 const autismIntroCards = ref([
   {
     title: "Unique Individual Differences",
@@ -79,8 +97,7 @@ const autismIntroCards = ref([
     colorAccent: "tertiary"
   }
 ]);
-
-// --- Initialize AOS ---
+// Initialize AOS animations when component is mounted
 onMounted(() => {
   AOS.init({
     duration: 1200, 
@@ -150,7 +167,6 @@ p {
   border: 0; 
 }
 
-/* 按钮样式 */
 .cta-button { 
   display: inline-block; 
   padding: 12px 28px; 
@@ -171,18 +187,17 @@ p {
 }
 
 .button-primary { 
-  background-color: #0ca678; 
+  background-color: #3E5C2B; 
 }
 
 .button-primary:hover { 
-  background-color: #63e6be; 
-  color: #0ca678; 
+  background-color: #4d7234; 
+  color: #ffffff; 
 }
 
-/* 信息卡片网格区域 */
 .info-grid-section { 
   padding: 5rem 5%; 
-  background-color: #ffffff; 
+  background-color: #F8EFED; 
 }
 
 .info-grid-container-wrapper { 
@@ -194,7 +209,7 @@ p {
 .section-title { 
   font-size: clamp(2rem, 5vw, 2.6rem); 
   font-weight: 700; 
-  color: #343a40; 
+  color: #4d2f20; 
   margin-bottom: 3.5rem; 
   line-height: 1.3; 
 }
@@ -205,7 +220,6 @@ p {
   gap: 2.5rem; 
 }
 
-/* 全宽区域样式 */
 .full-width-section { 
   width: 100%; 
   padding: 15rem 5%; 
@@ -220,9 +234,8 @@ p {
   border-bottom: none; 
 }
 
-/* 背景图片区域样式 */
 .background-image-section {
-  background-color: transparent;
+  background-color: #f8f7f6;
   background-image: url('/777.jpg');
   background-size: cover;
   background-position: center center;
@@ -269,7 +282,7 @@ p {
 
 .background-image-section .resource-button {
   background-color: #ffffff;
-  color: #2c3e50;
+  color: #3E5C2B;
   border: none;
   padding: 14px 32px;
   font-size: 1.05rem;
@@ -284,12 +297,13 @@ p {
   display: inline-block;
 }
 
-.background-image-section .resource-button:active {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+.background-image-section .resource-button:hover {
+  background-color: #3E5C2B;
+  color: #ffffff;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* 内容项目的动画过渡 */
 .content-item {
   opacity: 0;
   transform: translateY(20px);
@@ -314,7 +328,6 @@ p {
   transition-delay: 0.5s;
 }
 
-/* 响应式调整 */
 @media (max-width: 768px) {
   .full-width-section,
   .background-image-section {
@@ -323,6 +336,45 @@ p {
   
   .background-image-section {
     padding: 8rem 5%;
+  }
+}
+
+.hero-video-content {
+  flex: 1 1 48%;
+  min-width: 320px;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.hero-text-content {
+  flex: 1 1 45%;
+  min-width: 280px;
+  text-align: left;
+}
+
+.hero-text-content h1 {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  color: #343a40;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  color: #6c757d;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .split-hero-section {
+    flex-direction: column;
+    padding: 4rem 5%;
+  }
+  .hero-text-content {
+    text-align: center;
   }
 }
 </style>

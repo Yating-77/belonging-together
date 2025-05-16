@@ -1,14 +1,20 @@
 <template>
   <div class="article-card" @click="viewArticle">
     <div class="card h-100">
-      <div class="card-img-placeholder"></div>
+      <img 
+        :src="articleImageUrl" 
+        class="card-img-top" 
+        :alt="article.title"
+        @error="handleImageError"
+      />
       <div class="card-body d-flex flex-column">
         <h5 class="card-title text-truncate" :title="article.title">{{ article.title }}</h5>
-        <p class="card-subtitle mb-2 text-muted">By The A List</p>
         
         <p v-if="showViews && article.view_count !== undefined" class="view-count">
-          <i class="fas fa-eye"></i> {{ article.view_count }} views
+          <i class="fas fa-eye"></i>
+          {{ article.view_count }} {{ article.view_count === 1 ? 'view' : 'views' }}
         </p>
+
         
         <p class="card-text flex-grow-1">{{ articlePreview }}</p>
         <div class="read-now-btn">
@@ -32,16 +38,37 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      imageError: false
+    };
+  },
   computed: {
     articlePreview() {
       if (!this.article.content) return '';
       const textContent = this.article.content.replace(/<[^>]*>/g, '');
-      return textContent.substring(0, 80) + (textContent.length > 80 ? '...' : '');
+      return textContent.substring(0, 60) + (textContent.length > 60 ? '...' : '');
+    },
+    articleImageUrl() {
+      if (this.imageError) {
+        return '/path/to/fallback-image.jpg'; // Fallback image path
+      }
+      
+      // If article has an image_url property, use it directly
+      if (this.article.image_url) {
+        return this.article.image_url;
+      }
+      
+      // Otherwise, construct URL based on article ID
+      return `http://localhost:3000/image/article_${this.article.id}.jpg`;
     }
   },
   methods: {
     viewArticle() {
       this.$router.push({ name: 'article', params: { id: this.article.id } });
+    },
+    handleImageError() {
+      this.imageError = true;
     }
   }
 }
@@ -63,18 +90,21 @@ export default {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  background-color: #f0f4ff;
+  background-color: #fff;
   width: 100%;
 }
 
-.card-img-placeholder {
+.card-img-top {
   height: 180px;
-  background-color: #e9ecef;
+  object-fit: cover;
+  width: 100%;
+  background-color: #e9ecef; /* Placeholder color while image loads */
 }
 
 .card-title {
   color: #333;
   font-weight: 600;
+  margin-top: 0.5rem;
 }
 
 .card-subtitle {
@@ -95,7 +125,7 @@ export default {
 }
 
 .read-now-btn .btn {
-  color: #d06dac;
+  color: #4d7234;
   font-weight: 500;
   padding: 0;
   text-decoration: none;
