@@ -633,7 +633,7 @@
               </div>
             </div>
             <div class="summary-footer">
-              <p>Regular tooth brushing helps prevent cavities and creates consistent daily routines for children with autism!</p>
+              <p>Regular tooth brushing helps prevent cavities and creates consistent daily routines for children!</p>
               <div class="summary-buttons">
                 <button @click="closeSummary" class="close-summary-button">Close</button>
               </div>

@@ -355,7 +355,7 @@
               </div>
             </div>
             <div class="summary-footer">
-              <p>Learning to get dressed independently helps build confidence and daily life skills for children with autism!</p>
+              <p>Learning to get dressed independently helps build confidence and daily life skills for children!</p>
               <div class="summary-buttons">
                 <button @click="closeSummary" class="close-summary-button">Close</button>
               </div>

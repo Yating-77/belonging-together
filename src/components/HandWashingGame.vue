@@ -288,7 +288,7 @@
               </div>
             </div>
             <div class="summary-footer">
-              <p>Regular hand washing helps prevent the spread of germs and creates a consistent routine for children with autism!</p>
+              <p>Regular hand washing helps prevent the spread of germs and creates a consistent routine for children!</p>
               <div class="summary-buttons">
                 <button @click="closeSummary" class="close-summary-button">Close</button>
               </div>
