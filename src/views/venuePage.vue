@@ -54,7 +54,7 @@
           <button v-if="densitySearchRef && densitySearchRef.densityResult" 
                   class="back-to-list-btn" 
                   @click="scrollToList">
-            <span class="back-icon">↑</span> Back to Results
+            <span class="back-icon">↑</span> Back to Resource Meter
           </button>
           <p>
             {{ showHeatmap ? 'Currently viewing the heatmap density analysis. Use controls to adjust visualization.' : 'Currently viewing selected resource points. Toggle heatmap to see density patterns.' }}
