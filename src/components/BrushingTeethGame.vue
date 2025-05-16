@@ -383,7 +383,7 @@
         <div class="modal-body">
           <div class="summary-content">
             <div class="summary-intro">
-              <p>Congratulations on mastering proper tooth brushing! Following these steps can help children with autism maintain good oral hygiene:</p>
+              <p>Congratulations on mastering proper tooth brushing! Following these steps can help children maintain good oral hygiene:</p>
             </div>
             <div class="summary-flow-grid">
               <!-- First row - Steps 1, 2, 3 -->

@@ -1,6 +1,6 @@
 <template>
   <div class="location-search">
-    <div class="search-title">Want to see resources near you?</div>
+    <div class="search-title">Explore the autism support resources in your community.</div>
     <div v-if="searchOutOfVicError" class="search-warning out-of-vic-error">
       {{ searchOutOfVicError }}
     </div>

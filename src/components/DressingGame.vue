@@ -244,7 +244,7 @@
         <div class="modal-body">
           <div class="summary-content">
             <div class="summary-intro">
-              <p>Congratulations on mastering dressing skills! Following these steps can help children with autism develop independence:</p>
+              <p>Congratulations on mastering dressing skills! Following these steps can help children develop independence:</p>
             </div>
             <div class="summary-flow-grid">
               <!-- First row - Steps 1, 2, 3 -->

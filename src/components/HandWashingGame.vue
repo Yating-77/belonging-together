@@ -192,7 +192,7 @@
         <div class="modal-body">
           <div class="summary-content">
             <div class="summary-intro">
-              <p>Congratulations on mastering proper hand washing! Follow these steps to help children with autism maintain good hygiene:</p>
+              <p>Congratulations on mastering proper hand washing! Follow these steps to help children maintain good hygiene:</p>
             </div>
             <div class="summary-flow-grid">
               <!-- First row - step 1, 2, 3 -->
