@@ -714,7 +714,7 @@ export default {
       densityResultClass.value = "";
 
       if (pointsCount === 0) {
-        densityResultClass.value = 'no-resource';
+        densityResultClass.value = 'very-low';
       } else if (pointsCount <= 5) {
         densityResultClass.value = 'very-low';  // 1-5
       } else if (pointsCount <= 10) {
