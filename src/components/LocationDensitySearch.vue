@@ -86,10 +86,13 @@
       
       
       <div class="density-info-display">
-        <div class="density-level" :class="densityResultClass">
+        <div v-if="densityResultClass === 'no-resource'" class="density-level no-resource">
+          We couldn't find any resources in this area.
+        </div>
+        <div v-else class="density-level" :class="densityResultClass">
           {{ densityLevelText }}
         </div>
-        <div class="density-detail">
+        <div class="density-detail" v-if="densityResultClass !== 'no-resource'">
           {{ densityData?.pointsCount || 0 }} resources in 3km
         </div>
       </div>
@@ -328,6 +331,7 @@ export default {
         'medium': 'Medium',
         'high': 'High',
         'very-high': 'Very High',
+        'no-resource': 'No Resource Nearby',
         'error': 'Error'
       };
       return texts[densityResultClass.value] || '';
@@ -492,6 +496,17 @@ export default {
         suggestions.value = []; showSuggestions.value = false; isLoadingSuggestions.value = false;
         return;
       }
+
+      // If the input contains non-VIC state names, directly show the error message
+      const NON_VIC_STATES = ['WA', 'NSW', 'QLD', 'SA', 'TAS', 'NT', 'ACT', 'WESTERN AUSTRALIA', 'NEW SOUTH WALES', 'QUEENSLAND', 'SOUTH AUSTRALIA', 'TASMANIA', 'NORTHERN TERRITORY', 'AUSTRALIAN CAPITAL TERRITORY'];
+      const upperQuery = query.toUpperCase();
+      if (NON_VIC_STATES.some(state => upperQuery.includes(state))) {
+        suggestions.value = [];
+        showSuggestions.value = false;
+        isLoadingSuggestions.value = false;
+        inputValidationError.value = 'Only Victoria (VIC) addresses are supported.';
+        return;
+      }
       
       isLoadingSuggestions.value = true;
       suggestions.value = [];
@@ -575,7 +590,7 @@ export default {
         let geocodedAddressName = searchLocation.value;
         let isVicLocation = true;
 
-        const coordsRegex = /^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/;
+        const coordsRegex = /^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)/;
         const coordsMatch = searchLocation.value.match(coordsRegex);
         
         if (coordsMatch) {
@@ -587,14 +602,18 @@ export default {
 
           if (geocodeResult.error || !geocodeResult.isVic) {
             isVicLocation = false;
-            if (geocodeResult.error === 'NOT_FOUND_IN_VIC_VIEWBOX') {
+            if (geocodeResult.error === 'NOT_FOUND_IN_VIC_VIEWBOX' || geocodeResult.error === 'FOUND_OUTSIDE_VIC' || (!geocodeResult.isVic && !geocodeResult.error)) {
+              densityResultClass.value = 'no-resource';
+              densityResult.value = 'evaluated';
               searchOutOfVicError.value = `Address not found within Victoria. Please try a different address.`;
-            } else if (geocodeResult.error === 'FOUND_OUTSIDE_VIC') {
-              searchOutOfVicError.value = `The address "${cleanAddressText(geocodeResult.result.display_name)}" is outside Victoria. Please search for an address within VIC.`;
-            } else if (!geocodeResult.isVic && !geocodeResult.error) {
-              searchOutOfVicError.value = `The address "${geocodeResult.displayName}" is outside Victoria. Please search for an address within VIC.`;
+              emit('update:loading', false);
+              return; 
             } else {
               searchOutOfVicError.value = `Could not process the address. Please try again. (${geocodeResult.message || ''})`;
+              densityResultClass.value = 'error';
+              densityResult.value = "trigger";
+              emit('update:loading', false);
+              return;
             }
           } else {
             lat = geocodeResult.lat;
@@ -604,8 +623,6 @@ export default {
         }
         
         if (!isVicLocation) {
-          densityResultClass.value = 'error';
-          densityResult.value = "trigger";
           emit('update:loading', false);
           return; 
         }
@@ -696,9 +713,10 @@ export default {
       nearbyResourcesList.value = nearbyRawResources || [];
       densityResultClass.value = "";
 
-      
-      if (pointsCount <= 5) {
-        densityResultClass.value = 'very-low';  // 0-5
+      if (pointsCount === 0) {
+        densityResultClass.value = 'no-resource';
+      } else if (pointsCount <= 5) {
+        densityResultClass.value = 'very-low';  // 1-5
       } else if (pointsCount <= 10) {
         densityResultClass.value = 'low';       // 6-10
       } else if (pointsCount <= 15) {
@@ -708,7 +726,7 @@ export default {
       } else {
         densityResultClass.value = 'very-high'; 
       }
-      
+
       if (densityResultClass.value) {
         densityResult.value = "evaluated";
       } else {
@@ -780,6 +798,13 @@ export default {
     const validateAndSearch = () => {
       inputValidationError.value = '';
       searchOutOfVicError.value = '';
+      
+      const NON_VIC_STATES = ['WA', 'NSW', 'QLD', 'SA', 'TAS', 'NT', 'ACT', 'WESTERN AUSTRALIA', 'NEW SOUTH WALES', 'QUEENSLAND', 'SOUTH AUSTRALIA', 'TASMANIA', 'NORTHERN TERRITORY', 'AUSTRALIAN CAPITAL TERRITORY'];
+      const upperInput = searchLocation.value.toUpperCase();
+      if (NON_VIC_STATES.some(state => upperInput.includes(state))) {
+        inputValidationError.value = 'Only Victoria (VIC) addresses are supported.';
+        return;
+      }
       
       const validation = validateInput(searchLocation.value);
       if (!validation.valid) {
@@ -1076,6 +1101,12 @@ export default {
   color: #0099CC;
   background-color: rgba(0, 153, 204, 0.1);
   border: 1px solid rgba(0, 153, 204, 0.3);
+}
+
+.density-level.no-resource {
+  color: #888;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
 }
 
 .density-level.error {
