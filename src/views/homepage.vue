@@ -11,7 +11,7 @@
             :key="card.title"
             :title="card.title"
             :description="card.description"
-            :imagePath="`/${card.imageName}.jpg`"  
+            :imagePath="`/iteration3/${card.imageName}.jpg`"  
             :colorAccent="card.colorAccent"
             :stat="card.stat"
             data-aos="fade-up"
