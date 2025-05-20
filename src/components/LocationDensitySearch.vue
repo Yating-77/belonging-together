@@ -604,14 +604,14 @@ export default {
             isVicLocation = false;
             if (geocodeResult.error === 'NOT_FOUND_IN_VIC_VIEWBOX' || geocodeResult.error === 'FOUND_OUTSIDE_VIC' || (!geocodeResult.isVic && !geocodeResult.error)) {
               densityResultClass.value = 'no-resource';
-              densityResult.value = '';
+              densityResult.value = 'evaluated';
               searchOutOfVicError.value = `Address not found within Victoria. Please try a different address.`;
               emit('update:loading', false);
               return; 
             } else {
               searchOutOfVicError.value = `Could not process the address. Please try again. (${geocodeResult.message || ''})`;
               densityResultClass.value = 'error';
-              densityResult.value = '';
+              densityResult.value = "trigger";
               emit('update:loading', false);
               return;
             }
@@ -631,7 +631,7 @@ export default {
 
         if (!isValidCoordinate(lat, lng)) {
           densityResultClass.value = 'error';
-          densityResult.value = '';
+          densityResult.value = "trigger";
           emit('update:loading', false);
           return;
         }
@@ -668,7 +668,7 @@ export default {
       } catch (error) {
         console.error('Error during searchLocationDensity:', error);
         densityResultClass.value = 'error';
-        densityResult.value = '';
+        densityResult.value = "trigger";
       } finally {
         emit('update:loading', false);
       }
@@ -801,7 +801,8 @@ export default {
       
       const NON_VIC_STATES = ['WA', 'NSW', 'QLD', 'SA', 'TAS', 'NT', 'ACT', 'WESTERN AUSTRALIA', 'NEW SOUTH WALES', 'QUEENSLAND', 'SOUTH AUSTRALIA', 'TASMANIA', 'NORTHERN TERRITORY', 'AUSTRALIAN CAPITAL TERRITORY'];
       const upperInput = searchLocation.value.toUpperCase();
-      if (NON_VIC_STATES.some(state => upperInput.includes(state))) {
+      
+      if (NON_VIC_STATES.some(state => upperInput.includes(state)) && !upperInput.includes('VIC')) {
         inputValidationError.value = 'Only Victoria (VIC) addresses are supported.';
         return;
       }
