@@ -2,6 +2,7 @@
   <footer class="my-footer">
     <div class="footer-container">
       <div class="footer-section about">
+        <img src="/whiteLogo.png" alt="Belonging Together Logo" class="footer-logo" />
         <h4>About Us</h4>
         <p>Dedicated to providing professional and friendly information and support for Autism Spectrum Disorder.</p>
       </div>
@@ -58,6 +59,13 @@
   margin-bottom: 0;
   width: 100%;
 }
+
+.footer-logo {
+  max-width: 150px;
+  margin-bottom: 1.2rem;
+  display: block;
+}
+
 .footer-container {
   display: grid; 
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
