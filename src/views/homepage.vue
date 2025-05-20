@@ -38,8 +38,8 @@
           <p class="navigate-description">
             Our Outing Guide and Sensory-Friendly Venues support inclusion by:
             <br>🧭 offering practical tools for preparation,
-            <br>🧒 reducing anxiety through environmental previews,
-            <br>🎒 and helping your child participate in shared community spaces with confidence.
+            <br>🌿 reducing anxiety through environmental previews,
+            <br>🤝 and helping your child participate in shared community spaces with confidence.
           </p>
           <p class="navigate-description">
             Together, we create not just smoother outings, but true moments of belonging.

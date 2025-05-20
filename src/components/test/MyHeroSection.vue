@@ -15,7 +15,7 @@
           </p>
           <div class="hero-actions">
            
-            <router-link to="/resource" class="cta-button button-secondary">Explore Our Resources</router-link>
+            <router-link to="/insights" class="cta-button button-secondary">Explore Our Insights</router-link>
           </div>
         </div>
 
