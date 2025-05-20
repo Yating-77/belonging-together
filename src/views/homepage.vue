@@ -29,9 +29,29 @@
       </div>
     </section>
       <MyVideoSection />
-      
+              <!-- Autism Support Map Section -->
+              <section class="community-map-section" aria-labelledby="community-map-heading">
+      <div class="community-map-container">
+        <div class="community-map-content" data-aos="fade-right" data-aos-duration="1200">
+          <h2 id="community-map-heading" class="community-map-title">Find Autism Support in Your Community</h2>
+          <p class="community-map-subtitle">Every family deserves access to the right support, close to home.</p>
+          <p class="community-map-description">
+            Our interactive map helps you locate nearby special schools, therapy centres, hospitals, early intervention programs, and daily living support services across Victoria.
+          </p>
+          <div class="community-map-buttons">
+            <router-link to="/venue" class="navigate-button">Explore the Community Map</router-link>
+          </div>
+        </div>
+        <div class="community-map-image-container" data-aos="fade-left" data-aos-duration="1200">
+          <img src="/00.jpg" alt="Community Map" class="community-map-image">
+        </div>
+      </div>
+    </section>
     <section class="navigate-section" aria-labelledby="navigate-heading">
       <div class="navigate-container">
+        <div class="navigate-image-container">
+          <img src="/999.jpg" alt="Child exploring the world" class="navigate-image">
+        </div>
         <div class="navigate-content" data-aos="fade-right" data-aos-duration="1200">
           <h2 id="navigate-heading" class="navigate-title">Navigate the World, Feel You Belong</h2>
           <p class="navigate-subtitle">Every child deserves to feel included in the world around them.</p>
@@ -49,12 +69,8 @@
             <router-link to="/detectpage" class="navigate-button">Explore Outing Guides</router-link>
           </div>
         </div>
-        <div class="navigate-image-container" data-aos="fade-left" data-aos-duration="1200">
-          <img src="/999.jpg" alt="Child exploring the world" class="navigate-image">
-        </div>
       </div>
     </section>
-      
     <div
       class="full-width-section background-image-section"
       data-aos="fade-left"
@@ -70,6 +86,7 @@
         <router-link to="/resource" class="resource-button content-item">Explore Resource Center</router-link>
       </div>
     </div>
+    
     <MyFooter />
   </div>
 </template>
@@ -393,7 +410,7 @@ p {
 
 .navigate-section {
   padding: 4rem 3%;
-  background-color: #F8EFED;
+  background-color: #fff;
   overflow: hidden;
 }
 
@@ -416,12 +433,7 @@ p {
   width: 100%;
   border-radius: 12px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  transform: perspective(1000px) rotateY(5deg);
-  transition: transform 0.5s ease;
-}
-
-.navigate-image:hover {
-  transform: perspective(1000px) rotateY(0deg);
+  transition: box-shadow 0.5s ease;
 }
 
 .navigate-content {
@@ -607,5 +619,166 @@ p {
   .insights-link-button {
     padding: 12px 28px;
   }
+}
+
+.community-map-section {
+  padding: 4rem 3%;
+  background-color: #F8EFED;
+  overflow: hidden;
+}
+
+.community-map-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.community-map-content {
+  flex: 0.8;
+  min-width: 320px;
+}
+
+.community-map-title {
+  font-size: clamp(1.8rem, 4vw, 2.2rem);
+  font-weight: 700;
+  color: #4d2f20;
+  margin-bottom: 1rem;
+}
+
+.community-map-subtitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #4d2f20;
+  margin-bottom: 1rem;
+}
+
+.community-map-description {
+  font-size: 1rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+  line-height: 1.8;
+}
+
+.community-map-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.community-map-button {
+  flex: unset !important;
+  width: auto;
+  min-width: unset;
+  max-width: 100%;
+  margin: 0 auto;
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+}
+
+.community-map-button:hover {
+  background-color: #4d7234;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.community-map-image-container {
+  flex: 1.2;
+  min-width: 380px;
+  padding-left: 2rem;
+  padding-right: 0;
+}
+
+.community-map-image {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+}
+
+@media (max-width: 1100px) {
+  .community-map-container {
+    gap: 1.5rem;
+  }
+  .community-map-image-container {
+    padding-left: 1rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .community-map-section {
+    padding: 3.5rem 4%;
+  }
+  .community-map-container {
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+  .community-map-content {
+    order: 1;
+    text-align: center;
+    max-width: 90%;
+  }
+  .community-map-image-container {
+    order: 2;
+    width: 80%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding-left: 0;
+  }
+  .community-map-buttons {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .community-map-section {
+    padding: 3rem 5%;
+  }
+  .community-map-title {
+    font-size: 1.6rem;
+  }
+  .community-map-subtitle {
+    font-size: 1.1rem;
+  }
+  .community-map-image-container {
+    width: 90%;
+  }
+  .community-map-buttons {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .community-map-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .community-map-section {
+    padding: 2.5rem 4%;
+  }
+  .community-map-content {
+    max-width: 100%;
+  }
+  .community-map-image-container {
+    width: 95%;
+    min-width: auto;
+  }
+  .community-map-description {
+    font-size: 0.95rem;
+  }
+}
+
+.community-map-buttons .navigate-button {
+  flex: unset !important;
+  width: auto;
+  min-width: unset;
+  max-width: 100%;
+  margin: 0 auto;
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 1rem;
 }
 </style>
