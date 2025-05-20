@@ -373,6 +373,7 @@ export default {
   padding: 2rem;
   max-width: 1200px;
   margin: auto;
+  z-index: 1060;
 }
 
 .summary-title {
