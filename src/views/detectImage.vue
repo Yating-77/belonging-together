@@ -44,8 +44,10 @@
             class="check-item-image" 
           />
         </div>
+
         <!-- outer container -->
         <div class="position-relative">
+          <!-- upload card -->
           <div class="upload-card mb-4">
             <div class="card-body">
               <div class="file-upload-container text-center">
@@ -363,17 +365,19 @@ import { useRouter, useRoute } from 'vue-router';
         const fileData = await readFileAsArrayBuffer(selectedFile.value);
           
         // Call Azure Computer Vision API
-          const response = await axios({
-            method: 'post',
-          url: process.env.VUE_APP_AZURE_VISION_ENDPOINT || 'https://5120.cognitiveservices.azure.com/vision/v3.2/analyze?visualFeatures=Objects,Tags,Description',
-            headers: {
-              'Content-Type': 'application/octet-stream',
-            'Ocp-Apim-Subscription-Key': process.env.VUE_APP_AZURE_VISION_KEY || 'EdLSbueKzPgxgxulSFPvVJkH4dOFmJp3IwC9Y1SQBZq56LqCoWEaJQQJ99BDACL93NaXJ3w3AAAFACOGI0sm'
-            },
-            data: fileData,
-            transformRequest: [(data) => data]
-          });
-          
+        const endpoint = 'https://5120detect.cognitiveservices.azure.com/vision/v3.2/analyze?visualFeatures=Objects,Tags,Description';
+        const key = '8xzQhbTNqugULuWhGxnvKpT5onhqo5jZxOs0CbwvrRe5lM2FqcflJQQJ99BEACL93NaXJ3w3AAAFACOGNKW5';
+        const response = await axios({
+          method: 'post',
+          url: endpoint,
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'Ocp-Apim-Subscription-Key': key
+          },
+          data: fileData,
+          transformRequest: [(data) => data]
+        });
+        
         results.value = response.data;
         console.log("API response:", results.value);
 
