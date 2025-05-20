@@ -39,7 +39,7 @@
             Our interactive map helps you locate nearby special schools, therapy centres, hospitals, early intervention programs, and daily living support services across Victoria.
           </p>
           <div class="community-map-buttons">
-            <router-link to="/venuePage" class="navigate-button">Explore the Community Map</router-link>
+            <router-link to="/venue" class="navigate-button">Explore the Community Map</router-link>
           </div>
         </div>
         <div class="community-map-image-container" data-aos="fade-left" data-aos-duration="1200">
@@ -666,6 +666,7 @@ p {
   gap: 1rem;
   margin-top: 2rem;
   width: 100%;
+  justify-content: flex-start;
 }
 
 .community-map-button {
@@ -673,8 +674,6 @@ p {
   width: auto;
   min-width: unset;
   max-width: 100%;
-  margin: 0 auto;
-  display: inline-block;
   padding: 12px 24px;
   font-size: 1.1rem;
 }
@@ -776,8 +775,6 @@ p {
   width: auto;
   min-width: unset;
   max-width: 100%;
-  margin: 0 auto;
-  display: inline-block;
   padding: 12px 24px;
   font-size: 1rem;
 }
